@@ -1,0 +1,44 @@
+<h1>Residential Properties</h1>
+
+<style type='text/css'>
+#search_form_wrapper { margin-bottom: 10px; position: absolute; top:0; right: 0; }
+</style>
+
+<div id='search_form_wrapper'>
+  <form action='/admin/residential' method='get' id='search_form'>
+    <input type='text' name='mls_acct' placeholder='MLS #' value="<%= @gen.params['mls_acct'] %>" style='width: 100px;' />    
+    <input type='submit' value='Search' />
+  </form>
+</div>
+
+<table class='data' id='properties_table'>
+  <tr>
+    <%= raw @gen.sortable_table_headings({
+				'mls_acct'                => 'MLS #',
+				'street_num, street_name'	=> 'Address',
+				'la_code'                 => 'Agent',
+				'lo_code'                 => 'Office'
+			})
+		%>
+  </tr>
+<% @properties.each do |p| %>
+  <% agent = p.agent %>
+  <% office = p.office %>
+  <tr onclick="window.location='/admin/residential/<%= p.mls_acct %>/edit';">
+    <td><%= raw p.mls_acct %></td>
+    <td><%= raw "#{p.street_num} #{p.street_name}, #{p.city}" %></td>
+    <td><%= p.agent ? "#{agent.first_name} #{agent.last_name}" : p.la_code %></td>
+    <td><%= p.office ? office.name : p.lo_code %></td>    
+  </tr>
+<% end %>
+</table>
+
+<p><%= raw @gen.generate %></p>
+
+<% content_for :caboose_js do %>
+<script type='text/javascript'>
+$(document).ready(function() { 
+  var modal = new CabooseModal(800);
+});
+</script>
+<% end %>

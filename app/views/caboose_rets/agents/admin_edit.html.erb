@@ -1,0 +1,28 @@
+<h1>Edit Agent</h1>
+<%= render :partial => 'agents/admin_top_nav' %>
+
+<div id='agent_<%= @agent.id %>_hide'         ></div>
+<div id='agent_<%= @agent.id %>_assistant_to' ></div>
+
+<p style='clear: both;'><input type='button' value='< Back' onclick="window.location='/admin/agents';" /></p>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type='text/javascript'>
+$(document).ready(function() {
+  m = new ModelBinder({
+    name: 'Agent',
+    id: <%= @agent.id %>,
+    update_url: '/admin/agents/<%= @agent.id %>',
+    authenticity_token: '<%= form_authenticity_token %>',
+    attributes: [
+      { name: 'hide'            , nice_name: 'Hide from website'  , type: 'checkbox'  , value: <%= raw @agent.hide                        %>, width: 400 },
+      { name: 'assistant_to'    , nice_name: 'Assistant To'       , type: 'select'    , value: <%= raw Caboose.json(@agent.assistant_to)  %>, width: 400, text: <%= raw Caboose.json(@boss ? "#{@boss.first_name} #{@boss.last_name}" : 'empty') %>, options_url: '/admin/agents/assistant-to-options', empty_text: 'Not an assistant' }
+    ]
+  });
+});
+$(window).load(function() {
+  var modal = new CabooseModal(800);
+});
+</script>
+<% end %>

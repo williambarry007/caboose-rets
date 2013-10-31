@@ -1,0 +1,7 @@
+<div class='top_right_controls'>
+<input type='button' value='General'      onclick="window.location='/admin/agents/<%= @agent.id %>/edit';" />
+<input type='button' value='Bio'          onclick="window.location='/admin/agents/<%= @agent.id %>/edit-bio';" />
+<input type='button' value='Contact Info' onclick="window.location='/admin/agents/<%= @agent.id %>/edit-contact-info';" />
+<input type='button' value='MLS Info'     onclick="window.location='/admin/agents/<%= @agent.id %>/edit-mls-info';" />
+</div>
+<p>Agent: <%= "#{@agent.first_name} #{@agent.last_name}, #{@agent.la_code}" %></p>

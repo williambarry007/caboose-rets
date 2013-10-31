@@ -1,0 +1,50 @@
+# Copyright 2013 William Barry
+# 
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+# 
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+$:.push File.expand_path("../lib", __FILE__)
+
+# Maintain your gem's version:
+require "caboose_rets/version"
+
+# Describe your gem and declare its dependencies:
+Gem::Specification.new do |s|
+  s.name        = "caboose-rets"
+  s.version     = CabooseRets::VERSION
+  s.authors     = ["William Barry"]
+  s.email       = ["william@nine.is"]
+  s.homepage    = "http://github.com/williambarry007/caboose-rets"
+  s.summary     = "Library to download RETS data to a local website."
+  s.description = "Library to download RETS data to a local website for easy use."
+
+  s.files = Dir["{app,bin,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
+  s.test_files = Dir["test/**/*"]
+  #s.executables = ["caboose"]
+
+  s.add_dependency "caboose-cms", "= 0.2.77"
+  #s.add_dependency "jquery-rails"
+  #s.add_dependency "jquery-ui-rails"
+  #s.add_dependency "activesupport"
+  #s.add_dependency "tinymce-rails"
+  #s.add_dependency "trollop"
+  #s.add_dependency "colorbox-rails"
+  #s.add_dependency "paperclip"
+  
+end

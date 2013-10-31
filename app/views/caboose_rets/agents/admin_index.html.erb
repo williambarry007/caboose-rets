@@ -1,0 +1,48 @@
+
+<style type='text/css'>
+#search_form_wrapper { margin-bottom: 10px; position: absolute; top:0; right: 0; }
+</style>
+
+<h1>Residential Agents</h1>
+
+<div id='search_form_wrapper'>
+  <form action='/admin/agents' method='get' id='search_form'>    
+    <input type='text' name='first_name_like' placeholder='First name' value="<%= @gen.params['first_name_like'] %>" style='width: 100px;' />
+    <input type='text' name='last_name_like'  placeholder='Last name'  value="<%= @gen.params['last_name_like']  %>" style='width: 100px;' />
+    <input type='submit' value='Search' />
+  </form>
+</div>
+
+<% if @agents.count > 0 %>
+  <table class='data' id='agents_table'>
+    <tr>
+      <%= raw @gen.sortable_table_headings({
+          'la_code'               => 'Agent Code',
+          'last_name, first_name' => 'Name',
+          'lo_code'               => 'Office',
+          'hide'                  => 'Hide'
+  			})
+  		%>
+    </tr>
+    <% @agents.each do |a| %>
+      <% office = a.office %>
+      <tr onclick="window.location='/admin/agents/<%= a.id %>/edit';">
+        <td><%= a.la_code %></td>
+        <td><%= "#{a.first_name} #{a.last_name}" %></td>
+        <td><%= office ? office.name : a.lo_code %></td>
+        <td><%= a.hide ? 'Yes' : 'No' %></td>
+      </tr>
+    <% end %>
+  </table>
+  <p><%= raw @gen.generate %></p>
+<% else %>
+  <p>No agents met your search.</p>
+<% end %>
+
+<% content_for :caboose_js do %>
+<script type='text/javascript'>
+$(document).ready(function() {  
+  var modal = new CabooseModal(800);
+});
+</script>
+<% end %>

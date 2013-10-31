@@ -1,0 +1,139 @@
+
+<% content_for :caboose_css do %>
+  <style type="text/css">
+  #recaptcha_area, #recaptcha_table { width: auto !important; }
+  #recaptcha_image { width: 80% !important; }
+  #recaptcha_image img { width:80% !important; margin-left: -20%; padding: 0px; }
+  fieldset.captcha { width:100px !important; }
+  #recaptcha_container { margin: 0px; padding: 0px; width: 157px !important; }
+  input#recaptcha_response_field { padding: 0px; }
+  #recaptcha_widget_div { width: 150%; }
+  .realtor_info { background-color: white; padding: 10px; margin-bottom: 20px; text-align: center; border: 1px solid #d0d0d0;}
+  </style>
+<% end %>
+
+<% tiny_img = "https://s3.amazonaws.com/advantagerealtygroup.com/residential/#{@property.mls_acct}_%d_tiny.jpg" %> 
+<% large_img = "https://s3.amazonaws.com/advantagerealtygroup.com/residential/#{@property.mls_acct}_%d_large.jpg" %>
+
+<div class="l-wrapper">
+  <div class="l-section">
+    <div class="l-sidebar-border inflate-tenor-baritone">
+      <div class="sidebar-aside">
+        <% if @agent %>
+          <div class="realtor_info">
+            <h4>Advantage Agent</h4>
+            <img src="https://s3.amazonaws.com/advantagerealtygroup.com/agents/<%= @agent.id %>_thumb.jpg?<%= DateTime.now.strftime('%F') %>" alt="<%= @agent.first_name %> <%= @agent.last_name %>" />
+            <br />
+            <a href="/agents/<%= @agent.la_code %>"><%= @agent.first_name %> <%= @agent.last_name %></a><br>
+            <a href="tel:<%= @agent.car_phone %>"><%= @agent.car_phone %></a>
+          </div>
+        <% end %>
+        <address class="h-type-h5">
+          <% if !@property.unit_num.nil? && @property.unit_num.strip.length > 0 %>Unit <%= @property.unit_num %>, <% end %>
+          <%= @property.street_num %> <%= @property.street_name.titleize %><br />
+          <%= @property.city.titleize %>, <%= @property.state %> <%= @property.zip %>
+        </address>
+        <p class="h-space-mvs h-type-highlight h-type-h4"> <%=h number_to_currency @property.current_price %>
+          <% if @property.foreclosure_yn == 'Y' %>
+            <br><span style='font-size: 0.8em; color: rgb(114, 114, 114);'>(Foreclosure)</span>
+          <% end %>
+          <!-- if @property.foreclosure_yn == 'Y' -->
+        </p>        
+        <p class="h-space-mvs h-type-highlight h-type-h4">MLS #<%= @property.mls_acct %></p>
+
+        <% if @property.street_num && @property.street_name && @property.city && @property.state && @property.zip %>
+        <div class="m-map-small h-border h-space-mbm" address="<%= @property.street_num %> <%= @property.street_name %> <%= @property.city %>, <%= @property.state %> <%= @property.zip %>"></div>
+        <% end %>
+        
+        
+        <h4 class="h-space-mvt">Directions</h4>
+        <p class="paragraph"><%= @property.directions %></p>
+        <h4 class="h-space-mvt">Neighborhood Information</h4>
+        
+        <ul class="m-list-pad">
+          <li><strong>Area</strong>: <%= @property.area.titleize %></li>
+          <% if @property.subdivision %><li><strong>Subdivision</strong>: <%= @property.subdivision.titleize %></li><% end %>
+          <% if @property.elem_school %><li><strong>Elementary School</strong>: <%= @property.elem_school.titleize %></li><% end %>
+          <% if @property.middle_school %><li><strong>Middle School</strong>: <%= @property.middle_school.titleize %></li><% end %>
+          <% if @property.high_school %><li><strong>High School</strong>: <%= @property.high_school.titleize %></li><% end %>
+          <li><strong>County</strong>: <%= @property.county.titleize %></li>
+          <li><strong>Lot Size</strong>: <%= @property.ftr_lotdesc %></li>
+        </ul>
+        
+        <% if @agent %>
+           <h4 class="h-space-mvt">Contact <%= @agent.first_name %> <%= @agent.last_name %> </h4>
+        <% else %>
+           <h4 class="h-space-mvt">Contact Advantage</h4>
+        <% end %>
+        
+        <%= form_for @message, :url => "/contact/create", :html => { :class => "m-form", :'accept-charset' => "utf-8", :method => "POST" } do |f| %>
+          <%= f.text_field :name, :placeholder => "Name", :value => "", :id => "contact_name", :maxlength => "150" %>
+          <%= f.text_field :email, :placeholder => "Email", :value => "", :id => "contact_addres", :maxlength => "150" %>
+          <%= f.text_area :body, :placeholder => "Message", :cols => "50", :rows => "4", :id => "contact_message", :class => "contact_message" %>
+          <p class="h-space-mvs"><%= recaptcha_tags %></p>
+          <input class="m-btn-red btn-large h-float-right h-space-mts" type="submit" value="Send" />
+        <% end %>
+
+      </div> <!-- .sidebar-aside -->
+      
+      <div class="sidebar-body">
+
+        <div class="photos" style="text-align: center;">
+          <% if @property.photo_count.to_i >= 1 %>
+            <a class="photo" style="display: block; margin: 25px;" href="<%= large_img % 1 %>"><img src="<%= large_img % 1 %>"/></a>
+            <div style="display: block;">
+              <% (2..@property.photo_count.to_i).each do |i| %>
+                <% if i != 2 && (i - 2) % 8 == 0 %></div><div style="display: block;"><% end %>
+                <a class="photo" style="float: left; display: block; width: 12.5%; padding: 2px;" href="<%= large_img % i %>">
+                  <img style="display: block; width: 100%;" src="<%= tiny_img % i %>"/>
+                </a>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <div style="clear: both;"></div><br />
+        <p class="paragraph"><%= @property.remarks %></p>
+        <h4 class="h-type-standard h-type-highlight h-type-caps h-space-mts">Property Details</h4>
+        <h5 class="h-type-standard">Single Family Home</h5>
+        
+        <ul class="m-list-bullet h-space-mts">
+          <% if @property.price_sqft != "" %><li><strong>Price/Sq. Ft.</strong>: <span id='square_footage'><%=h number_to_currency @property.price_sqft %></span></li><% end %>
+          <% if @property.bedrooms   != "" %><li><strong>Bedrooms</strong>: <%= @property.bedrooms %></li><% end %>
+          <% if @property.baths      != "" %><li><strong>Baths</strong>: <%= @property.baths %> full <% if @property.baths_half != "" && @property.baths_half != "0" %> &amp; <%= @property.baths_half %> half baths<% end %></li><% end %>
+          <% if @property.acreage    != "" %><li><strong>Acreage</strong>: <%= @property.acreage %></li><% end %>
+        </ul> <!-- .m-list-bullet -->
+        <h4 class="h-type-standard h-type-highlight h-type-caps h-space-mts">Features</h4>
+        
+        <ul>
+          <% if @property.ftr_interior %><li><strong>Interior</strong>: <%=   @property.ftr_interior %> </li><% end %>
+          <% if @property.ftr_cooling  %><li><strong>Cooling</strong>: <%=    @property.ftr_cooling  %> </li><% end %>
+          <% if @property.ftr_heating  %><li><strong>Heating</strong>: <%=    @property.ftr_heating  %> </li><% end %>
+          <% if @property.year_built   %><li><strong>Year Built</strong>: <%= @property.year_built   %> </li><% end %>
+        </ul>
+        <br>
+        <% if @property.virtual_tour %><a class="m-btn h-space-mtm" href='<%= @property.virtual_tour %>' target='_blank'>Virtual Tour</a><% end %>
+
+        <a data-pin-do="buttonPin" data-pin-config="beside" href="//pinterest.com/pin/create/button/?url=<%= request.original_url %>&amp;media=<%= large_img % 1 %>" ></a>
+      </div> <!-- .sidebar-body -->
+    </div> <!-- .l-sidebar -->
+  </div> <!-- .body-section -->
+</div> <!-- .l-wrapper -->
+
+<div class="body-sink"></div>
+
+<% content_for :caboose_js do %>
+  <%= javascript_include_tag '//assets.pinterest.com/js/pinit.js' %>
+  <%= javascript_include_tag 'details_colorbox' %>
+  <script type="text/javascript">
+
+    if (document.contains('square_footage')) {
+      var str = document.getElementById('square_footage').innerHTML;
+      str = str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      document.getElementById('square_footage').innerHTML = str;
+    }
+
+    <% if !flash[:notice].blank? %>
+      alert('<%= flash[:notice] %>');
+    <% end %>
+  </script>
+<% end %>
