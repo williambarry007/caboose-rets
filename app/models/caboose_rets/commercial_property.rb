@@ -2,21 +2,20 @@
 class CabooseRets::CommercialProperty < ActiveRecord::Base
   self.table_name = "rets_commercial"
 
-  def agent
-    return Agent.where(:la_code => self.la_code).first
-  end
+  def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
+  def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end  
+  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
   
-  def office
-    return Office.where(:lo_code => self.lo_code).first
-  end
-  
-  def images
-    return Media.where(:mls_acct => self.id).order(:media_order).all
-  end
-  
-  def self.geolocatable
-    all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL")
-  end
+  def self.geolocatable()   all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
+  #def self.property_types() self.pucs("prop_type"     ).reject(&:empty?).sort end    
+  #def self.statuses()       self.pucs("status"        ).reject(&:empty?).sort end
+  #def self.zips()           self.pucs("zip"           ).reject(&:empty?).sort end
+  #def self.cities()         self.pucs("city"          ).reject(&:empty?).sort end
+  #def self.counties()       self.pucs("county"        ).reject(&:empty?).sort end    
+  #def self.subdivisions()   self.pucs("subdivision"   ).reject(&:empty?).sort end
+  #def self.elem_schools()   self.pucs("elem_school"   ).reject(&:empty?).sort end
+  #def self.middle_schools() self.pucs("middle_school" ).reject(&:empty?).sort end
+  #def self.high_schools()   self.pucs("high_school"   ).reject(&:empty?).sort end
 
   def parse(data)
     self.acreage                    = data['ACREAGE']

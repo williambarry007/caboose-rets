@@ -4,31 +4,79 @@ module CabooseRets
      
     # GET /land
     def index
-      @gen = Caboose::PageBarGenerator.new(params, {
-          'mls_acct' => ''
+      @gen = Caboose::PageBarGenerator.new(params, {          
+          'acreage'                     => '',
+          'acreage_gte'                 => '',
+          'acreage_lte'                 => '',
+          'acreage_source'              => '',
+          'adjoining_land_use'          => '',
+          'agent_notes_like'            => '',
+          'area'                        => '',
+          'bom_date'                    => '',                    
+          'city'                        => '',
+          'city_code'                   => '',
+          'co_la_code'                  => '',
+          'co_lo_code'                  => '',
+          'co_sa_code'                  => '',
+          'co_so_code'                  => '',          
+          'converted'                   => '',
+          'county'                      => '',
+          'current_price_gte'           => '',
+          'current_price_lte'           => '',
+          'date_created_gte'            => '',
+          'date_created_lte'            => '',
+          'date_modified_gte'           => '',
+          'date_modified_lte'           => '',          
+          'elem_school'                 => '',          
+          'ftr_access_like'             => '',          
+          'ftr_lotdesc_like'            => '',
+          'ftr_mineralrights'           => '',                    
+          'ftr_zoning'                  => '',          
+          'high_school'                 => '',
+          'internet_yn'                 => '',
+          'la_code'                     => '',          
+          'list_date_gte'               => '',
+          'list_date_lte'               => '',
+          'list_price_gte'              => '',
+          'list_price_lte'              => '',          
+          'lo_code'                     => '',
+          'middle_school'               => '',
+          'mls_acct'                    => '',
+          'municipality'                => '',
+          'parcel_id'                   => '',
+          'prop_type'                   => '',
+          'remarks_like'                => '',          
+          'sa_code'                     => '',                    
+          'so_code'                     => '',          
+          'state'                       => '',
+          'status'                      => '',
+          'street_name_like'            => '',
+          'street_num_like'             => '',          
+          'subdivision'                 => '',          
+          'unit_num'                    => '',          
+          'waterfront'                  => '',
+          'waterfront_yn'               => '',
+          'zip'                         => ''    
         },{
-          'model'           => 'ResidentialProperty',
+          'model'           => 'CabooseRets::LandProperty',
           'sort'            => 'mls_acct',
           'desc'            => false,
           'base_url'        => '/land',
           'items_per_page'  => 10
       })
-      Caboose.log(@gen.where)
+      
       @properties = @gen.items
       if params[:waterfront].present? then @properties.reject!{|p| p.waterfront.blank?} end
-      if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end
-      #if params[:foreclosure] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
     end
     
     # GET /land/:mls_acct/details
     def details
-      @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
+      @property = CabooseRets::LandProperty.where(:mls_acct => params[:mls_acct]).first
       if @property.nil?
         @mls_acct = params[:mls_acct]
-        render 'land/land_not_exists'
+        render 'land/not_exists'
         return
-      end
-      @message = Message.new    
+      end    
     end
     
     #=============================================================================

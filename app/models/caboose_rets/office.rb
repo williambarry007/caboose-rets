@@ -9,7 +9,7 @@ class CabooseRets::Office < ActiveRecord::Base
     self.lo_email 		        = data['LO_EMAIL']
     self.lo_fax_phone 	      = data['LO_FAX_PHONE']
     self.lo_idx_yn 		        = data['LO_IDX_YN']
-    self.lo_lo_code 	        = data['LO_LO_CODE']
+    self.lo_code 	            = data['LO_LO_CODE']
     self.lo_mailaddr1 	      = data['LO_MAILADDR1']
     self.lo_mailaddr2 	      = data['LO_MAILADDR2']
     self.lo_mailcity 	        = data['LO_MAILCITY']

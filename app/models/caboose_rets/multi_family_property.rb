@@ -2,22 +2,12 @@
 class CabooseRets::MultiFamilyProperty < ActiveRecord::Base
   self.table_name = "rets_multi_family"
 
-  def agent
-    return Agent.where(:la_code => self.la_code).first
-  end
+  def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
+  def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end
+  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
+                                                                   
+  def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
   
-  def office
-    return Office.where(:lo_code => self.lo_code).first
-  end
-  
-  def images
-    return Media.where(:mls_acct => self.id).order(:media_order).all
-  end
-  
-  def self.geolocatable
-    all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL")
-  end
-
   def parse(data)
     self.acreage                   = data['ACREAGE']
     self.agent_notes               = data['AGENT_NOTES']

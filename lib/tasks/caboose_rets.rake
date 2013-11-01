@@ -67,7 +67,7 @@ namespace :caboose_rets do
       t.string :lo_email 		       
       t.string :lo_fax_phone 	     
       t.string :lo_idx_yn 		     
-      t.string :lo_lo_code 	       
+      t.string :lo_code 	       
       t.string :lo_mailaddr1 	     
       t.string :lo_mailaddr2 	     
       t.string :lo_mailcity 	     

@@ -2,10 +2,7 @@ require 'ruby-rets'
 require 'httparty'
 require 'json'
 
-# Check for examples:
 # http://rets.solidearth.com/ClientHome.aspx
-# https://www.flexmls.com/developers/rets/tutorials/dmql-tutorial/
-# https://www.flexmls.com/developers/rets/tutorials/how-to-efficiently-replicate-rets-data/
 
 class CabooseRets::RetsImporter # < ActiveRecord::Base
    
@@ -83,10 +80,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Main updater
   #=============================================================================
   
-  def self.update_after(date_modified)
-    self.get_config if @@config.nil? || @@config['url'].nil?
-        
-    # Import the data
+  def self.update_after(date_modified)    
+    self.update_data_after(date_modified)
+    self.update_images_after(date_modified)
+  end
+  
+  def self.update_data_after(date_modified)
+    self.get_config if @@config.nil? || @@config['url'].nil?            
     self.import_modified_after(date_modified, 'Agent'     , 'AGT')
     self.import_modified_after(date_modified, 'Office'    , 'OFF')
     self.import_modified_after(date_modified, 'OpenHouse' , 'OPH')        
@@ -94,9 +94,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.import_modified_after(date_modified, 'Property'  , 'LND')
     self.import_modified_after(date_modified, 'Property'  , 'MUL')
     self.import_modified_after(date_modified, 'Property'  , 'RES')
-    #self.update_coords(obj)
-    
-    # Import the images
+    self.update_coords
+  end
+  
+  def self.update_images_after(date_modified)
+    self.get_config if @@config.nil? || @@config['url'].nil?    
     self.download_agent_images_modified_after(date_modified)
     self.download_property_images_modified_after(date_modified)
   end
@@ -197,7 +199,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   
   def self.download_property_images_modified_after(date_modified)
-    [CommercialProperty, LandProperty, MultiFamilyProperty, ResidentialProperty].each do |model|
+    models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
+    models.each do |model|
       model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).each do |p|        
         self.download_property_images(p)                        
       end
@@ -243,29 +246,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # GPS
   #=============================================================================
   
-  def self.update_coords(p, type = 'RES')
-    if type == 'RES'
-      self.update_property_coords(ResidentialProperty, 'residential', p)
-    elsif type == 'COM'
-      self.update_property_coords(CommercialProperty, 'commercial', p)
-    elsif type == 'LND'
-      self.update_property_coords(LandProperty, 'land', p)
-    end
-  end
-  
-  def self.update_property_coords(property_class, symbolic_name, property = nil)
-    if (property.nil?)
-      if (property_class.where(:latitude => nil).count == 0)
-        self.log "All #{symbolic_name} properties have GPS coordinates."
-        return
+  def self.update_coords(p = nil)    
+    if p.nil?
+      models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
+      models.each do |model|      
+        model.where(:latitude => nil).reorder(:mls_acct).each do |p|
+          self.update_coords(p)                        
+        end
       end
-      property_class.where(:latitude => nil).reorder(:mls_acct).each do |p|
-        self.update_property_coords(property_class, symbolic_name, p)
-      end                         
-      self.update_property_coords(property_class, symbolic_name, nil)
       return
     end
-    p = property
       
     coords = self.coords_from_address(CGI::escape "#{p.street_num} #{p.street_name}, #{p.city}, #{p.state} #{p.zip}")
     return if coords.nil? || coords == false
@@ -273,14 +263,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     p.latitude = coords['lat']
     p.longitude = coords['lng']
     p.save
-    self.log "Saved #{symbolic_name} property #{p.mls_acct} coords"
+    self.log "Saved coords for mls_acct #{p.mls_acct}"
   end
   
   def self.coords_from_address(address)   
     begin
       uri = "https://maps.googleapis.com/maps/api/geocode/json?address=#{address}&sensor=false"
-      uri.gsub!(" ", "+")
-      
+      uri.gsub!(" ", "+")      
       resp = HTTParty.get(uri)
       json = JSON.parse(resp.body)
       return json['results'][0]['geometry']['location']          
@@ -298,6 +287,5 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.log(msg)
     puts "[rets_importer] #{msg}"
     Rails.logger.info("[rets_importer] #{msg}")
-  end
-  
+  end  
 end

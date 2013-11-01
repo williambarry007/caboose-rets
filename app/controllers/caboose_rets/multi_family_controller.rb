@@ -1,8 +1,8 @@
 
 module CabooseRets
-  class ResidentialController < ApplicationController  
+  class MultiFamilyController < ApplicationController  
      
-    # GET /residential
+    # GET /multi-family
     def index
     	params[:street_num_like] = params[:street_name_like].tr('A-z', '').tr(' ', '') unless params[:street_name_like].nil?
     	unless params[:street_name_like].nil?
@@ -41,64 +41,55 @@ module CabooseRets
         'date_modified_lte'  => '',
         'status'             => ['active', 'pending']
       },{
-        'model'           => 'CabooseRets::ResidentialProperty',
+        'model'           => 'CabooseRets::MultiFamilyProperty',
         'sort'            => 'current_price ASC, mls_acct',
         'desc'            => false,
-        'base_url'        => '/residential',
+        'base_url'        => '/multi-family',
         'items_per_page'  => 10
-      })
-      
-      @properties = @gen.items      
-    
-      if params[:waterfront].present? then @properties.reject!{|p| p.waterfront.blank?} end
-      if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end
-      #if params[:foreclosure] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
+      })      
+      @properties = @gen.items
     end
     
-    # GET /residential/:mls_acct/details
+    # GET /multi_family/:mls_acct/details
     def details
-      @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
-      if @property.lo_code == '46'
-        @agent = Agent.where(:la_code => @property.la_code).first
-      end
+      @property = MultiFamilyProperty.where(:mls_acct => params[:mls_acct]).first      
       if @property.nil?
         @mls_acct = params[:mls_acct]
-        render 'residential/residential_not_exists'
+        render 'multi_family/not_exists'
         return
-      end
-      #@message = Message.new    
+      end          
     end
     
     #=============================================================================
     # Admin actions
     #=============================================================================
     
-    # GET /admin/residential
+    # GET /admin/multi_family
     def admin_index
       return if !user_is_allowed('properties', 'view')
         
       @gen = Caboose::PageBarGenerator.new(params, {
           'mls_acct'     => ''
       },{
-          'model'    => 'ResidentialProperty',
+          'model'    => 'MultiFamilyProperty',
           'sort'     => 'mls_acct',
           'desc'     => false,
-          'base_url' => '/admin/residential'
+          'base_url' => '/admin/multi_family'
       })
       @properties = @gen.items    
       render :layout => 'caboose/admin'
     end
     
-    # GET /admin/residential/:mls_acct/edit
+    # GET /admin/multi_family/:mls_acct/edit
     def admin_edit
       return if !user_is_allowed('properties', 'edit')    
-      @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
+      @property = MultiFamilyProperty.where(:mls_acct => params[:mls_acct]).first
       render :layout => 'caboose/admin'
     end
     
-    # GET /admin/residential/:mls_acct/refresh
+    # GET /admin/multi_family/:mls_acct/refresh
     def admin_refresh        
-      RetsResidentialImporter.import_property(params[:mls_acct])
+      RetsMultiFamilyImporter.import_property(params[:mls_acct])
       flash[:message] = "<p class='note success'>The property info has been updated from MLS.</p>"
       render :json => Caboose::StdClass.new({ 'reload' => true })
     end

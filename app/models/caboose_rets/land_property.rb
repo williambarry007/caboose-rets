@@ -2,21 +2,20 @@
 class CabooseRets::LandProperty < ActiveRecord::Base
   self.table_name = "rets_land"
   
-  def agent
-    return Agent.where(:la_code => self.la_code).first
-  end
+  def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
+  def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end
+  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
   
-  def office
-    return Office.where(:lo_code => self.lo_code).first
-  end
-  
-  def images
-    return Media.where(:mls_acct => self.id).order(:media_order).all
-  end
-  
-  def self.geolocatable
-    all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL")
-  end
+  def self.geolocatable()   all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
+  #def self.property_types() self.unique_field("prop_type"     ) end    
+  #def self.statuses()       self.unique_field("status"        ) end
+  #def self.zips()           self.unique_field("zip"           ) end
+  #def self.cities()         self.unique_field("city"          ) end
+  #def self.counties()       self.unique_field("county"        ) end    
+  #def self.subdivisions()   self.unique_field("subdivision"   ) end
+  #def self.elem_schools()   self.unique_field("elem_school"   ) end
+  #def self.middle_schools() self.unique_field("middle_school" ) end
+  #def self.high_schools()   self.unique_field("high_school"   ) end
 
   def parse(data)
     self.acreage                    = data['ACREAGE']

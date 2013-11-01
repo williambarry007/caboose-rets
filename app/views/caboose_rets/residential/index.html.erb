@@ -1,102 +1,49 @@
-<div class="l-wrapper">
-  <a class="m-btn h-space-mtm" href="/search/residential">Search Residential Listings</a>
-  
-  <div class="l-sidebar-border inflate-tenor-baritone h-space-pvm">   
-    <div class="sidebar-body l-grid-border">
-      <p></p>
-      <div class="l-grid inflate-baritone-bass listing">
-        <% if @properties.nil? || @properties == [] %>
-          <div class='no-results'>No results found</div>
-        <% else %>
-          <% @properties.each do |p| %>
-            <div class='grid-row'>
-              <div class='grid-unit-1of4 list-part' id='list1'>
-                <a href="/residential/<%= p.mls_acct %>/details"><img src='https://s3.amazonaws.com/advantagerealtygroup.com/residential/<%= p.mls_acct %>_1_thumb.jpg' width="400" /></a><br>
-                <div id='list-meta'>
-                  <span class='address'><% if !p.unit_num.nil? && p.unit_num.strip.length > 0 %>Unit <%= p.unit_num %>, <% end %><%= p.street_num %> <%= p.street_name.titleize %></span><br> <!-- , {city}, {state} {zip} -->
-                  <% if p.lo_code != '46' %>
-                    <span class="nonadvantage_agent"><% if p.owner_name && p.office && p.office.name %>Listing Courtesy of <%= p.office.name.titleize %><% end %></span>
-                  <% else %>
-                    <span class="advantage_agent"><% if p.agent %>Listing Courtesy of <%= p.agent.first_name.titleize %> <%= p.agent.last_name.titleize %><% end %></span>
-                  <% end %>
-                </div>
-              </div>
-              
-              <div class='grid-unit-1of4 list-part' id='list2'>
-                <% if p.current_price != 0 %><span class='price'><%=h number_to_currency(p.current_price, :precision => 0) %></span><br><% end %>
-                <% if p.foreclosure_yn == 'Y' %> <span class='list-info' style='font-size: 0.8em;'>(Foreclosure)</span><br> <% end %>
-                <div class="info-meta">
-                  <span class='list-info'>Sq. footage: <span class='sqfeet'> <%= p.tot_heat_sqft %></span></span> <br>
-                  <span class='list-info'>Bedrooms:  <%= p.bedrooms %></span>         <br>
-                  <span class='list-info'>Full baths:  <%= p.baths_full %></span>     <br>
-                  <span class='list-info'>Half baths:  <%= p.baths_half %></span>     <br>
-                </div>
-                <span>MLS#:  <%= p.mls_acct %></span>  
-              </div>
 
-              <div class='grid-unit-1of4 list-part' id='list3'>
-                <div class="list-schools">
-                  Schools:<br>
-                  <span class="school"> Elementary - <%= p.elem_school.titleize %></span> <br>
-                  <span class="school">Middle - <%= p.middle_school.titleize %></span> <br>
-                  <span class="school">High - <%= p.high_school.titleize %></span> <br>
-                </div>
-                <div class='desc-container'>
-                  <span class='description'><%= p.remarks %></span>
-                </div>
-              </div>
+<%= render :partial => 'caboose_rets/residential/search_form' %>
 
-              <div class='grid-unit-1of4 list-part' id='list4'>
-                <a href="/residential/<%= p.mls_acct %>/details" class="m-btn-ornate">
-                  <div class="btn-inner see-more">MORE DETAILS</div>
-                </a>
-                <br>
-                <% if p.lo_code == '46' && p.agent %>
-                  <a href="/agents/<%= p.la_code %>" class="m-btn-ornate">
-                    <div class="btn-inner contact-btn">Contact <%= p.agent.first_name.titleize %> <%= p.agent.last_name.titleize %></div>
-                  </a>
-                <% else %>
-                  <a href="/agents/048540000" class="m-btn-ornate">
-                    <div class="btn-inner contact-btn">Contact Advantage</div>
-                  </a>
-                <% end %>
-                <br>
-                <% unless defined? p.virtual_tour && p.virtual_tour %>
-                  <a href="<%= p.virtual_tour %>" class="m-btn-ornate">
-                    <div class="btn-inner contact-btn">Take Virtual Tour</div>
-                  </a>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-          <%= @gen.generate.html_safe %>
+<div class='listings'>
+  <% if @properties.nil? || @properties == [] %>
+    <div class='no-results'>No results found</div>
+  <% else %>
+    <ul>
+    <% @properties.each do |p| %>
+      <li>
+        <% if p.images && p.images.count > 0 %>
+          <div class='image'><a href="/residential/<%= p.mls_acct %>/details"><img src="<%= p.images[0].url(:thumb) %>" /></a></div>
         <% end %>
-      </div>
-    </div> <!-- .sidebar-body -->
-  </div> <!-- .l-sidebar -->
-</div> <!-- .l-wrapper -->
-
-<% content_for :caboose_js do %>
-<script style="text/javascript">
-  function toTitleCase(str) {
-    return str.replace(/\w\S*/g, function(txt) {
-      if (txt != "of" && txt != "<br>") {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      } else {
-        return txt;
-      }
-    });
-  }
-  $.fn.digits = function() { 
-    return this.each(function(){ 
-      $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
-    })
-  }
-  $('.price').digits();
-  $('.sqfeet').digits();
-  //$.each( $(".advantage_agent"), function() { $(this).text( toTitleCase( $(this).text() ))});
-  //$.each( $(".contact-btn"), function() { $(this).text( toTitleCase( $(this).text() ))});
-  //$.each( $(".address"), function() { $(this).text( toTitleCase( $(this).text() ))});
-  //$.each( $(".school"), function() { $(this).text( toTitleCase( $(this).text() ))});
-</script>
-<% end %>
+        <div class="address"><% if !p.unit_num.nil? && p.unit_num.strip.length > 0 %>Unit <%= p.unit_num %>, <% end %><%= p.street_num %> <%= p.street_name.titleize %></div>                  
+        <% if p.agent %>
+          <div class="agent">
+            Listing Courtesy of <%= p.agent.first_name.titleize %> <%= p.agent.last_name.titleize %>
+            <% if p.office %> with <%= p.office.name.titleize %><% end %>
+          </div>
+        <% end %>        
+        <% if p.current_price != 0    %><span class='price'       >$<%= p.current_price %></span><% end %>
+        <% if p.foreclosure_yn == 'Y' %><span class='foreclosure' >(Foreclosure)</span><% end %>
+        <ul class="meta">
+          <li class='sq_footage' ><label>Sq. footage:  </label><span><%= p.tot_heat_sqft %></span></li>
+          <li class='bedrooms'   ><label>Bedrooms:     </label><span><%= p.bedrooms      %></span></li>
+          <li class='full_baths' ><label>Full baths:   </label><span><%= p.baths_full    %></span></li>
+          <li class='half_baths' ><label>Half baths:   </label><span><%= p.baths_half    %></span></li>
+        </div>        
+        <ul class='schools'>          
+          <li><label>Elementary: </label><span><%= p.elem_school.titleize   %><span></li>
+          <li><label>Middle:     </label><span><%= p.middle_school.titleize %><span></li>
+          <li><label>High:       </label><span><%= p.high_school.titleize   %><span></li>
+        </ul>
+        <div class='mls_acct'><label>MLS#: </label><span><%= p.mls_acct %></span></div>
+        <div class='remarks'><%= p.remarks %></div>                
+        <div class='more_details'><a href='/residential/<%= p.mls_acct %>/details'>MORE DETAILS</a></div>
+        <% if p.agent || p.office %>        
+          <div class='contact lo_code_<%= p.lo_code %>'>Contact 
+            <% if p.agent %><a href="/agents/<%= p.la_code %>"><%= p.agent.first_name.titleize %> <%= p.agent.last_name.titleize %></a>
+            <% else       %><a href="/offices/<%= p.lo_code %>"><%= p.office.name %></a><% end %>            
+          </div>
+        <% end %>
+        <% if p.virtual_tour %><div class='virtual_tour'><a href="<%= p.virtual_tour %>">Take Virtual Tour</a></div><% end %>
+      </li>      
+    <% end %>
+    </ul>
+    <%= @gen.generate.html_safe %>
+  <% end %>
+</div>

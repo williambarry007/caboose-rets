@@ -1,5 +1,5 @@
 
-class CabooseRets
+module CabooseRets
   class CommercialController < ApplicationController  
      
     # GET /commercial
@@ -18,7 +18,7 @@ class CabooseRets
           'lo_code'                   => '',
           'address'                   => '',
       },{
-          'model'           => 'CommercialProperty',
+          'model'           => 'CabooseRets::CommercialProperty',
           'sort'            => 'mls_acct',
           'desc'            => false,
           'base_url'        => '/commercial',
@@ -29,11 +29,7 @@ class CabooseRets
     
     # GET /commercial/:mls_acct/details
     def details
-      @property = CommercialProperty.where(:mls_acct => params[:mls_acct]).first
-      if @property.lo_code == '46'
-        @agent = Agent.where(:la_code => @property.la_code).first
-      end
-      @message = Message.new
+      @property = CommercialProperty.where(:mls_acct => params[:mls_acct]).first      
     end
     
     #=============================================================================

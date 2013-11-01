@@ -2,21 +2,20 @@
 class CabooseRets::ResidentialProperty < ActiveRecord::Base
   self.table_name = "rets_residential"
   
-  def agent
-    return Agent.where(:la_code => self.la_code).first
-  end
+  def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
+  def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end
+  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
   
-  def office
-    return Office.where(:lo_code => self.lo_code).first
-  end
-  
-  def images
-    return Media.where(:mls_acct => self.id).order(:media_order).all
-  end
-  
-  def self.geolocatable
-    all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL")
-  end
+  def self.geolocatable()   all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end  
+  #def self.property_types() self.uniq.pluck("prop_type"     ).reject(&:empty?).sort end    
+  #def self.statuses()       self.uniq.pluck("status"        ).reject(&:empty?).sort end
+  #def self.zips()           self.uniq.pluck("zip"           ).reject(&:empty?).sort end
+  #def self.cities()         self.uniq.pluck("city"          ).reject(&:empty?).sort end
+  #def self.counties()       self.uniq.pluck("county"        ).reject(&:empty?).sort end
+  #def self.subdivisions()   self.uniq.pluck("subdivision"   ).reject(&:empty?).sort end
+  #def self.elem_schools()   self.uniq.pluck("elem_school"   ).reject(&:empty?).sort end
+  #def self.middle_schools() self.uniq.pluck("middle_school" ).reject(&:empty?).sort end
+  #def self.high_schools()   self.uniq.pluck("high_school"   ).reject(&:empty?).sort end
 
   def parse(data)
     self.bedrooms                        = data['BEDROOMS']

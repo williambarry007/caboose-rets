@@ -33,18 +33,12 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/williambarry007/caboose-rets"
   s.summary     = "Library to download RETS data to a local website."
   s.description = "Library to download RETS data to a local website for easy use."
+  s.license     = "MIT"
 
   s.files = Dir["{app,bin,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
   s.test_files = Dir["test/**/*"]
   #s.executables = ["caboose"]
 
-  s.add_dependency "caboose-cms", "= 0.2.77"
-  #s.add_dependency "jquery-rails"
-  #s.add_dependency "jquery-ui-rails"
-  #s.add_dependency "activesupport"
-  #s.add_dependency "tinymce-rails"
-  #s.add_dependency "trollop"
-  #s.add_dependency "colorbox-rails"
-  #s.add_dependency "paperclip"
+  s.add_dependency "caboose-cms", "= 0.2.81"  
   
 end
