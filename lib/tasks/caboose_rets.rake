@@ -91,7 +91,7 @@ namespace :caboose_rets do
       t.string :file_name 		
       t.string :media_id 		 
       t.string :media_order 	
-      t.string :media_remarks
+      t.text :media_remarks
       t.string :media_type 		
       t.string :mls_acct 		 
       t.text :url 		     
