@@ -94,7 +94,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.import_modified_after(date_modified, 'Property'  , 'LND')
     self.import_modified_after(date_modified, 'Property'  , 'MUL')
     self.import_modified_after(date_modified, 'Property'  , 'RES')
-    self.update_coords
   end
   
   def self.update_images_after(date_modified)
@@ -167,6 +166,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         obj.id = id
         obj.save        
       end
+      
+      case obj
+        when CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty
+          self.update_coords(obj)
+      end      
     end
   end
   
@@ -198,24 +202,27 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Property Images
   #=============================================================================
   
-  def self.download_property_images_modified_after(date_modified, start_with_mls_acct = nil)
-    models = [
-      CabooseRets::CommercialProperty, 
-      CabooseRets::LandProperty, 
-      CabooseRets::MultiFamilyProperty, 
-      CabooseRets::ResidentialProperty
-    ]
-    models.each do |model|      
-      found_it = start_with_mls_acct ? false : true
-      model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).reorder(:mls_acct).each do |p|
-        found_it = true if !found_it && p.mls_acct == start_with_mls_acct                           
-        self.download_property_images(p) if found_it                        
+  def self.download_property_images_modified_after(date_modified)
+    models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
+    names = ["commercial", "land", "multi-family", "residential"]
+    i = 0
+    models.each do |model|            
+      count = model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).count
+      j = 1      
+      model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).reorder(:mls_acct).each do |p|        
+        self.log("Downloading images for #{j} of #{count} #{names[i]} properties...")
+        self.download_property_images(p)
+        j = j + 1
       end
+      i = i + 1
     end    
   end
     
   def self.download_property_images(p)
     self.refresh_property_media(p)
+    
+    self.log("-- Downloading images and resizing for #{p.mls_acct}")
+    media = []
     self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
       
       # Find the associated media record for the image
@@ -224,17 +231,24 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       
       if m.nil?
         self.log("Can't find media record for #{p.mls_acct} #{filename}.")
-      else                                 
+      else         
         m.image = URI.parse(headers['location'])
-        m.save
-      end
-      
+        media << m
+        #m.save
+      end      
     end
+    
+    self.log("-- Uploading images to S3 for #{p.mls_acct}")
+    media.each do |m|      
+      m.save
+    end        
   end
   
   def self.refresh_property_media(p)
+    self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
     CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
     
+    self.log("-- Downloading image metadata for #{p.mls_acct}...")    
     params = {
       :search_type => 'Media',
       :class => 'GFX',
@@ -256,21 +270,25 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.update_coords(p = nil)    
     if p.nil?
       models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
+      names = ["commercial", "land", "multi-family", "residential"]
+      i = 0
       models.each do |model|      
+        self.log "Updating coords #{names[i]} properties..."
         model.where(:latitude => nil).reorder(:mls_acct).each do |p|
           self.update_coords(p)                        
         end
+        i = i + 1
       end
       return
     end
-      
+    
+    self.log "Getting coords for mls_acct #{p.mls_acct}..."
     coords = self.coords_from_address(CGI::escape "#{p.street_num} #{p.street_name}, #{p.city}, #{p.state} #{p.zip}")
     return if coords.nil? || coords == false
     
     p.latitude = coords['lat']
     p.longitude = coords['lng']
-    p.save
-    self.log "Saved coords for mls_acct #{p.mls_acct}"
+    p.save    
   end
   
   def self.coords_from_address(address)   
