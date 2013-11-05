@@ -13,8 +13,7 @@ module CabooseRets
     def details
       la_code = params[:la_code]
       @agents = Agent.where("lo_code = '46' AND hide IS false").order("last_name, first_name")
-      @agent = Agent.where(:la_code => la_code).first || Agent.where(:la_code => '048540000').first
-      Caboose.log(@agent.last_name)    
+      @agent = Agent.where(:la_code => la_code).first || Agent.where(:la_code => '048540000').first    
       @assistants = Agent.where(:assistant_to => la_code).order("last_name, first_name")
       @next = Agent.where("\'la_code\' > \'#{la_code}\' AND \'la_code\' <> \'048540000\' AND \'lo_code\' = \'46\' AND hide IS false").order("last_name, first_name").first
       @prev = Agent.where("\'la_code\' < \'#{la_code}\' AND \'la_code\' <> \'048540000\' AND \'lo_code\' = \'46\' AND hide IS false").order("last_name, first_name").first
@@ -39,9 +38,7 @@ module CabooseRets
         { type: 'RES' , title: 'Residential Listings' , url_prefix: 'residential' , properties: residential_properties },
         { type: 'COM' , title: 'Commercial Listings'  , url_prefix: 'commercial'  , properties: commercial_properties  },
         { type: 'LND' , title: 'Land Listings'        , url_prefix: 'land'        , properties: land_properties        },
-      ]
-  
-      @message = Message.new
+      ]        
     end
     
     #=============================================================================

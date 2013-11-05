@@ -199,10 +199,15 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   
   def self.download_property_images_modified_after(date_modified, start_with_mls_acct = nil)
-    models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
+    models = [
+      CabooseRets::CommercialProperty, 
+      CabooseRets::LandProperty, 
+      CabooseRets::MultiFamilyProperty, 
+      CabooseRets::ResidentialProperty
+    ]
     models.each do |model|      
       found_it = start_with_mls_acct ? false : true
-      model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).each do |p|
+      model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).reorder(:mls_acct).each do |p|
         found_it = true if !found_it && p.mls_acct == start_with_mls_acct                           
         self.download_property_images(p) if found_it                        
       end
