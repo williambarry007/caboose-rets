@@ -4,8 +4,8 @@ module CabooseRets
      
     # GET /agents
     def index
-      @agents = Agent.where("lo_code = '46' AND hide IS false").order("last_name, first_name")
-      @agent = Agent.where(:la_code => '048540000').first
+      @agents     = Agent.where("lo_code = '46' AND hide IS false").order("last_name, first_name")
+      @agent      = Agent.where(:la_code => '048540000').first
       @assistants = Agent.where(:assistant_to => '048540000').order("last_name, first_name")
     end
   

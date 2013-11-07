@@ -185,7 +185,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
       return
     end
-    
+    self.download_agent_images(agent)
+  end
+  
+  def self.download_agent_images(agent)    
     a = agent    
     self.log "Saving image for #{a.first_name} #{a.last_name}..."
     begin

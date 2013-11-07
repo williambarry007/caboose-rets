@@ -2,6 +2,20 @@
 class CabooseRets::OpenHouse < ActiveRecord::Base
   self.table_name = "rets_open_houses"
   
+  def property
+    models = [CabooseRets::ResidentialProperty, CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty]
+    models.each do |model|
+      id = self.mls_acct.to_i
+      return model.find(id) if model.exists?(id)
+    end
+    return nil
+  end
+  
+  def agent
+    return CabooseRets::Agent.where(:la_code => self.la_code).first if CabooseRets::Agent.exists?(:la_code => self.la_code)
+    return nil
+  end
+  
   def parse(data)
     self.id 		          = data['ID']
     self.comments 		    = data['COMMENTS']
