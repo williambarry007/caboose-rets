@@ -2,6 +2,7 @@
 class CabooseRets::MultiFamilyProperty < ActiveRecord::Base
   self.table_name = "rets_multi_family"
 
+  def url()     return "/multi-family/#{self.id}" end
   def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
   def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end
   def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
