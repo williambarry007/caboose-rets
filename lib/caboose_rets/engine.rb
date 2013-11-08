@@ -11,7 +11,7 @@ module CabooseRets
       CabooseRets::MultiFamilyProperty
     ]
     models.each do |model|
-      return model.find(mls.mls_acct.to_i) if model.exists?(msg.mls_acct.to_i)            
+      return model.find(mls_acct.to_i) if model.exists?(mls_acct.to_i)            
     end
     return nil
   end
