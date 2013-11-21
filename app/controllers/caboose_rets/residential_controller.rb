@@ -80,7 +80,7 @@ module CabooseRets
       @gen = Caboose::PageBarGenerator.new(params, {
           'mls_acct'     => ''
       },{
-          'model'    => 'ResidentialProperty',
+          'model'    => 'CabooseRets::ResidentialProperty',
           'sort'     => 'mls_acct',
           'desc'     => false,
           'base_url' => '/admin/residential'

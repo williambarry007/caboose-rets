@@ -55,7 +55,7 @@ module CabooseRets
           'first_name_like' => '',
       	  'last_name_like'  => ''
         },{
-      	  'model'       => 'Agent',
+      	  'model'       => 'CabooseRets::Agent',
           'sort'			  => 'last_name, first_name',
       	  'desc'			  => false,
       	  'base_url'		=> '/admin/agents'

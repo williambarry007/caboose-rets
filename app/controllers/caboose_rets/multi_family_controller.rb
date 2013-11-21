@@ -71,7 +71,7 @@ module CabooseRets
       @gen = Caboose::PageBarGenerator.new(params, {
           'mls_acct'     => ''
       },{
-          'model'    => 'MultiFamilyProperty',
+          'model'    => 'CabooseRets::MultiFamilyProperty',
           'sort'     => 'mls_acct',
           'desc'     => false,
           'base_url' => '/admin/multi_family'

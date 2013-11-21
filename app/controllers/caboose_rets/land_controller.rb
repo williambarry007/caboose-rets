@@ -90,7 +90,7 @@ module CabooseRets
       @gen = Caboose::PageBarGenerator.new(params, {
           'name'       => ''
       },{
-          'model'       => 'ResidentialProperty',
+          'model'       => 'CabooseRets::LandProperty',
           'sort'        => 'mls_acct',
           'desc'        => false,
           'base_url'    => '/admin/land'
@@ -102,7 +102,7 @@ module CabooseRets
     # GET /admin/land/:mls_acct/edit
     def admin_edit
       return if !user_is_allowed('properties', 'edit')    
-      @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
+      @property = LandProperty.where(:mls_acct => params[:mls_acct]).first
       render :layout => 'caboose/admin'
     end
     

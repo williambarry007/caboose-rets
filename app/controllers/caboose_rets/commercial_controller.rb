@@ -43,7 +43,7 @@ module CabooseRets
       @gen = Caboose::PageBarGenerator.new(params, {
           'name'       => ''
       },{
-          'model'       => 'CommercialProperty',
+          'model'       => 'CabooseRets::CommercialProperty',
           'sort'        => 'mls_acct',
           'desc'        => false,
           'base_url'    => '/admin/commercial'
