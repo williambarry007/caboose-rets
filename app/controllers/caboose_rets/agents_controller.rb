@@ -127,9 +127,9 @@ module CabooseRets
     # GET /admin/agents/:id/refresh
     def admin_refresh
       agent = Agent.find(params[:id])        
-      RetsAgentsImporter.import_agent(agent.la_code)
-      flash[:message] = "<p class='note success'>The agent's info has been updated from MLS.</p>"
-      render :json => Caboose::StdClass.new({ 'reload' => true })
+      RetsImporter.import("(LA_LA_CODE=#{agent.la_code})", 'Agent', 'AGT')
+      RetsImporter.download_agent_images(agent)
+      render :json => Caboose::StdClass.new({ 'success' => "The agent's info has been updated from MLS." })
     end
   
     # GET /admin/agents/assistant-to-options

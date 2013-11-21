@@ -19,9 +19,15 @@ CabooseRets::Engine.routes.draw do
   get  "admin/open-houses/new"                    => "open_houses#admin_new"
   post "admin/open-houses"                        => "open_houses#admin_add"
   
+  get  "admin/offices"                            => "offices#admin_index"
+  get  "admin/offices/:id"                        => "offices#admin_edit"
+  get  "admin/offices/:id/refresh"                => "offices#admin_refresh"
+  
   get  "commercial"                               => "commercial#index"                         
   get  "commercial/:mls_acct/details"             => "commercial#details"
   get  "commercial/:mls_acct"                     => "commercial#details"
+  get  "admin/commercial/new"                     => "commercial#admin_new"
+  post "admin/commercial"                         => "commercial#admin_add"
   get  "admin/commercial"                         => "commercial#admin_index"
   get  "admin/commercial/:mls_acct/edit"          => "commercial#admin_edit"
   get  "admin/commercial/:mls_acct/refresh"       => "commercial#admin_refresh"

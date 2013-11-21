@@ -1,0 +1,55 @@
+<h1>Edit Office</h1>
+
+<p>
+<input type='button' value='< Back' onclick="window.location='/admin/offices';" />
+<input type='button' value='Refresh from MLS' onclick="refresh_office_from_mls(<%= @office.id %>);" />
+</p>
+<div id='message'></div>
+
+<table class='data'>
+<tr><td>lo_date_created 	  </td><td><%= @office.lo_date_created 	   %></td></tr>  
+<tr><td>lo_date_modified 	  </td><td><%= @office.lo_date_modified 	 %></td></tr>
+<tr><td>lo_email 		        </td><td><%= @office.lo_email 		       %></td></tr>
+<tr><td>lo_fax_phone 	      </td><td><%= @office.lo_fax_phone 	     %></td></tr>
+<tr><td>lo_idx_yn 		      </td><td><%= @office.lo_idx_yn 		       %></td></tr>  
+<tr><td>lo_code 	          </td><td><%= @office.lo_code 	           %></td></tr>  
+<tr><td>lo_mailaddr1 	      </td><td><%= @office.lo_mailaddr1 	     %></td></tr>
+<tr><td>lo_mailaddr2 	      </td><td><%= @office.lo_mailaddr2 	     %></td></tr>
+<tr><td>lo_mailcity 	      </td><td><%= @office.lo_mailcity 	       %></td></tr>  
+<tr><td>lo_mailstate 	      </td><td><%= @office.lo_mailstate 	     %></td></tr>
+<tr><td>lo_mailzip 	        </td><td><%= @office.lo_mailzip 	       %></td></tr>
+<tr><td>lo_main_lo_code 	  </td><td><%= @office.lo_main_lo_code 	   %></td></tr>  
+<tr><td>lo_name 	          </td><td><%= @office.lo_name 	           %></td></tr>  
+<tr><td>lo_other_phone 	    </td><td><%= @office.lo_other_phone 	   %></td></tr>
+<tr><td>lo_page 		        </td><td><%= @office.lo_page 		         %></td></tr>  
+<tr><td>lo_phone 	          </td><td><%= @office.lo_phone 	         %></td></tr>
+<tr><td>lo_status 		      </td><td><%= @office.lo_status 		       %></td></tr>  
+<tr><td>photo_count 		    </td><td><%= @office.photo_count 		     %></td></tr>  
+<tr><td>photo_date_modified </td><td><%= @office.photo_date_modified %></td></tr>
+</table>
+
+<p><input type='button' value='< Back' onclick="window.location='/admin/offices';" /></p>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type='text/javascript'>
+
+function refresh_office_from_mls(office_id)
+{
+  modal.autosize("<p class='loading'>Refreshing office info from MLS...</p>");
+  $.ajax({
+    url: '/admin/offices/' + office_id + '/refresh',
+    success: function(resp) {
+      if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");          
+    }
+  });
+}
+
+var modal = false;
+$(window).load(function() {
+  modal = new CabooseModal(800);
+});
+
+</script>
+<% end %>

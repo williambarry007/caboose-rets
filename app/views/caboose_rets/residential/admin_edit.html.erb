@@ -234,10 +234,8 @@ function refresh_property_from_mls(mls_acct)
   $.ajax({
     url: '/admin/residential/' + mls_acct + '/refresh',
     success: function(resp) {
-      if (resp.error)
-        modal.autosize("<p class='note error'>" + resp.error + "</p>");
-      if (resp.reload)
-        location.reload();    
+      if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");          
     }
   });
 }

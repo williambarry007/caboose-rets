@@ -107,10 +107,11 @@ module CabooseRets
     end
     
     # GET /admin/land/:mls_acct/refresh
-    def admin_refresh        
-      RetsLandImporter.import_property(params[:mls_acct])
-      flash[:message] = "<p class='note success'>The property info has been updated from MLS.</p>"
-      render :json => Caboose::StdClass.new({ 'reload' => true })
+    def admin_refresh
+      p = LandProperty.find(params[:mls_acct])        
+      RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'LND')
+      RetsImporter.download_property_images(p)
+      render :json => Caboose::StdClass.new({ 'success' => "The property's info has been updated from MLS." })
     end
    
   end

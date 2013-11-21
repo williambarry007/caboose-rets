@@ -1,4 +1,4 @@
-class RetsPlugin < Caboose::CaboosePlugin
+class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
 
   def self.admin_nav(nav, user = nil, page = nil)
     return nav if user.nil? || !user.is_allowed('properties', 'view')
@@ -11,7 +11,7 @@ class RetsPlugin < Caboose::CaboosePlugin
     }
     
     item['children'] << { 'id' => 'agents'      , 'href' => '/admin/agents'           , 'text' => 'Agents'                , 'modal' => false }
-    item['children'] << { 'id' => 'agents'      , 'href' => '/admin/offices'          , 'text' => 'Offices'               , 'modal' => false }
+    item['children'] << { 'id' => 'offices'     , 'href' => '/admin/offices'          , 'text' => 'Offices'               , 'modal' => false }
     item['children'] << { 'id' => 'open-houses' , 'href' => '/admin/open-houses'      , 'text' => 'Open Houses'           , 'modal' => false }
     item['children'] << { 'id' => 'residential' , 'href' => '/admin/residential'      , 'text' => 'Residential Property'  , 'modal' => false }
     item['children'] << { 'id' => 'commercial'  , 'href' => '/admin/commercial'       , 'text' => 'Commercial Property'   , 'modal' => false }

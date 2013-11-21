@@ -1,0 +1,48 @@
+
+<style type='text/css'>
+#search_form_wrapper { margin-bottom: 10px; position: absolute; top:0; right: 0; }
+</style>
+
+<h1>Offices</h1>
+
+<div id='search_form_wrapper'>
+  <form action='/admin/offices' method='get' id='search_form'>    
+    <input type='text' name='lo_name_like' placeholder='Name' value="<%= @gen.params['lo_name_like'] %>" style='width: 100px;' />    
+    <input type='submit' value='Search' />
+  </form>
+</div>
+
+<% if @offices.count > 0 %>
+  <table class='data' id='agents_table'>
+    <tr>
+      <%= raw @gen.sortable_table_headings({
+          'lo_code' 	=> 'Office Code',
+          'lo_name' 	=> 'Name',          
+          'lo_email' 	=> 'Email',                                                  
+          'lo_phone' 	=> 'Phone',
+          'lo_status' => 'Status'
+  			})
+  		%>
+    </tr>
+    <% @offices.each do |office| %>
+      <tr onclick="window.location='/admin/offices/<%= office.id %>';">
+        <td><%= office.lo_code    %></td>
+        <td><%= office.lo_name    %></td>      
+        <td><%= office.lo_email   %></td>                                               
+        <td><%= office.lo_phone   %></td>
+        <td><%= office.lo_status  %></td>
+      </tr>
+    <% end %>
+  </table>
+  <p><%= raw @gen.generate %></p>
+<% else %>
+  <p>No offices met your search.</p>
+<% end %>
+
+<% content_for :caboose_js do %>
+<script type='text/javascript'>
+$(document).ready(function() {  
+  var modal = new CabooseModal(800);
+});
+</script>
+<% end %>

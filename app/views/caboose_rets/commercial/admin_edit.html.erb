@@ -1,6 +1,6 @@
 <%
 p = @property
-is_custom_property = p.mls_acct.starts_with?('0')
+is_custom_property = p.id > 1000000
 attributes = [
   'acreage',
   'adjoining_land_use',
@@ -231,15 +231,13 @@ function refresh_property_from_mls(mls_acct)
   $.ajax({
     url: '/admin/commercial/' + mls_acct + '/refresh',
     success: function(resp) {
-      if (resp.error)
-        modal.autosize("<p class='note error'>" + resp.error + "</p>");
-      if (resp.reload)
-        location.reload();
+      if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");
     }        
   });
 }
 
-<% if p.mls_acct.starts_with?('0') %>
+<% if is_custom_property %>
 
 $(document).ready(function() {
   m = new ModelBinder({

@@ -50,14 +50,12 @@
 
 function refresh_agent_from_mls(agent_id)
 {
-  //modal.autosize("<p class='loading'>Refreshing agent info from MLS...</p>");
+  modal.autosize("<p class='loading'>Refreshing agent info from MLS...</p>");
   $.ajax({
     url: '/admin/agents/' + agent_id + '/refresh',
     success: function(resp) {
-      if (resp.error)
-        modal.autosize("<p class='note error'>" + resp.error + "</p>");
-      if (resp.reload)
-        location.reload();    
+      if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");          
     }
   });
 }

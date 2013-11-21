@@ -52,6 +52,35 @@ module CabooseRets
       render :layout => 'caboose/admin'
     end
     
+    # GET /admin/commercial/new
+    def admin_new
+      return if !user_is_allowed('properties', 'edit')
+      @agents = Agent.reorder("last_name, first_name").all
+      @offices = Office.reorder("lo_name")
+      render :layout => 'caboose/admin'      
+    end
+    
+    # POST /admin/commercial
+    def admin_add
+      return if !user_is_allowed('properties', 'edit')      
+       
+      max_id = 1000001
+      if CommercialProperty.where("id > 1000000").count > 0
+        max_id = CommercialProperty.maximum(:id, :conditions => ['id > 1000000'])
+      end      
+                  
+      p = CommercialProperty.new      
+      p.id = max_id + 1
+      p.mls_acct = p.id
+      p.la_code = params[:la_code]      
+      p.lo_code = params[:lo_code]            
+      p.save
+      
+      render :json => Caboose::StdClass.new({
+        'redirect' => "/admin/commercial/#{p.id}/edit"  
+      })        
+    end    
+    
     # GET /admin/commercial/:mls_acct/edit
     def admin_edit
       return if !user_is_allowed('properties', 'edit')    
@@ -267,10 +296,11 @@ module CabooseRets
     end
     
     # GET /admin/commercial/:mls_acct/refresh
-    def admin_refresh        
-      RetsCommercialImporter.import_property(params[:mls_acct], 'COM')
-      flash[:message] = "<p class='note success'>The property info has been updated from MLS.</p>"
-      render :json => Caboose::StdClass.new({ 'reload' => true })
+    def admin_refresh
+      p = CommercialProperty.find(params[:mls_acct])        
+      RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'COM')
+      RetsImporter.download_property_images(p)
+      render :json => Caboose::StdClass.new({ 'success' => "The property's info has been updated from MLS." })
     end
   
   end

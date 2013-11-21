@@ -313,7 +313,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   
   def self.log(msg)
-    puts "[rets_importer] #{msg}"
+    #puts "[rets_importer] #{msg}"
     Rails.logger.info("[rets_importer] #{msg}")
   end  
 end
