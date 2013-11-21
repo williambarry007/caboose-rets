@@ -1,6 +1,6 @@
 
 class CabooseRets::Agent < ActiveRecord::Base
-  self.table_name = "rets_agents"
+  self.table_name = "rets_agents"  
   has_many :commercial_properties
   has_many :residential_properties
   # attr_accessible :title, :body
@@ -13,7 +13,7 @@ class CabooseRets::Agent < ActiveRecord::Base
   after_initialize :fix_name
 
   def office
-    Office.where(:lo_code => self.lo_code).first
+    CabooseRets::Office.where(:lo_code => self.lo_code).first
   end
   
   def fix_name

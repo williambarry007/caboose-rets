@@ -30,7 +30,7 @@
     <td><%= raw p.mls_acct %></td>
     <td><%= raw "#{p.street_num} #{p.street_name}, #{p.city}" %></td>
     <td><%= p.agent ? "#{agent.first_name} #{agent.last_name}" : p.la_code %></td>
-    <td><%= p.office ? office.name : p.lo_code %></td>    
+    <td><%= p.office ? office.lo_name : p.lo_code %></td>    
   </tr>
 <% end %>
 </table>

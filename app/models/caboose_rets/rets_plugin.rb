@@ -1,4 +1,4 @@
-class AdvantagePlugin < Caboose::CaboosePlugin
+class RetsPlugin < Caboose::CaboosePlugin
 
   def self.admin_nav(nav, user = nil, page = nil)
     return nav if user.nil? || !user.is_allowed('properties', 'view')

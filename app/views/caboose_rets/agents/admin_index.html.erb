@@ -29,7 +29,7 @@
       <tr onclick="window.location='/admin/agents/<%= a.id %>/edit';">
         <td><%= a.la_code %></td>
         <td><%= "#{a.first_name} #{a.last_name}" %></td>
-        <td><%= office ? office.name : a.lo_code %></td>
+        <td><%= office ? office.lo_name : a.lo_code %></td>
         <td><%= a.hide ? 'Yes' : 'No' %></td>
       </tr>
     <% end %>
