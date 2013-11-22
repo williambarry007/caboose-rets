@@ -60,5 +60,11 @@ CabooseRets::Engine.routes.draw do
   get  "admin/multi-family/:mls_acct/refresh"     => "multi_family#admin_refresh"
   put  "admin/multi-family/:mls_acct"             => "multi_family#admin_update"
   post "admin/multi-family/:mls_acct"             => "multi_family#admin_update"
+  
+  get    "saved-searches"                         => "saved_searches#index"
+  post   "saved-searches"                         => "saved_searches#add"
+  get    "saved-searches/:id"                     => "saved_searches#redirect"
+  put    "saved-searches/:id"                     => "saved_searches#update"
+  delete "saved-searches/:id"                     => "saved_searches#delete"
 
 end

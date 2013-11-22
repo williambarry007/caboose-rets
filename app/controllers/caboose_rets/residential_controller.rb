@@ -53,6 +53,11 @@ module CabooseRets
       if params[:waterfront].present? then @properties.reject!{|p| p.waterfront.blank?} end
       if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end
       #if params[:foreclosure] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
+      
+      @saved_search = nil
+      if CabooseRets::SavedSearch.exists?(:uri => request.fullpath)
+        @saved_search = CabooseRets::SavedSearch.where(:uri => request.fullpath).first
+      end
     end
     
     # GET /residential/:mls_acct/details

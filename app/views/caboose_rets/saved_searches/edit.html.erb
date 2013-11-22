@@ -1,0 +1,35 @@
+
+<h1>Edit Saved Search</h1>
+<%= render :partial => 'caboose_rets/agents/admin_top_nav' %>
+
+<p>Search Type: <%= @search.property_type %></p>
+<p>Parameters: </p>
+<ul><% @search.params.each do |k,v| %><li><%= k %>: <%= v %></li><% end %></ul>
+<div id='savedsearch_<%= @search.id %>_notify'></div>
+
+<p style='clear: both;'><input type='button' value='< Back' onclick="window.location='/saved-searches';" /></p>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type='text/javascript'>
+$(document).ready(function() {
+  m = new ModelBinder({
+    name: 'SavedSearch',
+    id: <%= @search.id %>,
+    update_url: '/saved-searches/<%= @search.id %>',
+    authenticity_token: '<%= form_authenticity_token %>',
+    attributes: [{ 
+      name: 'notify',
+      nice_name: 'Notify me of new properties',
+      type: 'checkbox',
+      value: <%= @search.notify ? 1 : 0 %>,
+      width: 600       
+    }]
+  });
+});
+$(window).load(function() {
+  var modal = new CabooseModal(800);
+});
+
+</script>
+<% end %>

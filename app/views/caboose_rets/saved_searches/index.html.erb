@@ -1,0 +1,78 @@
+<h1>Saved Searches</h1>
+
+<% if @searches && @searches.count > 0 %>
+  <table class='data'>
+    <tr>
+      <th>Parameters</th>
+      <th>Notify</th>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+    </tr>
+    <% @searches.each do |search| %>
+      <tr>
+        <td>
+          <% search.params.each do |k,v| %>
+            <% next if v.nil? || v.length == 0 %>
+            <%= k.titleize %>: <%= v %><br />
+          <% end %>
+        </td>
+        <td><div id='savedsearch_<%= search.id %>_notify'></div></td>
+        <td><input type='button' value='See Results'   onclick="parent.window.location='<%= raw search.uri %>';" /></td>
+        <td><input type='button' value='Delete Search' onclick="delete_search(<%= search.id %>);" /></td>    
+      </tr>
+    <% end %>
+  </table>
+<% else %>
+  <p>You don't have any saved searches yet.</p>
+<% end %>
+
+<div id='message'></div>
+<p><input type='button' value='Close' onclick="modal.close();" /></p>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type='text/javascript'>
+
+$(document).ready(function() {
+  <% @searches.each do |search| %>
+    m = new ModelBinder({
+      name: 'SavedSearch',
+      id: <%= search.id %>,
+      update_url: '/saved-searches/<%= search.id %>',
+      authenticity_token: '<%= form_authenticity_token %>',
+      attributes: [{ name: 'notify', nice_name: 'Notify', type: 'checkbox', fixed_placeholder: false, value: <%= search.notify ? 1 : 0 %>, width: 25 }]
+    });
+  <% end %>
+});
+
+function delete_search(search_id, confirm)
+{
+  if (!confirm)
+  {
+    var p = $('<p/>')
+      .addClass('note warning')
+      .append("Are you sure? This can't be undone. ")
+      .append($("<input />").attr('type', 'button').val('Yes').click(function() { delete_search(search_id, true); }))
+      .append(" ")
+      .append($("<input />").attr('type', 'button').val('No' ).click(function() { $('#message').empty(); modal.autosize(); }))
+    modal.autosize(p);
+    return;
+  }
+  modal.autosize("<p class='loading'>Deleting search...</p>");
+  $.ajax({
+    url: '/saved-searches/' + search_id,
+    type: 'delete',
+    success: function(resp) {
+      if (resp.success) window.location.reload(true);
+      if (resp.error) modal.autosize("<p class='note error'>" + resp.error + "</p>");
+    }
+  });
+}
+
+var modal = false;
+$(window).load(function() {
+  modal = new CabooseModal(800);
+});
+
+</script>
+<% end %>
