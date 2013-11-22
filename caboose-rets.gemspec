@@ -39,6 +39,6 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
   #s.executables = ["caboose"]
 
-  s.add_dependency "caboose-cms", "= 0.2.81"  
+  s.add_dependency "caboose-cms", "~> 0.2.86"  
   
 end
