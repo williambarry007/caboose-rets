@@ -17,6 +17,7 @@ module CabooseRets
          # 'added_by_advantage'        => '',
           'lo_code'                   => '',
           'address'                   => '',
+          'status'                    => ['Active', 'Pending']
       },{
           'model'           => 'CabooseRets::CommercialProperty',
           'sort'            => 'mls_acct',

@@ -39,7 +39,7 @@ module CabooseRets
         'date_created_lte'   => '',
         'date_modified_gte'  => '',
         'date_modified_lte'  => '',
-        'status'             => ['active', 'pending']
+        'status'             => ['Active', 'Pending']
       },{
         'model'           => 'CabooseRets::ResidentialProperty',
         'sort'            => 'current_price ASC, mls_acct',
