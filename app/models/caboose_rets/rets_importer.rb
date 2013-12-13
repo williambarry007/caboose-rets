@@ -265,6 +265,56 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       m.save
     end
   end
+  
+  #def self.download_property_images(p)
+  #
+  #  self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
+  #  CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
+  #  
+  #  self.log("-- Downloading image metadata for #{p.mls_acct}...")    
+  #  params = {
+  #    :search_type => 'Media',
+  #    :class => 'GFX',
+  #    :query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
+  #    :timeout => -1
+  #  }
+  #  puts "Before search #{p.id}"
+  #  self.client.search(params) do |data|
+  #    puts "download_property_images self.client.search #{p.id}"            
+  #    #m = CabooseRets::Media.new
+  #    #m.parse(data)
+  #    #m.id = m.media_id
+  #    #m.save      
+  #    self.download_property_images2(p)
+  #  end
+  #  puts "After search #{p.id}"
+  #end
+  #
+  #def self.download_property_images2(p)
+  #  puts "download_property_images2 #{p.id}"
+  #  sleep(1)
+  #  
+  #  #self.log("-- Downloading images and resizing for #{p.mls_acct}")
+  #  #media = []
+  #  #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
+  #  #
+  #  ## Find the associated media record for the image
+  #  #filename = File.basename(headers['location'])
+  #  #m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
+  #  #
+  #  #if m.nil?
+  #  #  self.log("Can't find media record for #{p.mls_acct} #{filename}.")
+  #  #else         
+  #  #  m.image = URI.parse(headers['location'])
+  #  #  media << m
+  #  #  #m.save
+  #  #end      
+  #  #    
+  #  #self.log("-- Uploading images to S3 for #{p.mls_acct}")
+  #  #media.each do |m|      
+  #  #  m.save
+  #  #end
+  #end
 
   #=============================================================================
   # GPS
