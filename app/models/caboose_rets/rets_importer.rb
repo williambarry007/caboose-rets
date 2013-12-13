@@ -261,7 +261,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.client.search(params) do |data|      
       m = CabooseRets::Media.new
       m.parse(data)
-      m.id = m.media_id
+      #m.id = m.media_id
       m.save
     end
   end
