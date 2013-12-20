@@ -6,6 +6,12 @@ class CabooseRets::ResidentialProperty < ActiveRecord::Base
   def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
   def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end
   def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
+    
+  def virtual_tour
+    return nil if !CabooseRets::Media.exists?("mls_acct = '#{self.mls_acct}' and media_type = 'Virtual Tour'")
+    media = CabooseRets::Media.where(:mls_acct => self.mls_acct, :media_type => 'Virtual Tour').first
+    return media.url    
+  end
   
   def self.geolocatable()   all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end  
   #def self.property_types() self.uniq.pluck("prop_type"     ).reject(&:empty?).sort end    
