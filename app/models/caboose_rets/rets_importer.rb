@@ -249,13 +249,75 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   
   def self.refresh_property_media(p)
     self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
+    #CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
+    CabooseRets::Media.where(:mls_acct => p.mls_acct).destroy_all
+    
+    self.log("-- Downloading image metadata for #{p.mls_acct}...")    
+    params = {
+      :search_type => 'Media',
+      :class => 'GFX',
+      #:query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
+      :query => "(MLS_ACCT=*#{p.id}*)",
+      :timeout => -1
+    }    
+    self.client.search(params) do |data|      
+      m = CabooseRets::Media.new
+      m.parse(data)
+      #m.id = m.media_id
+      m.save
+    end
+  end
+  
+  def self.refresh_all_virtual_tours
+    # See how many records we have
+    self.client.search(
+      :search_type => 'Media',
+      :class => 'GFX',
+      :query => "(MEDIA_TYPE=|V)",
+      :count_mode => :only,
+      :timeout => -1
+    )
+    # Return if no records found
+    if (self.client.rets_data[:code] == "20201")
+      self.log "No virtual tours found."
+      return
+    else
+      count = self.client.rets_data[:count]            
+      self.log "Importing #{count} virtual tours..."
+    end
+
+    count = self.client.rets_data[:count]    
+    batch_count = (count.to_f/@@config['limit'].to_f).ceil
+    
+    (0...batch_count).each do |i|  
+      params = {
+        :search_type => 'Media',
+        :class => 'GFX',
+        :query => "(MEDIA_TYPE=|V)",
+        :limit => @@config['limit'],
+        :offset => @@config['limit'] * i,
+        :timeout => -1
+      }
+      obj = nil
+      self.client.search(params) do |data|
+        mls_acct = data['MLS_ACCT'].to_i                
+        m = CabooseRets::Media.exists?("mls_acct = '#{mls_acct}' and media_type = 'Virtual Tour'") ? CabooseRets::Media.where("mls_acct = '#{mls_acct}' and media_type = 'Virtual Tour'").first : CabooseRets::Media.new
+        m.parse(data)        
+        m.save
+      end                  
+    end
+  end
+  
+  def self.refresh_virtual_tours(p)
+    self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
     CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
     
     self.log("-- Downloading image metadata for #{p.mls_acct}...")    
     params = {
       :search_type => 'Media',
       :class => 'GFX',
-      :query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
+      #:query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
+      :query => "(MLS_ACCT=*#{p.id}*)",
       :timeout => -1
     }    
     self.client.search(params) do |data|      
