@@ -48,8 +48,8 @@ module CabooseRets
           'remarks_like'                => '',          
           'sa_code'                     => '',                    
           'so_code'                     => '',          
-          'state'                       => '',          
-          'status'                      => ['Active', 'Pending'],
+          'state'                       => '',
+          'status'                      => 'Active',
           'street_name_like'            => '',
           'street_num_like'             => '',          
           'subdivision'                 => '',          
@@ -72,6 +72,7 @@ module CabooseRets
     # GET /land/:mls_acct/details
     def details
       @property = CabooseRets::LandProperty.where(:mls_acct => params[:mls_acct]).first
+      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?
       if @property.nil?
         @mls_acct = params[:mls_acct]
         render 'land/not_exists'

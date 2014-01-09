@@ -39,7 +39,7 @@ module CabooseRets
         'date_created_lte'   => '',
         'date_modified_gte'  => '',
         'date_modified_lte'  => '',
-        'status'             => ['Active', 'Pending']
+        'status'             => 'Active'
       },{
         'model'           => 'CabooseRets::ResidentialProperty',
         'sort'            => 'current_price ASC, mls_acct',
@@ -63,6 +63,7 @@ module CabooseRets
     # GET /residential/:mls_acct/details
     def details
       @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
+      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists? 
       if @property.lo_code == '46'
         @agent = Agent.where(:la_code => @property.la_code).first
       end

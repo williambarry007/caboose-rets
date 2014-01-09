@@ -5,25 +5,15 @@ class CabooseRets::CommercialProperty < ActiveRecord::Base
   def url()     return "/commercial/#{self.id}" end
   def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
   def office()  return CabooseRets::Office.where(:lo_code => self.lo_code).first end  
-  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct).order(:media_order).all end
-  
+  def images()  return CabooseRets::Media.where(:mls_acct => self.mls_acct, :media_type => 'Photo').reorder(:media_order).all end
+  def files()   return CabooseRets::Media.where(:mls_acct => self.mls_acct, :media_type => 'File' ).reorder(:media_order).all end  
   def virtual_tour    
     return nil if !CabooseRets::Media.where(:mls_acct => self.mls_acct.to_s).where(:media_type => 'Virtual Tour').exists?
     media = CabooseRets::Media.where(:mls_acct => self.mls_acct.to_s, :media_type => 'Virtual Tour').first
     return media.url    
   end
+  def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
   
-  def self.geolocatable()   all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
-  #def self.property_types() self.pucs("prop_type"     ).reject(&:empty?).sort end    
-  #def self.statuses()       self.pucs("status"        ).reject(&:empty?).sort end
-  #def self.zips()           self.pucs("zip"           ).reject(&:empty?).sort end
-  #def self.cities()         self.pucs("city"          ).reject(&:empty?).sort end
-  #def self.counties()       self.pucs("county"        ).reject(&:empty?).sort end    
-  #def self.subdivisions()   self.pucs("subdivision"   ).reject(&:empty?).sort end
-  #def self.elem_schools()   self.pucs("elem_school"   ).reject(&:empty?).sort end
-  #def self.middle_schools() self.pucs("middle_school" ).reject(&:empty?).sort end
-  #def self.high_schools()   self.pucs("high_school"   ).reject(&:empty?).sort end
-
   def parse(data)
     self.acreage                    = data['ACREAGE']
     self.adjoining_land_use         = data['ADJOINING_LAND_USE']

@@ -39,7 +39,7 @@ module CabooseRets
         'date_created_lte'   => '',
         'date_modified_gte'  => '',
         'date_modified_lte'  => '',
-        'status'             => ['Active', 'Pending']        
+        'status'             => 'Active'                
       },{
         'model'           => 'CabooseRets::MultiFamilyProperty',
         'sort'            => 'current_price ASC, mls_acct',
@@ -52,7 +52,8 @@ module CabooseRets
     
     # GET /multi_family/:mls_acct/details
     def details
-      @property = MultiFamilyProperty.where(:mls_acct => params[:mls_acct]).first      
+      @property = MultiFamilyProperty.where(:mls_acct => params[:mls_acct]).first
+      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?      
       if @property.nil?
         @mls_acct = params[:mls_acct]
         render 'multi_family/not_exists'

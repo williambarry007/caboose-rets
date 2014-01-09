@@ -38,7 +38,7 @@ module CabooseRets
     end
   
     # GET /admin/offices/options
-    def office_options
+    def admin_options
       options = [{
         'value' => '',
         'text' => '-- No Office --'

@@ -17,7 +17,7 @@ module CabooseRets
          # 'added_by_advantage'        => '',
           'lo_code'                   => '',
           'address'                   => '',
-          'status'                    => ['Active', 'Pending']
+          'status'                    => 'Active'
       },{
           'model'           => 'CabooseRets::CommercialProperty',
           'sort'            => 'mls_acct',
@@ -30,7 +30,9 @@ module CabooseRets
     
     # GET /commercial/:mls_acct/details
     def details
-      @property = CommercialProperty.where(:mls_acct => params[:mls_acct]).first      
+      @property = CommercialProperty.where(:mls_acct => params[:mls_acct]).first
+      #@agent = Agent.where(:la_code => @property.la_code).first ? Agent.where(:la_code => @property.la_code).exists? : nil 
+      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?      
     end
     
     #=============================================================================
@@ -94,11 +96,21 @@ module CabooseRets
       return if !user_is_allowed('properties', 'edit')
       
       resp = Caboose::StdClass.new({'attributes' => {}})
-      property = CommercialProperty.find(params[:id])    
+      property = CommercialProperty.find(params[:mls_acct])    
       
       save = true    
       params.each do |name,value|
         case name        
+          when 'la_code'
+            property.la_code = value
+            a = Agent.where(:la_code => value).first
+            resp.attributes['la_code'] = { 'text' => "#{a.first_name} #{a.last_name}" }
+            break
+          when 'lo_code'
+            property.lo_code = value
+            o = Office.where(:lo_code => value).first
+            resp.attributes['lo_code'] = { 'text' => o.lo_name }
+            break
           when 'acreage',
             'adjoining_land_use',
             'agent_notes',
@@ -107,6 +119,7 @@ module CabooseRets
             'annual_taxes',
             'approx_age',
             'area',
+            'banner',
             'baths',
             'baths_full',
             'baths_half',
@@ -186,7 +199,7 @@ module CabooseRets
             'income_other',
             'income_rental',
             'internet_yn',
-            'la_code',
+            #'la_code',
             'leased_through',
             'legal_block',
             'legal_lot',
@@ -202,6 +215,7 @@ module CabooseRets
             'middle_school',
             'mls_acct',
             'municipality',
+            'negotiable_price',
             'num_units',
             'num_units_occupied',
             'off_mkt_date',
@@ -302,7 +316,6 @@ module CabooseRets
       RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'COM')
       RetsImporter.download_property_images(p)
       render :json => Caboose::StdClass.new({ 'success' => "The property's info has been updated from MLS." })
-    end
-  
+    end        
   end
 end

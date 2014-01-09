@@ -5,7 +5,7 @@ CabooseRets::Engine.routes.draw do
   get  "agents/:la_code/listings"                 => "agents#listings"
   get  "admin/agents"                             => "agents#admin_index"
   get  "admin/agents/assistant-to-options"        => "agents#admin_assistant_to_options"
-  get  "admin/agents/agent_options"               => "agents#agent_options"
+  get  "admin/agents/options"                     => "agents#agent_options"
   get  "admin/agents/:id/edit"                    => "agents#admin_edit"
   get  "admin/agents/:id/edit-bio"                => "agents#admin_edit_bio"
   get  "admin/agents/:id/edit-contact-info"       => "agents#admin_edit_contact_info"
@@ -19,6 +19,7 @@ CabooseRets::Engine.routes.draw do
   get  "admin/open-houses/new"                    => "open_houses#admin_new"
   post "admin/open-houses"                        => "open_houses#admin_add"
   
+  get  "admin/offices/options"                    => "offices#admin_options"
   get  "admin/offices"                            => "offices#admin_index"
   get  "admin/offices/:id"                        => "offices#admin_edit"
   get  "admin/offices/:id/refresh"                => "offices#admin_refresh"
@@ -66,5 +67,22 @@ CabooseRets::Engine.routes.draw do
   get    "saved-searches/:id"                     => "saved_searches#redirect"
   put    "saved-searches/:id"                     => "saved_searches#update"
   delete "saved-searches/:id"                     => "saved_searches#delete"
+  
+  get    "saved-properties/:mls_acct/status"      => "saved_properties#status"
+  get    "saved-properties/:mls_acct/toggle"      => "saved_properties#toggle_save"
+  get    "saved-properties"                       => "saved_properties#index"
+  post   "saved-properties"                       => "saved_properties#add"    
+  delete "saved-properties/:mls_acct"             => "saved_properties#delete"
+  
+  get    "admin/media/:mls_acct/photos/new"       => "media#admin_new_photo"
+  get    "admin/media/:mls_acct/files/new"        => "media#admin_new_file"    
+  get    "admin/media/:mls_acct/photos"           => "media#admin_photos"
+  get    "admin/media/:mls_acct/files"            => "media#admin_files"
+  get    "admin/media/:mls_acct"                  => "media#admin_index"  
+  put    "admin/media/:mls_acct/order"            => "media#admin_update_order"
+  post   "admin/media/:mls_acct/photos"           => "media#admin_add_photo"
+  post   "admin/media/:mls_acct/files"            => "media#admin_add_file"        
+  delete "admin/media/:id"                        => "media#admin_delete"
+  
 
 end

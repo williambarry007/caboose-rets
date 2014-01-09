@@ -4,11 +4,17 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
     return nav if user.nil?
     
     nav << {
+      'id' => 'saved-properties',
+      'text' => 'Saved Properties', 
+      'href' => '/saved-properties',
+      'modal' => false
+    }
+    nav << {
       'id' => 'saved-searches',
       'text' => 'Saved Searches', 
       'href' => '/saved-searches',
       'modal' => true
-    }
+    }    
     
     return nav if !user.is_allowed('properties', 'view')
     

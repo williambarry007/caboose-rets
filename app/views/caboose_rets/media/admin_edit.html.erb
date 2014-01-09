@@ -1,0 +1,245 @@
+<%
+p = @property
+%>
+<h1>Edit Residential Property</h1>
+
+<p>
+<input type='button' value='< Back' onclick="window.location='/admin/residential';" />
+<input type='button' value='Manually Refresh from MLS' onclick="refresh_property_from_mls('<%= p.mls_acct %>');" />
+</p>
+<div id='message'><%= raw flash[:message] ? flash[:message] : "" %></div>
+
+<table class='data'>
+<tr><td>acreage                       </td><td><%= p.acreage                        %></td></tr>
+<tr><td>agent_notes                   </td><td><%= p.agent_notes                    %></td></tr>
+<tr><td>agent_other_contact_desc      </td><td><%= p.agent_other_contact_desc       %></td></tr>
+<tr><td>agent_other_contact_phone     </td><td><%= p.agent_other_contact_phone      %></td></tr>
+<tr><td>annual_taxes                  </td><td><%= p.annual_taxes                   %></td></tr>
+<tr><td>area                          </td><td><%= p.area                           %></td></tr>
+<tr><td>avm_automated_sales_disabled  </td><td><%= p.avm_automated_sales_disabled   %></td></tr>
+<tr><td>avm_instant_valuation_disabled</td><td><%= p.avm_instant_valuation_disabled %></td></tr>
+<tr><td>basement_yn                   </td><td><%= p.basement_yn                    %></td></tr>
+<tr><td>baths                         </td><td><%= p.baths                          %></td></tr>
+<tr><td>baths_full                    </td><td><%= p.baths_full                     %></td></tr>
+<tr><td>baths_half                    </td><td><%= p.baths_half                     %></td></tr>
+<tr><td>bedrooms                      </td><td><%= p.bedrooms                       %></td></tr>
+<tr><td>bom_date                      </td><td><%= p.bom_date                       %></td></tr>
+<tr><td>book_number                   </td><td><%= p.book_number                    %></td></tr>
+<tr><td>book_page                     </td><td><%= p.book_page                      %></td></tr>
+<tr><td>book_type                     </td><td><%= p.book_type                      %></td></tr>
+<tr><td>buyer_broker                  </td><td><%= p.buyer_broker                   %></td></tr>
+<tr><td>buyer_broker_type             </td><td><%= p.buyer_broker_type              %></td></tr>
+<tr><td>buyer_name                    </td><td><%= p.buyer_name                     %></td></tr>
+<tr><td>category                      </td><td><%= p.category                       %></td></tr>
+<tr><td>city                          </td><td><%= p.city                           %></td></tr>
+<tr><td>city_code                     </td><td><%= p.city_code                      %></td></tr>
+<tr><td>co_la_code                    </td><td><%= p.co_la_code                     %></td></tr>
+<tr><td>co_lo_code                    </td><td><%= p.co_lo_code                     %></td></tr>
+<tr><td>co_sa_code                    </td><td><%= p.co_sa_code                     %></td></tr>
+<tr><td>co_so_code                    </td><td><%= p.co_so_code                     %></td></tr>
+<tr><td>construction_date_comp        </td><td><%= p.construction_date_comp         %></td></tr>
+<tr><td>construction_status           </td><td><%= p.construction_status            %></td></tr>
+<tr><td>contacts                      </td><td><%= p.contacts                       %></td></tr>
+<tr><td>contr_broker                  </td><td><%= p.contr_broker                   %></td></tr>
+<tr><td>contr_broker_type             </td><td><%= p.contr_broker_type              %></td></tr>
+<tr><td>converted                     </td><td><%= p.converted                      %></td></tr>
+<tr><td>county                        </td><td><%= p.county                         %></td></tr>
+<tr><td>current_price                 </td><td><%= p.current_price                  %></td></tr>
+<tr><td>currentlease_yn               </td><td><%= p.currentlease_yn                %></td></tr>
+<tr><td>date_created                  </td><td><%= p.date_created                   %></td></tr>
+<tr><td>date_modified                 </td><td><%= p.date_modified                  %></td></tr>
+<tr><td>df_yn                         </td><td><%= p.df_yn                          %></td></tr>
+<tr><td>directions                    </td><td><%= p.directions                     %></td></tr>
+<tr><td>display_address_yn            </td><td><%= p.display_address_yn             %></td></tr>
+<tr><td>dom                           </td><td><%= p.dom                            %></td></tr>
+<tr><td>elem_school                   </td><td><%= p.elem_school                    %></td></tr>
+<tr><td>expire_date                   </td><td><%= p.expire_date                    %></td></tr>
+<tr><td>flood_plain                   </td><td><%= p.flood_plain                    %></td></tr>
+<tr><td>foreclosure_yn                </td><td><%= p.foreclosure_yn                 %></td></tr>
+<tr><td>ftr_age                       </td><td><%= p.ftr_age                        %></td></tr>
+<tr><td>ftr_appliances                </td><td><%= p.ftr_appliances                 %></td></tr>
+<tr><td>ftr_attic                     </td><td><%= p.ftr_attic                      %></td></tr>
+<tr><td>ftr_basement                  </td><td><%= p.ftr_basement                   %></td></tr>
+<tr><td>ftr_citycommunit              </td><td><%= p.ftr_citycommunit               %></td></tr>
+<tr><td>ftr_construction              </td><td><%= p.ftr_construction               %></td></tr>
+<tr><td>ftr_cooling                   </td><td><%= p.ftr_cooling                    %></td></tr>
+<tr><td>ftr_diningroom                </td><td><%= p.ftr_diningroom                 %></td></tr>
+<tr><td>ftr_docs_on_file              </td><td><%= p.ftr_docs_on_file               %></td></tr>
+<tr><td>ftr_drive                     </td><td><%= p.ftr_drive                      %></td></tr>
+<tr><td>ftr_exterior                  </td><td><%= p.ftr_exterior                   %></td></tr>
+<tr><td>ftr_fireplace                 </td><td><%= p.ftr_fireplace                  %></td></tr>
+<tr><td>ftr_garage                    </td><td><%= p.ftr_garage                     %></td></tr>
+<tr><td>ftr_heating                   </td><td><%= p.ftr_heating                    %></td></tr>
+<tr><td>ftr_hoaamenities              </td><td><%= p.ftr_hoaamenities               %></td></tr>
+<tr><td>ftr_hoaincludes               </td><td><%= p.ftr_hoaincludes                %></td></tr>
+<tr><td>ftr_interior                  </td><td><%= p.ftr_interior                   %></td></tr>
+<tr><td>ftr_landscaping               </td><td><%= p.ftr_landscaping                %></td></tr>
+<tr><td>ftr_laundry                   </td><td><%= p.ftr_laundry                    %></td></tr>
+<tr><td>ftr_lotdesc                   </td><td><%= p.ftr_lotdesc                    %></td></tr>
+<tr><td>ftr_miscellaneous             </td><td><%= p.ftr_miscellaneous              %></td></tr>
+<tr><td>ftr_pool                      </td><td><%= p.ftr_pool                       %></td></tr>
+<tr><td>ftr_porchpatio                </td><td><%= p.ftr_porchpatio                 %></td></tr>
+<tr><td>ftr_possession                </td><td><%= p.ftr_possession                 %></td></tr>
+<tr><td>ftr_roof                      </td><td><%= p.ftr_roof                       %></td></tr>
+<tr><td>ftr_sewer                     </td><td><%= p.ftr_sewer                      %></td></tr>
+<tr><td>ftr_showing                   </td><td><%= p.ftr_showing                    %></td></tr>
+<tr><td>ftr_terms                     </td><td><%= p.ftr_terms                      %></td></tr>
+<tr><td>ftr_warrantyprogrm            </td><td><%= p.ftr_warrantyprogrm             %></td></tr>
+<tr><td>ftr_waterheater               </td><td><%= p.ftr_waterheater                %></td></tr>
+<tr><td>ftr_watersupply               </td><td><%= p.ftr_watersupply                %></td></tr>
+<tr><td>ftr_window_treat              </td><td><%= p.ftr_window_treat               %></td></tr>
+<tr><td>ftr_windows                   </td><td><%= p.ftr_windows                    %></td></tr>
+<tr><td>geo_precision                 </td><td><%= p.geo_precision                  %></td></tr>
+<tr><td>georesult                     </td><td><%= p.georesult                      %></td></tr>
+<tr><td>high_school                   </td><td><%= p.high_school                    %></td></tr>
+<tr><td>hoa_fee                       </td><td><%= p.hoa_fee                        %></td></tr>
+<tr><td>hoa_fee_yn                    </td><td><%= p.hoa_fee_yn                     %></td></tr>
+<tr><td>hoa_term                      </td><td><%= p.hoa_term                       %></td></tr>
+<tr><td>homestead_yn                  </td><td><%= p.homestead_yn                   %></td></tr>
+<tr><td>internet_yn                   </td><td><%= p.internet_yn                    %></td></tr>
+<tr><td>la_code                       </td><td><%= p.la_code                        %></td></tr>
+<tr><td>lease_exp_date                </td><td><%= p.lease_exp_date                 %></td></tr>
+<tr><td>legals                        </td><td><%= p.legals                         %></td></tr>
+<tr><td>levels                        </td><td><%= p.levels                         %></td></tr>
+<tr><td>list_date                     </td><td><%= p.list_date                      %></td></tr>
+<tr><td>list_price                    </td><td><%= p.list_price                     %></td></tr>
+<tr><td>listing_type                  </td><td><%= p.listing_type                   %></td></tr>
+<tr><td>lo_code                       </td><td><%= p.lo_code                        %></td></tr>
+<tr><td>lot_dimensions                </td><td><%= p.lot_dimensions                 %></td></tr>
+<tr><td>master_bed_lvl                </td><td><%= p.master_bed_lvl                 %></td></tr>
+<tr><td>media_flag                    </td><td><%= p.media_flag                     %></td></tr>
+<tr><td>middle_school                 </td><td><%= p.middle_school                  %></td></tr>
+<tr><td>mls_acct                      </td><td><%= p.mls_acct                       %></td></tr>
+<tr><td>off_mkt_date                  </td><td><%= p.off_mkt_date                   %></td></tr>
+<tr><td>off_mkt_days                  </td><td><%= p.off_mkt_days                   %></td></tr>
+<tr><td>office_notes                  </td><td><%= p.office_notes                   %></td></tr>
+<tr><td>onsite_days_hours             </td><td><%= p.onsite_days_hours              %></td></tr>
+<tr><td>onsite_yn                     </td><td><%= p.onsite_yn                      %></td></tr>
+<tr><td>orig_lp                       </td><td><%= p.orig_lp                        %></td></tr>
+<tr><td>other_fee                     </td><td><%= p.other_fee                      %></td></tr>
+<tr><td>other_fee_type                </td><td><%= p.other_fee_type                 %></td></tr>
+<tr><td>outlier_yn                    </td><td><%= p.outlier_yn                     %></td></tr>
+<tr><td>owner_name                    </td><td><%= p.owner_name                     %></td></tr>
+<tr><td>owner_phone                   </td><td><%= p.owner_phone                    %></td></tr>
+<tr><td>parcel_id                     </td><td><%= p.parcel_id                      %></td></tr>
+<tr><td>pending_date                  </td><td><%= p.pending_date                   %></td></tr>
+<tr><td>photo_count                   </td><td><%= p.photo_count                    %></td></tr>
+<tr><td>photo_date_modified           </td><td><%= p.photo_date_modified            %></td></tr>
+<tr><td>price_change_date             </td><td><%= p.price_change_date              %></td></tr>
+<tr><td>price_sqft                    </td><td><%= p.price_sqft                     %></td></tr>
+<tr><td>proj_close_date               </td><td><%= p.proj_close_date                %></td></tr>
+<tr><td>prop_id                       </td><td><%= p.prop_id                        %></td></tr>
+<tr><td>prop_type                     </td><td><%= p.prop_type                      %></td></tr>
+<tr><td>remarks                       </td><td><%= p.remarks                        %></td></tr>
+<tr><td>right_red_date                </td><td><%= p.right_red_date                 %></td></tr>
+<tr><td>rm_bath1                      </td><td><%= p.rm_bath1                       %></td></tr>
+<tr><td>rm_bath1_desc                 </td><td><%= p.rm_bath1_desc                  %></td></tr>
+<tr><td>rm_bath2                      </td><td><%= p.rm_bath2                       %></td></tr>
+<tr><td>rm_bath2_desc                 </td><td><%= p.rm_bath2_desc                  %></td></tr>
+<tr><td>rm_bath3                      </td><td><%= p.rm_bath3                       %></td></tr>
+<tr><td>rm_bath3_desc                 </td><td><%= p.rm_bath3_desc                  %></td></tr>
+<tr><td>rm_br1                        </td><td><%= p.rm_br1                         %></td></tr>
+<tr><td>rm_br1_desc                   </td><td><%= p.rm_br1_desc                    %></td></tr>
+<tr><td>rm_br2                        </td><td><%= p.rm_br2                         %></td></tr>
+<tr><td>rm_br2_desc                   </td><td><%= p.rm_br2_desc                    %></td></tr>
+<tr><td>rm_br3                        </td><td><%= p.rm_br3                         %></td></tr>
+<tr><td>rm_br3_desc                   </td><td><%= p.rm_br3_desc                    %></td></tr>
+<tr><td>rm_br4                        </td><td><%= p.rm_br4                         %></td></tr>
+<tr><td>rm_br4_desc                   </td><td><%= p.rm_br4_desc                    %></td></tr>
+<tr><td>rm_br5                        </td><td><%= p.rm_br5                         %></td></tr>
+<tr><td>rm_br5_desc                   </td><td><%= p.rm_br5_desc                    %></td></tr>
+<tr><td>rm_brkfst                     </td><td><%= p.rm_brkfst                      %></td></tr>
+<tr><td>rm_brkfst_desc                </td><td><%= p.rm_brkfst_desc                 %></td></tr>
+<tr><td>rm_den                        </td><td><%= p.rm_den                         %></td></tr>
+<tr><td>rm_den_desc                   </td><td><%= p.rm_den_desc                    %></td></tr>
+<tr><td>rm_dining                     </td><td><%= p.rm_dining                      %></td></tr>
+<tr><td>rm_dining_desc                </td><td><%= p.rm_dining_desc                 %></td></tr>
+<tr><td>rm_family                     </td><td><%= p.rm_family                      %></td></tr>
+<tr><td>rm_family_desc                </td><td><%= p.rm_family_desc                 %></td></tr>
+<tr><td>rm_foyer                      </td><td><%= p.rm_foyer                       %></td></tr>
+<tr><td>rm_foyer_desc                 </td><td><%= p.rm_foyer_desc                  %></td></tr>
+<tr><td>rm_great                      </td><td><%= p.rm_great                       %></td></tr>
+<tr><td>rm_great_desc                 </td><td><%= p.rm_great_desc                  %></td></tr>
+<tr><td>rm_kitchen                    </td><td><%= p.rm_kitchen                     %></td></tr>
+<tr><td>rm_kitchen_desc               </td><td><%= p.rm_kitchen_desc                %></td></tr>
+<tr><td>rm_kitchen2                   </td><td><%= p.rm_kitchen2                    %></td></tr>
+<tr><td>rm_kitchen2_desc              </td><td><%= p.rm_kitchen2_desc               %></td></tr>
+<tr><td>rm_laundry                    </td><td><%= p.rm_laundry                     %></td></tr>
+<tr><td>rm_laundry_desc               </td><td><%= p.rm_laundry_desc                %></td></tr>
+<tr><td>rm_living                     </td><td><%= p.rm_living                      %></td></tr>
+<tr><td>rm_living_desc                </td><td><%= p.rm_living_desc                 %></td></tr>
+<tr><td>rm_lrdr                       </td><td><%= p.rm_lrdr                        %></td></tr>
+<tr><td>rm_lrdr_desc                  </td><td><%= p.rm_lrdr_desc                   %></td></tr>
+<tr><td>rm_master                     </td><td><%= p.rm_master                      %></td></tr>
+<tr><td>rm_master_desc                </td><td><%= p.rm_master_desc                 %></td></tr>
+<tr><td>rm_other1                     </td><td><%= p.rm_other1                      %></td></tr>
+<tr><td>rm_other1_desc                </td><td><%= p.rm_other1_desc                 %></td></tr>
+<tr><td>rm_other1_name                </td><td><%= p.rm_other1_name                 %></td></tr>
+<tr><td>rm_other2                     </td><td><%= p.rm_other2                      %></td></tr>
+<tr><td>rm_other2_desc                </td><td><%= p.rm_other2_desc                 %></td></tr>
+<tr><td>rm_other2_name                </td><td><%= p.rm_other2_name                 %></td></tr>
+<tr><td>rm_other3                     </td><td><%= p.rm_other3                      %></td></tr>
+<tr><td>rm_other3_desc                </td><td><%= p.rm_other3_desc                 %></td></tr>
+<tr><td>rm_other3_name                </td><td><%= p.rm_other3_name                 %></td></tr>
+<tr><td>rm_other4                     </td><td><%= p.rm_other4                      %></td></tr>
+<tr><td>rm_other4_desc                </td><td><%= p.rm_other4_desc                 %></td></tr>
+<tr><td>rm_other4_name                </td><td><%= p.rm_other4_name                 %></td></tr>
+<tr><td>rm_recrm                      </td><td><%= p.rm_recrm                       %></td></tr>
+<tr><td>rm_recrm_desc                 </td><td><%= p.rm_recrm_desc                  %></td></tr>
+<tr><td>rm_study                      </td><td><%= p.rm_study                       %></td></tr>
+<tr><td>rm_study_desc                 </td><td><%= p.rm_study_desc                  %></td></tr>
+<tr><td>rm_sun                        </td><td><%= p.rm_sun                         %></td></tr>
+<tr><td>rm_sun_desc                   </td><td><%= p.rm_sun_desc                    %></td></tr>
+<tr><td>sa_code                       </td><td><%= p.sa_code                        %></td></tr>
+<tr><td>sale_lease                    </td><td><%= p.sale_lease                     %></td></tr>
+<tr><td>sale_notes                    </td><td><%= p.sale_notes                     %></td></tr>
+<tr><td>so_code                       </td><td><%= p.so_code                        %></td></tr>
+<tr><td>sold_date                     </td><td><%= p.sold_date                      %></td></tr>
+<tr><td>sold_price                    </td><td><%= p.sold_price                     %></td></tr>
+<tr><td>sold_terms                    </td><td><%= p.sold_terms                     %></td></tr>
+<tr><td>sqft_source                   </td><td><%= p.sqft_source                    %></td></tr>
+<tr><td>state                         </td><td><%= p.state                          %></td></tr>
+<tr><td>status                        </td><td><%= p.status                         %></td></tr>
+<tr><td>status_date                   </td><td><%= p.status_date                    %></td></tr>
+<tr><td>status_flag                   </td><td><%= p.status_flag                    %></td></tr>
+<tr><td>street_dir                    </td><td><%= p.street_dir                     %></td></tr>
+<tr><td>street_name                   </td><td><%= p.street_name                    %></td></tr>
+<tr><td>street_num                    </td><td><%= p.street_num                     %></td></tr>
+<tr><td>style                         </td><td><%= p.style                          %></td></tr>
+<tr><td>sub_agent                     </td><td><%= p.sub_agent                      %></td></tr>
+<tr><td>sub_agent_type                </td><td><%= p.sub_agent_type                 %></td></tr>
+<tr><td>subdivision                   </td><td><%= p.subdivision                    %></td></tr>
+<tr><td>take_photo_yn                 </td><td><%= p.take_photo_yn                  %></td></tr>
+<tr><td>third_party_comm_yn           </td><td><%= p.third_party_comm_yn            %></td></tr>
+<tr><td>tot_heat_sqft                 </td><td><%= p.tot_heat_sqft                  %></td></tr>
+<tr><td>unit_num                      </td><td><%= p.unit_num                       %></td></tr>
+<tr><td>upload_source                 </td><td><%= p.upload_source                  %></td></tr>
+<tr><td>valuation_yn                  </td><td><%= p.valuation_yn                   %></td></tr>
+<tr><td>vt_yn                         </td><td><%= p.vt_yn                          %></td></tr>
+<tr><td>waterfront                    </td><td><%= p.waterfront                     %></td></tr>
+<tr><td>wf_feet                       </td><td><%= p.wf_feet                        %></td></tr>
+<tr><td>withdrawn_date                </td><td><%= p.withdrawn_date                 %></td></tr>
+<tr><td>year_built                    </td><td><%= p.year_built                     %></td></tr>
+<tr><td>year_built_source             </td><td><%= p.year_built_source              %></td></tr>
+<tr><td>zip                           </td><td><%= p.zip                            %></td></tr>
+</table><br />
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<%= javascript_include_tag "caboose_rets/admin_media" %>
+<script type='text/javascript'>
+
+function refresh_property_from_mls(mls_acct)
+{
+  modal.autosize("<p class='loading'>Refreshing property info and images from MLS...</p>");
+  $.ajax({
+    url: '/admin/residential/' + mls_acct + '/refresh',
+    success: function(resp) {
+      if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");          
+    }
+  });
+}
+
+</script>
+<% end %>
