@@ -36,7 +36,7 @@ module CabooseRets
     def admin_add_photo
       return if !user_is_allowed('media', 'edit')      
             
-      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct]})
+      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct], :media_type => 'Photo'})
       x = 0 if x.nil?
       
       m = Media.new
@@ -55,7 +55,7 @@ module CabooseRets
     def admin_add_file
       return if !user_is_allowed('media', 'edit')
 
-      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct]})
+      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct], :media_type => 'File'})
       x = 0 if x.nil?      
                   
       m = Media.new

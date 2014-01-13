@@ -45,6 +45,7 @@ MediaController.prototype = {
   
   sortable_files: function()
   {  
+    var that = this;
     $('#files').sortable({      
       placeholder: 'sortable-placeholder',
       handle: '.sort_handle',      

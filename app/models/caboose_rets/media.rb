@@ -2,7 +2,7 @@
 class CabooseRets::Media < ActiveRecord::Base
   self.table_name = "rets_media"
   
-  has_attached_file :file, :path => 'rets/media/:mls_acct_:media_order.:extension' 
+  has_attached_file :file, :path => 'rets/media/:mls_acct_:id.:extension' 
   has_attached_file :image, 
     :path => 'rets/media/:mls_acct_:media_order_:style.:extension', 
     :styles => {
@@ -43,22 +43,28 @@ class CabooseRets::Media < ActiveRecord::Base
     
     # Rename the s3 assets to temp names
     media_ids.each do |id|
-      m = CabooseRets::Media.find(id)
-      (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.image
-      (m.file.styles.keys+[:original]).each  { |style| b.objects[m.file.path(style) ].rename_to "#{m.file.path(style)}.temp"  } if m.file
+      m = CabooseRets::Media.find(id) 
+      (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.media_type == 'Photo'
+      b.objects[m.file.path].rename_to "#{m.file.path}.temp" if m.media_type == 'File'
     end
     
     # Rename the assets to their new names
     i = 1
+    j = 1
     media_ids.each do |id|
-      m = CabooseRets::Media.find(id)                      
-      orig_image_name = m.image ? "#{m.image.path}.temp" : nil
-      orig_file_name  = m.file  ? "#{m.image.path}.temp" : nil
-      m.media_order = i      
-      (m.image.styles.keys+[:original]).each { |style| b.objects[orig_image_name.gsub("original", style.to_s)].rename_to m.image.path(style) } if m.image
-      (m.file.styles.keys+[:original]).each  { |style| b.objects[orig_file_name.gsub( "original", style.to_s)].rename_to m.file.path(style)  } if m.file
-      m.save
-      i = i + 1
+      m = CabooseRets::Media.find(id)
+      if m.media_type == 'Photo'        
+        orig_name = "#{m.image.path}.temp"        
+        m.media_order = i      
+        (m.image.styles.keys+[:original]).each { |style| b.objects[orig_name.gsub("original", style.to_s)].rename_to m.image.path(style) }                
+        m.save
+        i = i + 1
+      elsif m.media_type == 'File'        
+        b.objects["#{m.file.path}.temp"].rename_to m.file.path
+        m.media_order = j
+        m.save
+        j = j + 1
+      end
     end
     
     return true

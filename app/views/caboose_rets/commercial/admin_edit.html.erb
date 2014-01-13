@@ -202,7 +202,7 @@ attributes = {
 <p>MLS#: <%= p.mls_acct %>
 <p>
 <input type='button' value='< Back' onclick="window.location='/admin/commercial';" />
-<input type='button' value='Images and Files' onclick="window.location='/admin/media/<%= p.mls_acct %>';" />
+<input type='button' value='Images and Files' onclick="window.location='/admin/properties/<%= p.mls_acct %>/media';" />
 <% if !is_custom_property %>
   <input type='button' value='Manually Refresh from MLS' onclick="refresh_property_from_mls('<%= p.mls_acct %>');" />
 <% end %>
