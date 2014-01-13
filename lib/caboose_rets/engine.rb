@@ -18,5 +18,11 @@ module CabooseRets
   
   class Engine < ::Rails::Engine
     isolate_namespace CabooseRets
+    initializer 'caboose_rets.assets.precompile' do |app|            
+      app.config.assets.precompile += [
+        'caboose_rets/admin_media.js',
+        'caboose_rets/caboose_rets.js'
+      ]      
+    end
   end
 end
