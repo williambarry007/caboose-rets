@@ -112,8 +112,8 @@ class CabooseRets::Media < ActiveRecord::Base
       puts "Renaming #{m.mls_acct}_#{m.id}..."
       if m.image_file_name && m.image
         ext = File.extname(m.image_file_name)
-        (m.image.styles.keys+[:original]).each do |style|        
-          b.objects[m.image.path(style)].copy_to "rets/media_new/#{m.id}_#{style}.#{ext}"
+        (m.image.styles.keys+[:original]).each do |style|          
+          b.objects[m.image.path(style)].copy_to "rets/media_new/#{m.id}_#{style}.#{ext}" if b.objects[m.image.path(style)].exists?
         end
       end
     end
