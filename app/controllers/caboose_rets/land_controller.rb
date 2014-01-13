@@ -59,7 +59,7 @@ module CabooseRets
           'zip'                         => ''    
         },{
           'model'           => 'CabooseRets::LandProperty',
-          'sort'            => 'current_price DESC, mls_acct',          
+          'sort'            => CabooseRets::default_property_sort,          
           'desc'            => false,
           'skip'            => ['status'],
           'base_url'        => '/land/search',          

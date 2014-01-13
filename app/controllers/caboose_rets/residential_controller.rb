@@ -42,7 +42,7 @@ module CabooseRets
         'status'             => 'Active'
       },{
         'model'           => 'CabooseRets::ResidentialProperty',
-        'sort'            => 'current_price DESC, mls_acct',
+        'sort'            => CabooseRets::default_property_sort,
         'desc'            => false,
         'skip'            => ['status'],
         'base_url'        => '/residential/search',
