@@ -3,6 +3,11 @@ require "caboose_rets/version"
 namespace :caboose_rets do
   
   desc "Initializes the database for a caboose installation"
+  task :rename_media => :environment do
+    CabooseRets::Media.rename_media    
+  end
+  
+  desc "Initializes the database for a caboose installation"
   task :db => :environment do
     CabooseRets::Schema.create_schema
     CabooseRets::Schema.load_data
