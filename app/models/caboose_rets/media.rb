@@ -45,7 +45,7 @@ class CabooseRets::Media < ActiveRecord::Base
     media_ids.each do |id|
       m = CabooseRets::Media.find(id)
       (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.image
-      #(m.file.styles.keys+[:original]).each  { |style| b.objects[m.file.path(style) ].rename_to "#{m.file.path(style)}.temp"  } if m.file
+      (m.file.styles.keys+[:original]).each  { |style| b.objects[m.file.path(style) ].rename_to "#{m.file.path(style)}.temp"  } if m.file
     end
     
     # Rename the assets to their new names
@@ -53,10 +53,10 @@ class CabooseRets::Media < ActiveRecord::Base
     media_ids.each do |id|
       m = CabooseRets::Media.find(id)                      
       orig_image_name = m.image ? "#{m.image.path}.temp" : nil
-      #orig_file_name  = m.file  ? "#{m.image.path}.temp" : nil
+      orig_file_name  = m.file  ? "#{m.image.path}.temp" : nil
       m.media_order = i      
       (m.image.styles.keys+[:original]).each { |style| b.objects[orig_image_name.gsub("original", style.to_s)].rename_to m.image.path(style) } if m.image
-      #(m.file.styles.keys+[:original]).each  { |style| b.objects[orig_file_name.gsub( "original", style.to_s)].rename_to m.file.path(style)  } if m.file
+      (m.file.styles.keys+[:original]).each  { |style| b.objects[orig_file_name.gsub( "original", style.to_s)].rename_to m.file.path(style)  } if m.file
       m.save
       i = i + 1
     end

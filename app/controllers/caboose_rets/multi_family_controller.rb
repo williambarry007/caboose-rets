@@ -41,10 +41,11 @@ module CabooseRets
         'date_modified_lte'  => '',
         'status'             => 'Active'                
       },{
-        'model'           => 'CabooseRets::MultiFamilyProperty',
-        'sort'            => 'current_price ASC, mls_acct',
+        'model'           => 'CabooseRets::MultiFamilyProperty',        
+        'sort'            => 'current_price DESC, mls_acct',
         'desc'            => false,
-        'base_url'        => '/multi-family',
+        'skip'            => ['status'],
+        'base_url'        => '/multi-family/search',
         'items_per_page'  => 10
       })      
       @properties = @gen.items

@@ -19,10 +19,11 @@ module CabooseRets
           'address'                   => '',
           'status'                    => 'Active'
       },{
-          'model'           => 'CabooseRets::CommercialProperty',
-          'sort'            => 'mls_acct',
+          'model'           => 'CabooseRets::CommercialProperty',          
+          'sort'            => 'current_price DESC, mls_acct',
           'desc'            => false,
-          'base_url'        => '/commercial',
+          'skip'            => ['status'],
+          'base_url'        => '/commercial/search',
           'items_per_page'  => 10
       })
       @properties = @gen.items

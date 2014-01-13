@@ -24,9 +24,10 @@ CabooseRets::Engine.routes.draw do
   get  "admin/offices/:id"                        => "offices#admin_edit"
   get  "admin/offices/:id/refresh"                => "offices#admin_refresh"
   
-  get  "commercial"                               => "commercial#index"                         
+  get  "commercial/search:search_params"          => "commercial#index", :constraints => {:search_params => /.*/}                             
   get  "commercial/:mls_acct/details"             => "commercial#details"
   get  "commercial/:mls_acct"                     => "commercial#details"
+  get  "commercial"                               => "commercial#index"
   get  "admin/commercial/new"                     => "commercial#admin_new"
   post "admin/commercial"                         => "commercial#admin_add"
   get  "admin/commercial"                         => "commercial#admin_index"
@@ -35,27 +36,30 @@ CabooseRets::Engine.routes.draw do
   put  "admin/commercial/:mls_acct"               => "commercial#admin_update"
   post "admin/commercial/:mls_acct"               => "commercial#admin_update"
   
-  get  "residential"                              => "residential#index"                        
+  get  "residential/search:search_params"         => "residential#index", :constraints => {:search_params => /.*/}  
   get  "residential/:mls_acct/details"            => "residential#details"
   get  "residential/:mls_acct"                    => "residential#details"
+  get  "residential"                              => "residential#index"
   get  "admin/residential"                        => "residential#admin_index"
   get  "admin/residential/:mls_acct/edit"         => "residential#admin_edit"
   get  "admin/residential/:mls_acct/refresh"      => "residential#admin_refresh"
   put  "admin/residential/:mls_acct"              => "residential#admin_update"
   post "admin/residential/:mls_acct"              => "residential#admin_update"
   
-  get  "land"                                     => "land#index"
+  get  "land/search:search_params"                => "land#index", :constraints => {:search_params => /.*/}    
   get  "land/:mls_acct/details"                   => "land#details"
-  get  "land/:mls_acct"                           => "land#details"         
+  get  "land/:mls_acct"                           => "land#details"
+  get  "land"                                     => "land#index"
   get  "admin/land"                               => "land#admin_index"
   get  "admin/land/:mls_acct/edit"                => "land#admin_edit"
   get  "admin/land/:mls_acct/refresh"             => "land#admin_refresh"
   put  "admin/land/:mls_acct"                     => "land#admin_update"
   post "admin/land/:mls_acct"                     => "land#admin_update"
   
-  get  "multi-family"                             => "multi_family#index"
+  get  "multi-family/search:search_params"        => "multi_family#index", :constraints => {:search_params => /.*/}    
   get  "multi-family/:mls_acct/details"           => "multi_family#details"
-  get  "multi-family/:mls_acct"                   => "multi_family#details"         
+  get  "multi-family/:mls_acct"                   => "multi_family#details"
+  get  "multi-family"                             => "multi_family#index"
   get  "admin/multi-family"                       => "multi_family#admin_index"
   get  "admin/multi-family/:mls_acct/edit"        => "multi_family#admin_edit"
   get  "admin/multi-family/:mls_acct/refresh"     => "multi_family#admin_refresh"
@@ -74,15 +78,23 @@ CabooseRets::Engine.routes.draw do
   post   "saved-properties"                       => "saved_properties#add"    
   delete "saved-properties/:mls_acct"             => "saved_properties#delete"
   
-  get    "admin/media/:mls_acct/photos/new"       => "media#admin_new_photo"
-  get    "admin/media/:mls_acct/files/new"        => "media#admin_new_file"    
-  get    "admin/media/:mls_acct/photos"           => "media#admin_photos"
-  get    "admin/media/:mls_acct/files"            => "media#admin_files"
-  get    "admin/media/:mls_acct"                  => "media#admin_index"  
-  put    "admin/media/:mls_acct/order"            => "media#admin_update_order"
-  post   "admin/media/:mls_acct/photos"           => "media#admin_add_photo"
-  post   "admin/media/:mls_acct/files"            => "media#admin_add_file"        
-  delete "admin/media/:id"                        => "media#admin_delete"
-  
+  #get    "admin/media/:mls_acct/photos/new"       => "media#admin_new_photo"
+  #get    "admin/media/:mls_acct/files/new"        => "media#admin_new_file"    
+  #get    "admin/media/:mls_acct/photos"           => "media#admin_photos"
+  #get    "admin/media/:mls_acct/files"            => "media#admin_files"
+  #get    "admin/media/:mls_acct"                  => "media#admin_index"  
+  #put    "admin/media/:mls_acct/order"            => "media#admin_update_order"
+  #post   "admin/media/:mls_acct/photos"           => "media#admin_add_photo"
+  #post   "admin/media/:mls_acct/files"            => "media#admin_add_file"        
+  #delete "admin/media/:id"                        => "media#admin_delete"
+        
+  get    "admin/properties/:mls_acct/photos"       => "media#admin_photos"
+  get    "admin/properties/:mls_acct/files"        => "media#admin_files"
+  get    "admin/properties/:mls_acct/media"        => "media#admin_property_media"  
+  put    "admin/properties/:mls_acct/media/order"  => "media#admin_update_order"
+  post   "admin/properties/:mls_acct/photos"       => "media#admin_add_photo"
+  post   "admin/properties/:mls_acct/files"        => "media#admin_add_file"
+  get    "admin/media/:id"                         => "media#admin_index"  
+  delete "admin/media/:id"                         => "media#admin_delete"  
 
 end

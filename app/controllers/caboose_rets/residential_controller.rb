@@ -42,9 +42,10 @@ module CabooseRets
         'status'             => 'Active'
       },{
         'model'           => 'CabooseRets::ResidentialProperty',
-        'sort'            => 'current_price ASC, mls_acct',
+        'sort'            => 'current_price DESC, mls_acct',
         'desc'            => false,
-        'base_url'        => '/residential',
+        'skip'            => ['status'],
+        'base_url'        => '/residential/search',
         'items_per_page'  => 10
       })
       

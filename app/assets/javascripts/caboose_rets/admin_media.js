@@ -1,20 +1,27 @@
 
-var MediaController = function(mls_acct) { this.init(mls_acct); };
+var MediaController = function(options) { this.init(options) };
 
 MediaController.prototype = {
-
+  
+  cdn_domain: false,
+  s3_domain: false,
   mls_acct: false,
   
   s3_url: function(url)
   {
-    return url.replace("d19w6hbyh7z79c.cloudfront.net/", "s3.amazonaws.com/advantagerealtygroup/");
+    if (!this.cnd_domain || !this.s3_domain)
+      return url;
+    return url.replace(this.cdn_domain, s3_domain);
   },
   
-  init: function(mls_acct)
+  init: function(options)
   {
-    this.mls_acct = mls_acct;
+    for (var thing in options)
+      this[thing] = options[thing];
+    
     var that = this;
     this.image_add_form();
+    this.file_add_form();
     this.render_images(function() { that.sortable_images(); });
     this.render_files(function() { that.sortable_files(); });
   },
@@ -27,7 +34,7 @@ MediaController.prototype = {
       handle: '.sort_handle',      
       update: function(e, ui) {                                
         $.ajax({
-          url: '/admin/media/' + that.mls_acct + '/order',
+          url: '/admin/properties/' + that.mls_acct + '/media/order',
           type: 'put',
           data: $('#images').sortable('serialize', { key: 'sort[]' }),
           success: function(resp) {}
@@ -43,7 +50,7 @@ MediaController.prototype = {
       handle: '.sort_handle',      
       update: function(e, ui) {                                
         $.ajax({
-          url: '/admin/media/' + that.mls_acct + '/order',
+          url: '/admin/properties/' + that.mls_acct + '/media/order',
           type: 'put',
           data: $('#files').sortable('serialize', { key: 'sort[]' }),
           success: function(resp) {}
@@ -66,6 +73,7 @@ MediaController.prototype = {
       $('#image_' + media_id).empty().append(p);
       return;
     }
+    $('#image_' + media_id).empty().append($('<p/>').addClass('loading').html('Deleting image...'));
     $.ajax({
       url: '/admin/media/' + media_id,
       type: 'delete',
@@ -85,8 +93,8 @@ MediaController.prototype = {
         .append("Are you sure you want to delete the file? ")
         .append($('<input/>').attr('type', 'button').val('Yes').click(function() { that.delete_file(media_id, true); })).append(" ")
         .append($('<input/>').attr('type', 'button').val('No').click(function()  { that.render_file(media_id); }));
-      $('#image_' + media_id).attr('onclick','').unbind('click');
-      $('#image_' + media_id).empty().append(p);
+      $('#file_' + media_id).attr('onclick','').unbind('click');
+      $('#file_' + media_id).empty().append(p);
       return;
     }
     $.ajax({
@@ -104,16 +112,17 @@ MediaController.prototype = {
 
   render_images: function(after)
   {
-    $('#images').empty();    
+    $('#images').empty().append($('<p/>').addClass('loading').html('Getting images...'));    
     var that = this;
     $.ajax({      
-      url: '/admin/media/' + this.mls_acct + '/photos',
+      url: '/admin/properties/' + this.mls_acct + '/photos',
       success: function(media) {
-        $(media).each(function(i,m) {
+        $('#images').empty();
+        $(media).each(function(i,m) {            
           $('#images')
             .append($('<li/>')
               .attr('id', 'image_container_' + m.id)                                          
-              .append($('<a/>').attr('id', 'image_' + m.id + '_sort_handle'  ).addClass('sort_handle'  ).append($('<span/>').addClass('ui-icon ui-icon-arrow-2-n-s')))
+              .append($('<a/>').attr('id', 'image_' + m.id + '_sort_handle'  ).addClass('sort_handle'  ).append($('<span/>').addClass('ui-icon ui-icon-arrow-4')))
               .append($('<a/>').attr('id', 'image_' + m.id + '_delete_handle').addClass('delete_handle').append($('<span/>').addClass('ui-icon ui-icon-close')).click(function(e) { e.preventDefault(); that.delete_image(m.id); }))
               .append($('<div/>').attr('id', 'image_' + m.id).append($('<img/>').attr('src', that.s3_url(m.image.tiny_url) + '?' + Math.random()).attr('title', m.id + ' ' + m.image.file_name)))
             );
@@ -137,18 +146,21 @@ MediaController.prototype = {
   
   render_files: function(after)
   {
-    $('#files').empty();    
+    $('#files').empty().append($('<p/>').addClass('loading').html('Getting files...'));        
     var that = this;
     $.ajax({      
-      url: '/admin/media/' + this.mls_acct + '/files',
+      url: '/admin/properties/' + this.mls_acct + '/files',
       success: function(media) {
+        $('#files').empty();
+        if (!media || media.length == 0)
+          $('#files').append($('<p/>').html('There are no files right now.'));
         $(media).each(function(i,m) {
           $('#files')
             .append($('<li/>')
               .attr('id', 'file_container_' + m.id)                                          
               .append($('<a/>').attr('id', 'file_' + m.id + '_sort_handle'  ).addClass('sort_handle'  ).append($('<span/>').addClass('ui-icon ui-icon-arrow-2-n-s')))
               .append($('<a/>').attr('id', 'file_' + m.id + '_delete_handle').addClass('delete_handle').append($('<span/>').addClass('ui-icon ui-icon-close')).click(function(e) { e.preventDefault(); that.delete_file(m.id); }))
-              .append($('<a/>').attr('id', 'file_' + m.id).attr('href', m.file.url).html(m.file.file_name))
+              .append($('<div/>').attr('id', 'file_' + m.id).append($('<a/>').attr('href', m.file.url).html(m.file.file_name)))
             );
         });
         if (after) after();
@@ -162,7 +174,7 @@ MediaController.prototype = {
     $.ajax({
       url: '/admin/media/' + media_id,
       success: function(m) {
-        $('#file_' + m.id).attr('href', m.file.url).html(m.file.file_name);
+        $('#file_' + m.id).empty().append($('<a/>').attr('href', m.file.url).html(m.file.file_name));        
         if (after) after();
       }
     });
@@ -173,25 +185,63 @@ MediaController.prototype = {
     var that = this;
     var form = $('<form/>')
       .attr('id', 'new_image_form')
-      .attr('action', '/admin/media/' + this.mls_acct +'/photos')
+      .attr('action', '/admin/properties/' + this.mls_acct +'/photos')
       .attr('method', 'post')
       .attr('target', 'image_upload_iframe')
-      .attr('enctype', 'multipart/form-data')      
-      .append($('<input/>').attr('type', 'hidden').attr('name', 'authenticity_token').val(this.auth_token))
-      .append($('<input/>').attr('type', 'file').attr('name', 'image').change(function() {
-        $('#new_image_form').submit();
-        $('#new_image_form').hide();
-        $('#new_image').append($('<p/>').addClass('loading').html("Adding image..."));
-      }));
+      .attr('enctype', 'multipart/form-data')
+      .append($('<p/>')      
+        .append($('<input/>').attr('type', 'hidden').attr('name', 'authenticity_token').val(this.auth_token))
+        .append($('<input/>').attr('type', 'button').val('Upload New Image').click(function() { $('#image').click(); }))
+        .append($('<input/>').attr('type', 'file').attr('id', 'image').attr('name', 'image')
+          .css({ visibility: 'hidden', width: 0, height: 0 })          
+          .change(function() {
+            $('#new_image_form').submit();
+            $('#new_image_form').hide();
+            $('#new_image').append($('<p/>').addClass('loading').html("Adding image..."));
+          })
+        )
+      );
     $('#new_image').empty()
-      .append(form)
-      .append($('<iframe/>').attr('name', 'image_upload_iframe').css('display', 'none'));
+      .append(form)      
+      .append($('<iframe/>').attr('name', 'image_upload_iframe').css({ visibility: 'hidden', width: 0, height: 0 }));
   },
   
   after_image_upload: function()
   {   
     this.image_add_form();
     this.render_images();        
-  },   
+  },
+  
+  file_add_form: function()
+  {    
+    var that = this;
+    var form = $('<form/>')
+      .attr('id', 'new_file_form')
+      .attr('action', '/admin/properties/' + this.mls_acct +'/files')
+      .attr('method', 'post')
+      .attr('target', 'file_upload_iframe')
+      .attr('enctype', 'multipart/form-data')
+      .append($('<p/>')      
+        .append($('<input/>').attr('type', 'hidden').attr('name', 'authenticity_token').val(this.auth_token))
+        .append($('<input/>').attr('type', 'button').val('Upload New File').click(function() { $('#file').click(); }))
+        .append($('<input/>').attr('type', 'file').attr('id', 'file').attr('name', 'file')
+          .css({ visibility: 'hidden', width: 0, height: 0 })          
+          .change(function() {
+            $('#new_file_form').submit();
+            $('#new_file_form').hide();
+            $('#new_file').append($('<p/>').addClass('loading').html("Adding file..."));
+          })
+        )
+      );
+    $('#new_file').empty()
+      .append(form)
+      .append($('<iframe/>').attr('name', 'file_upload_iframe').css({ visibility: 'hidden', width: 0, height: 0 }));
+  },
+  
+  after_file_upload: function()
+  {   
+    this.file_add_form();
+    this.render_files();        
+  }
 
 };
