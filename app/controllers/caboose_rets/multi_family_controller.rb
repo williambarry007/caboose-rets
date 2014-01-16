@@ -33,6 +33,7 @@ module CabooseRets
         'mls_acct'           => '',
         'subdivision'        => '',
         'foreclosure_yn'     => '',
+        'street_num_concat_street_name_like' => '',
         'street_name_like'   => '',
         'street_num_like'    => '',
         'date_created_gte'   => '',
@@ -45,6 +46,7 @@ module CabooseRets
         'sort'            => CabooseRets::default_property_sort,
         'desc'            => false,
         'skip'            => ['status'],
+        'abbreviations'   => { 'street_num_concat_street_name_like' => 'address_like' },
         'base_url'        => '/multi-family/search',
         'items_per_page'  => 10
       })      

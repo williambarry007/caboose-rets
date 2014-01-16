@@ -8,6 +8,7 @@ module CabooseRets
           'name'                      => '',
           'current_price_gte'         => '',
           'current_price_lte'         => '',
+          'street_num_concat_street_name_like' => '',
           'prop_type'                 => '',
           'tot_heat_sqft_gte'         => '',
           'city'                      => '',
@@ -23,6 +24,7 @@ module CabooseRets
           'sort'            => CabooseRets::default_property_sort,
           'desc'            => false,
           'skip'            => ['status'],
+          'abbreviations'   => { 'street_num_concat_street_name_like' => 'address_like' },
           'base_url'        => '/commercial/search',
           'items_per_page'  => 10
       })
