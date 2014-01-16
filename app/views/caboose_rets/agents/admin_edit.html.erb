@@ -3,6 +3,7 @@
 
 <div id='agent_<%= @agent.id %>_hide'         ></div>
 <div id='agent_<%= @agent.id %>_assistant_to' ></div>
+<div id='agent_<%= @agent.id %>_designation'  ></div>
 
 <p style='clear: both;'><input type='button' value='< Back' onclick="window.location='/admin/agents';" /></p>
 
@@ -17,7 +18,8 @@ $(document).ready(function() {
     authenticity_token: '<%= form_authenticity_token %>',
     attributes: [
       { name: 'hide'            , nice_name: 'Hide from website'  , type: 'checkbox'  , value: <%= raw @agent.hide                        %>, width: 400 },
-      { name: 'assistant_to'    , nice_name: 'Assistant To'       , type: 'select'    , value: <%= raw Caboose.json(@agent.assistant_to)  %>, width: 400, text: <%= raw Caboose.json(@boss ? "#{@boss.first_name} #{@boss.last_name}" : 'empty') %>, options_url: '/admin/agents/assistant-to-options', empty_text: 'Not an assistant' }
+      { name: 'assistant_to'    , nice_name: 'Assistant To'       , type: 'select'    , value: <%= raw Caboose.json(@agent.assistant_to)  %>, width: 400, text: <%= raw Caboose.json(@boss ? "#{@boss.first_name} #{@boss.last_name}" : 'empty') %>, options_url: '/admin/agents/assistant-to-options', empty_text: 'Not an assistant' },
+      { name: 'designation'     , nice_name: 'Designation'        , type: 'text'      , value: <%= raw Caboose.json(@agent.designation)   %>, width: 400 }
     ]
   });
 });

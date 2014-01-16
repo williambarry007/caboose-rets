@@ -110,6 +110,8 @@ module CabooseRets
             agent.contact_info = value
           when 'bio'
             agent.bio = value
+          when 'designation'
+            agent.designation = value
           when 'assistant_to'
             agent.assistant_to = value
             if !value.nil? && value.length > 0 && Agent.exists?(:la_code => value)
