@@ -11,6 +11,10 @@ class CabooseRets::Agent < ActiveRecord::Base
       :large => '200x300>'
     }
   after_initialize :fix_name
+  
+  def assistants
+    CabooseRets::Agent.where(:assistant_to => self.la_code).reorder(:last_name, :first_name).all
+  end
 
   def office
     CabooseRets::Office.where(:lo_code => self.lo_code).first
