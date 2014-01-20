@@ -1,6 +1,13 @@
 
 class CabooseRets::Schema < Caboose::Utilities::Schema
   
+  def self.removed_columns
+    {
+      CabooseRets::CommercialProperty => [ :virtual_tour ],
+      CabooseRets::ResidentialProperty => [ :virtual_tour ]
+    }
+  end
+  
   # The schema of the database
   # { Model => [[name, data_type, options]] }
   def self.schema      
@@ -236,8 +243,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :year_built                , :text    ],              
         [ :zip                       , :text    ],              
         [ :zoning_northport          , :text    ],              
-        [ :zoning_tusc               , :text    ],              
-        [ :virtual_tour              , :text    ],              
+        [ :zoning_tusc               , :text    ],
         [ :latitude                  , :float ],  
         [ :longitude                 , :float ]  
       ],
@@ -800,8 +806,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :rm_other2_name                 , :text ], 
         [ :withdrawn_date                 , :text ], 
         [ :media_flag                     , :text ], 
-        [ :rm_other3                      , :text ], 
-        [ :virtual_tour                   , :text ], 
+        [ :rm_other3                      , :text ],         
         [ :latitude                       , :float ], 
         [ :longitude                      , :float ]       
       ],
