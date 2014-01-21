@@ -147,7 +147,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     count = self.client.rets_data[:count]    
     batch_count = (count.to_f/@@config['limit'].to_f).ceil
     
-    (0...batch_count).each do |i|  
+    (0...batch_count).each do |i|      
       params = {
         :search_type => search_type,
         :class => class_type,
@@ -157,7 +157,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         :timeout => -1
       }
       obj = nil
-      self.client.search(params) do |data|
+      self.client.search(params) do |data|        
         m = @@models[class_type].constantize
         key_field = @@key_fields[search_type]
         id = data[key_field].to_i

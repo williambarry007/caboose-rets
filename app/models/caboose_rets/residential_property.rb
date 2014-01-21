@@ -226,7 +226,6 @@ class CabooseRets::ResidentialProperty < ActiveRecord::Base
 	  self.rm_other2_name                  = data['RM_OTHER2_NAME']
 	  self.withdrawn_date                  = data['WITHDRAWN_DATE']
 	  self.media_flag                      = data['MEDIA_FLAG']
-	  self.rm_other3                       = data['RM_OTHER3']
-	  self.virtual_tour					           = data['VIRTUAL_TOUR']
+	  self.rm_other3                       = data['RM_OTHER3']	  
 	end
 end

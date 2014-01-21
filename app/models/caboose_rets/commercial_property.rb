@@ -204,7 +204,6 @@ class CabooseRets::CommercialProperty < ActiveRecord::Base
     self.year_built                 = data['YEAR_BUILT']
     self.zip                        = data['ZIP']
     self.zoning_northport           = data['ZONING_NORTHPORT']
-    self.zoning_tusc                = data['ZONING_TUSC']
-    self.virtual_tour               = data['VIRTUAL_TOUR']
+    self.zoning_tusc                = data['ZONING_TUSC']    
   end
 end
