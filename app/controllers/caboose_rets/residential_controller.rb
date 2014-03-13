@@ -31,8 +31,8 @@ module CabooseRets
         'ftr_lotdesc_like'   => '',
         'mls_acct'           => '',
         'subdivision'        => '',
-        'foreclosure_yn'     => '',        
-        'street_num_concat_street_name_like' => '',
+        'foreclosure_yn'     => '',
+        'address_like'       => '',        
         'street_name_like'   => '',
         'street_num_like'    => '',
         'date_created_gte'   => '',
@@ -44,7 +44,9 @@ module CabooseRets
         'model'           => 'CabooseRets::ResidentialProperty',
         'sort'            => CabooseRets::default_property_sort,
         'desc'            => false,
-        'abbreviations'   => { 'street_num_concat_street_name_like' => 'address_like' },
+        'abbreviations'   => { 
+          'address_like' => 'street_num_concat_street_name_like'  
+        },
         'skip'            => ['status'],
         'base_url'        => '/residential/search',
         'items_per_page'  => 10

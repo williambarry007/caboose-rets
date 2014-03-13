@@ -159,11 +159,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       obj = nil
       self.client.search(params) do |data|        
         m = @@models[class_type].constantize
-        key_field = @@key_fields[search_type]
-        id = data[key_field].to_i
-        obj = m.exists?(id) ? m.find(id) : m.new
+        #key_field = @@key_fields[search_type]
+        #id = data[key_field].to_i
+        #obj = m.exists?(id) ? m.find(id) : m.new
+        obj = self.get_instance_with_id(m, data)
         obj.parse(data)
-        obj.id = id
+        #obj.id = id
         obj.save        
       end
       
@@ -172,6 +173,21 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
           self.update_coords(obj)
       end      
     end
+  end
+  
+  def self.get_instance_with_id(model, data)
+    m = nil
+    case model
+      when CabooseRets::OpenHouse             then m = model.where(:id       => data['ID']            ).exists? ? model.where(:id       => data['ID']            ).first : model.new(:id       => data['ID']            )
+      when CabooseRets::Media                 then m = model.where(:media_id => data['MEDIA_ID']      ).exists? ? model.where(:media_id => data['MEDIA_ID']      ).first : model.new(:media_id => data['MEDIA_ID']      )
+      when CabooseRets::CommercialProperty    then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )
+      when CabooseRets::LandProperty          then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
+      when CabooseRets::MultiFamilyProperty   then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
+      when CabooseRets::ResidentialProperty   then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
+      when CabooseRets::Agent                 then m = model.where(:la_code  => data['LA_LA_CODE']    ).exists? ? model.where(:la_code  => data['LA_LA_CODE']    ).first : model.new(:la_code  => data['LA_LA_CODE']    )
+      when CabooseRets::Office                then m = model.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? model.where(:lo_code  => data['LO_LO_CODE']    ).first : model.new(:lo_code  => data['LO_LO_CODE']    )
+    end
+    return m    
   end
   
   #=============================================================================
