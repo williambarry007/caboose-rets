@@ -10,6 +10,7 @@ class CabooseRets::Agent < ActiveRecord::Base
       :thumb => '100x150>',
       :large => '200x300>'
     }
+  do_not_validate_attachment_file_type :image
   after_initialize :fix_name
   
   def assistants

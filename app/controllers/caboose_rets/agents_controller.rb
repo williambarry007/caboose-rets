@@ -22,8 +22,8 @@ module CabooseRets
     # GET /agents/:la_code/listings
     def listings
       @agent = Agent.where(:la_code => params[:la_code]).first
-      is_agents = "la_code = ? AND (status = 'Active' OR status = 'Pending')"
-      is_coagents = "co_la_code = ? AND (status = 'Active' OR status = 'Pending')"
+      is_agents = "la_code = ? AND status = 'Active'"
+      is_coagents = "co_la_code = ? AND status = 'Active'"
   
       residential_properties = ResidentialProperty.where(is_agents, params[:la_code])
       residential_properties += ResidentialProperty.where(is_coagents, params[:la_code]).select{ |p| defined? p && p.mls_acct }

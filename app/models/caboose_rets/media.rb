@@ -2,7 +2,8 @@
 class CabooseRets::Media < ActiveRecord::Base
   self.table_name = "rets_media"
   
-  has_attached_file :file, :path => 'rets/media/:mls_acct_:id.:extension' 
+  has_attached_file :file, :path => 'rets/media/:mls_acct_:id.:extension'
+  do_not_validate_attachment_file_type :file
   has_attached_file :image, 
     :path => 'rets/media/:mls_acct_:media_order_:style.:extension', 
     :styles => {
@@ -10,6 +11,7 @@ class CabooseRets::Media < ActiveRecord::Base
       :thumb => '400x300>',
       :large => '640x480>'
     }
+  do_not_validate_attachment_file_type :image
   attr_accessible :date_modified, :file_name, :media_id, :media_order, :media_remarks, :media_type, :mls_acct, :url
   
   def parse(data)

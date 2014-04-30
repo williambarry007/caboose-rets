@@ -90,7 +90,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.import_modified_after(date_modified, 'Agent'     , 'AGT')
     self.import_modified_after(date_modified, 'Office'    , 'OFF')
     self.import_modified_after(date_modified, 'OpenHouse' , 'OPH')        
-    self.import_modified_after(date_modified, 'Property'  , 'COM')
+    #self.import_modified_after(date_modified, 'Property'  , 'COM')
     self.import_modified_after(date_modified, 'Property'  , 'LND')
     self.import_modified_after(date_modified, 'Property'  , 'MUL')
     self.import_modified_after(date_modified, 'Property'  , 'RES')
@@ -105,6 +105,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   # Data
   #=============================================================================
+  
+  def self.import_property(mls_acct)
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
+    p = CabooseRets::ResidentialProperty.find(mls_acct.to_i)
+    self.download_property_images(p)
+  end
   
   def self.import_modified_after(date_modified, search_type = nil, class_type = nil)
     self.get_config if @@config.nil? || @@config['url'].nil?
@@ -158,11 +164,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       }
       obj = nil
       self.client.search(params) do |data|        
-        m = @@models[class_type].constantize
+        m = @@models[class_type]
         #key_field = @@key_fields[search_type]
         #id = data[key_field].to_i
         #obj = m.exists?(id) ? m.find(id) : m.new
         obj = self.get_instance_with_id(m, data)
+        if obj.nil?
+          puts "Error: object is nil"
+          puts m.inspect
+          puts data.inspect
+          next
+        end
         obj.parse(data)
         #obj.id = id
         obj.save        
@@ -175,19 +187,20 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
   end
   
-  def self.get_instance_with_id(model, data)
-    m = nil
+  def self.get_instance_with_id(model, data)            
+    obj = nil
+    m = model.constantize
     case model
-      when CabooseRets::OpenHouse             then m = model.where(:id       => data['ID']            ).exists? ? model.where(:id       => data['ID']            ).first : model.new(:id       => data['ID']            )
-      when CabooseRets::Media                 then m = model.where(:media_id => data['MEDIA_ID']      ).exists? ? model.where(:media_id => data['MEDIA_ID']      ).first : model.new(:media_id => data['MEDIA_ID']      )
-      when CabooseRets::CommercialProperty    then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )
-      when CabooseRets::LandProperty          then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
-      when CabooseRets::MultiFamilyProperty   then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
-      when CabooseRets::ResidentialProperty   then m = model.where(:id       => data['MLS_ACCT'].to_i ).exists? ? model.where(:id       => data['MLS_ACCT'].to_i ).first : model.new(:id       => data['MLS_ACCT'].to_i )   
-      when CabooseRets::Agent                 then m = model.where(:la_code  => data['LA_LA_CODE']    ).exists? ? model.where(:la_code  => data['LA_LA_CODE']    ).first : model.new(:la_code  => data['LA_LA_CODE']    )
-      when CabooseRets::Office                then m = model.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? model.where(:lo_code  => data['LO_LO_CODE']    ).first : model.new(:lo_code  => data['LO_LO_CODE']    )
+      when 'CabooseRets::OpenHouse'             then obj = m.where(:id       => data['ID'].to_i       ).exists? ? m.where(:id       => data['ID'].to_i       ).first : m.new(:id       => data['ID'].to_i       )
+      when 'CabooseRets::Media'                 then obj = m.where(:media_id => data['MEDIA_ID']      ).exists? ? m.where(:media_id => data['MEDIA_ID']      ).first : m.new(:media_id => data['MEDIA_ID']      )
+      when 'CabooseRets::CommercialProperty'    then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
+      when 'CabooseRets::LandProperty'          then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'CabooseRets::MultiFamilyProperty'   then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'CabooseRets::ResidentialProperty'   then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'CabooseRets::Agent'                 then obj = m.where(:la_code  => data['LA_LA_CODE']    ).exists? ? m.where(:la_code  => data['LA_LA_CODE']    ).first : m.new(:la_code  => data['LA_LA_CODE']    )
+      when 'CabooseRets::Office'                then obj = m.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? m.where(:lo_code  => data['LO_LO_CODE']    ).first : m.new(:lo_code  => data['LO_LO_CODE']    )
     end
-    return m    
+    return obj    
   end
   
   #=============================================================================
