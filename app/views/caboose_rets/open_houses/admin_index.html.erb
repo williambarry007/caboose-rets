@@ -1,0 +1,24 @@
+
+<h1>Open Houses</h1>
+<p><input type='button' value='Refresh Open Houses' onclick='refresh_open_house();' /></p>
+<div id='message'></div>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type='text/javascript'>
+
+function refresh_open_house()
+{
+  $('#message').html("<p class='loading'>Refreshing open houses...</p>");
+  $.ajax({
+    url: '/admin/open-houses/refresh',
+    type: 'get',    
+    success: function(resp) {
+      if (resp.error)   $('#message').html("<p class='note error'>" + resp.error + "</p>");
+      if (resp.success) $('#message').html("<p class='note success'>" + resp.success + "</p>");
+    }
+  });
+}
+
+</script>
+<% end %>

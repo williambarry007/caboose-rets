@@ -16,8 +16,8 @@ CabooseRets::Engine.routes.draw do
   
   get  "open-houses"                              => "open_houses#index"                         
   get  "open-houses/:id"                          => "open_houses#details"
-  get  "admin/open-houses/new"                    => "open_houses#admin_new"
-  post "admin/open-houses"                        => "open_houses#admin_add"
+  get  "admin/open-houses"                        => "open_houses#admin_index"
+  get  "admin/open-houses/refresh"                => "open_houses#admin_refresh"    
   
   get  "admin/offices/options"                    => "offices#admin_options"
   get  "admin/offices"                            => "offices#admin_index"
