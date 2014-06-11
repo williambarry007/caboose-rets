@@ -45,7 +45,7 @@ class CabooseRets::ResidentialProperty < ActiveRecord::Base
 		end
 		
 		# Start the same update process in five minutes
-		self.delay(:run_at => 5.minutes.from_now).update_rets		
+		self.delay(:run_at => 1.minutes.from_now).update_rets		
 	end
 	
 	#=============================================================================
