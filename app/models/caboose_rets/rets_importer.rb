@@ -107,11 +107,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   
   def self.import_property(mls_acct)    
-    p = nil
-    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')    
-    if !CabooseRets::ResidentialProperty.exists?(:id => mls_acct.to_i)
+    
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
+    p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first
+    if p.nil?
       self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
-      p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first      
+      p = CabooseRets::CommercialProperty.where(:id => mls_acct.to_i).first      
       if p.nil?
         self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'LND')
         p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first
