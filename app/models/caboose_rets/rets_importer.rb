@@ -471,4 +471,42 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     #puts "[rets_importer] #{msg}"
     Rails.logger.info("[rets_importer] #{msg}")
   end  
+  
+  #=============================================================================
+  # Locking update task
+  #=============================================================================
+  
+  def self.last_updated
+    if !Caboose::Setting.exists?(:name => 'rets_last_updated')
+      Caboose::Setting.create(:name => 'rets_last_updated', :value => '2013-08-06T00:00:01')
+    end
+    s = Caboose::Setting.where(:name => 'rets_last_updated').first
+    return DateTime.parse(s.value)
+  end
+  
+  def self.save_last_updated(d)
+    s = Caboose::Setting.where(:name => 'rets_last_updated').first
+    s.value = d.strftime('%FT%T')
+    s.save
+  end
+  
+  def self.task_is_locked
+    return Caboose::Setting.exists?(:name => 'rets_update_running')
+  end
+  
+  def self.lock_task
+    date = DateTime.now
+    Caboose::Setting.create(:name => 'rets_update_running', :value => date.strftime('%F %T'))
+    return date
+  end
+  
+  def self.unlock_task
+    Caboose::Setting.where(:name => 'rets_update_running').first.destroy
+  end
+  
+  def self.unlock_task_if_last_updated(d)
+    setting = Caboose::Setting.where(:name => 'rets_update_running').first
+    unlock_task if setting && d.strftime('%F %T') == setting.value
+  end
+  
 end
