@@ -106,9 +106,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Data
   #=============================================================================
   
-  def self.import_property(mls_acct)
-    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
-    p = CabooseRets::ResidentialProperty.find(mls_acct.to_i)
+  def self.import_property(mls_acct)    
+    p = nil
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')    
+    if !CabooseRets::ResidentialProperty.exists?(:id => mls_acct.to_i)
+      self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
+      p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first      
+      if p.nil?
+        self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'LND')
+        p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first
+        if p.nil?
+          self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'MUL')
+          p = CabooseRets::MultiFamilyProperty.where(:id => mls_acct.to_i).first
+          return if p.nil?
+        end
+      end
+    end
     self.download_property_images(p)
   end
   

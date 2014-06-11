@@ -21,10 +21,7 @@ class CabooseRets::CommercialProperty < ActiveRecord::Base
   end
   
   def self.import_from_mls(mls_acct)
-    CabooseRets::RetsImporter.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
-    return if !self.exists?(:id => mls_acct.to_i)
-    p = self.find(mls_acct.to_i)
-    CabooseRets::RetsImporter.download_property_images(p)
+    CabooseRets::RetsImporter.import_property(mls_acct)          
   end
   
   def parse(data)

@@ -3,12 +3,6 @@
 <form action='/admin/rets/import' method='post' id='import_form' onsubmit="import_property(); return false;">
 <input type='hidden' name='authenticity_token' value='<%= form_authenticity_token %>' />
 <p><input type='text' name='mls_acct' id='mls_acct' placeholder='MLS #' value="" style='width: 300px;' /></p>
-<p><select name='type'>
-  <option value='RES'>Residential</option>
-  <option value='COM'>Commercial</option>
-  <option value='LND'>Land</option>
-  <option value='MUL'>Multi-Family</option>
-</select></p>
 <div id='message'></div>
 <p><input type='submit' value='Import Property' /></p>
 </form>
