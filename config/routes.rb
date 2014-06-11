@@ -24,6 +24,9 @@ CabooseRets::Engine.routes.draw do
   get  "admin/offices/:id"                        => "offices#admin_edit"
   get  "admin/offices/:id/refresh"                => "offices#admin_refresh"
   
+  get  "admin/rets/import"                        => "rets#admin_import_form"
+  post "admin/rets/import"                        => "rets#admin_import"  
+  
   get  "commercial/search:search_params"          => "commercial#index", :constraints => {:search_params => /.*/}                             
   get  "commercial/:mls_acct/details"             => "commercial#details"
   get  "commercial/:mls_acct"                     => "commercial#details"

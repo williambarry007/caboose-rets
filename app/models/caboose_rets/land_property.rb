@@ -22,6 +22,7 @@ class CabooseRets::LandProperty < ActiveRecord::Base
   
   def self.import_from_mls(mls_acct)
     CabooseRets::RetsImporter.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'LND')
+    return if !self.exists?(:mls_acct => mls_acct)
     p = self.find(mls_acct.to_i)
     CabooseRets::RetsImporter.download_property_images(p)
   end

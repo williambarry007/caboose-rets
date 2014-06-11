@@ -1,0 +1,34 @@
+<h1>Import Property from MLS</h1>
+
+<form action='/admin/rets/import' method='post' id='import_form' onsubmit="import_property(); return false;">
+<input type='hidden' name='authenticity_token' value='<%= form_authenticity_token %>' />
+<p><input type='text' name='mls_acct' id='mls_acct' placeholder='MLS #' value="" style='width: 300px;' /></p>
+<p><select name='type'>
+  <option value='RES'>Residential</option>
+  <option value='COM'>Commercial</option>
+  <option value='LND'>Land</option>
+  <option value='MUL'>Multi-Family</option>
+</select></p>
+<div id='message'></div>
+<p><input type='submit' value='Import Property' /></p>
+</form>
+
+<% content_for :caboose_js do %>
+<script type='text/javascript'>
+
+function import_property()
+{
+  $('#message').html("<p class='loading'>Importing property from MLS...</p>");
+  $.ajax({
+    url: '/admin/rets/import',
+    type: 'post',
+    data: $('#import_form').serialize(),
+    success: function(resp) {
+      if (resp.error)   $('#message').html("<p class='note error'>"   + resp.error   + "</p>");
+      if (resp.success) $('#message').html("<p class='note success'>" + resp.success + "</p>");          
+    }
+  });
+}
+
+</script>
+<% end %>
