@@ -506,7 +506,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   
   def self.unlock_task_if_last_updated(d)
     setting = Caboose::Setting.where(:name => 'rets_update_running').first
-    unlock_task if setting && d.strftime('%F %T') == setting.value
+    self.unlock_task if setting && d.strftime('%F %T') == setting.value
   end
   
 end
