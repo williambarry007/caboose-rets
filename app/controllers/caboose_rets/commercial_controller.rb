@@ -49,12 +49,13 @@ module CabooseRets
       return if !user_is_allowed('properties', 'view')
         
       @gen = Caboose::PageBarGenerator.new(params, {
-          'name'       => ''
+          'mls_acct'    => ''
       },{
           'model'       => 'CabooseRets::CommercialProperty',
           'sort'        => 'mls_acct',
           'desc'        => false,
-          'base_url'    => '/admin/commercial'
+          'base_url'    => '/admin/commercial',
+          'use_url_params'  => false
       })
       @properties = @gen.items    
       render :layout => 'caboose/admin'

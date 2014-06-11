@@ -93,13 +93,14 @@ module CabooseRets
     def admin_index
       return if !user_is_allowed('properties', 'view')
         
-      @gen = Caboose::PageBarGenerator.new(params, {
-          'name'       => ''
+      @gen = Caboose::PageBarGenerator.new(params, {          
+          'mls_acct'    => ''
       },{
           'model'       => 'CabooseRets::LandProperty',
           'sort'        => 'mls_acct',
           'desc'        => false,
-          'base_url'    => '/admin/land'
+          'base_url'    => '/admin/land',
+          'use_url_params'  => false
       })
       @properties = @gen.items    
       render :layout => 'caboose/admin'

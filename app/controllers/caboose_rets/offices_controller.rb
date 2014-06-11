@@ -17,7 +17,8 @@ module CabooseRets
       	  'model'       => 'CabooseRets::Office',
           'sort'			  => 'lo_name',
       	  'desc'			  => false,
-      	  'base_url'		=> '/admin/offices'
+      	  'base_url'		=> '/admin/offices',
+      	  'use_url_params'  => false
       })
       @offices = @gen.items    
       render :layout => 'caboose/admin'

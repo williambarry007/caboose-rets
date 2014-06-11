@@ -49,7 +49,7 @@ module CabooseRets
         },
         'skip'            => ['status'],
         'base_url'        => '/residential/search',
-        'items_per_page'  => 10
+        'items_per_page'  => 10        
       })
       
       @properties = @gen.items      
@@ -93,7 +93,8 @@ module CabooseRets
           'model'    => 'CabooseRets::ResidentialProperty',
           'sort'     => 'mls_acct',
           'desc'     => false,
-          'base_url' => '/admin/residential'
+          'base_url' => '/admin/residential',
+          'use_url_params'  => false
       })
       @properties = @gen.items    
       render :layout => 'caboose/admin'

@@ -58,7 +58,8 @@ module CabooseRets
       	  'model'       => 'CabooseRets::Agent',
           'sort'			  => 'last_name, first_name',
       	  'desc'			  => false,
-      	  'base_url'		=> '/admin/agents'
+      	  'base_url'		=> '/admin/agents',
+      	  'use_url_params'  => false
       })
       @agents = @gen.items    
       render :layout => 'caboose/admin'

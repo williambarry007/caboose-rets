@@ -80,7 +80,8 @@ module CabooseRets
           'model'    => 'CabooseRets::MultiFamilyProperty',
           'sort'     => 'mls_acct',
           'desc'     => false,
-          'base_url' => '/admin/multi_family'
+          'base_url' => '/admin/multi_family',
+          'use_url_params'  => false
       })
       @properties = @gen.items    
       render :layout => 'caboose/admin'
