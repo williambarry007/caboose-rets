@@ -1,6 +1,7 @@
 
 class CabooseRets::CommercialProperty < ActiveRecord::Base
   self.table_name = "rets_commercial"
+  attr_accessible :id, :mls_acct
 
   def url()     return "/commercial/#{self.id}" end
   def agent()   return CabooseRets::Agent.where(:la_code => self.la_code).first end  
@@ -13,6 +14,17 @@ class CabooseRets::CommercialProperty < ActiveRecord::Base
     return media.url    
   end
   def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
+    
+  def refresh_from_mls        
+    CabooseRets::RetsImporter.import("(MLS_ACCT=#{self.mls_acct})", 'Property', 'COM')
+    CabooseRets::RetsImporter.download_property_images(self)      
+  end
+  
+  def self.import_from_mls(mls_acct)
+    CabooseRets::RetsImporter.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
+    p = self.find(mls_acct.to_i)
+    CabooseRets::RetsImporter.download_property_images(p)
+  end
   
   def parse(data)
     self.acreage                    = data['ACREAGE']

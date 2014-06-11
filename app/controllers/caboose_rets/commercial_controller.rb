@@ -317,10 +317,17 @@ module CabooseRets
     
     # GET /admin/commercial/:mls_acct/refresh
     def admin_refresh
-      p = CommercialProperty.find(params[:mls_acct])        
-      RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'COM')
-      RetsImporter.download_property_images(p)
-      render :json => Caboose::StdClass.new({ 'success' => "The property's info has been updated from MLS." })
+      return if !user_is_allowed('properties', 'edit')
+      
+      p = CommercialProperty.find(params[:mls_acct])            
+      p.delay.refresh_from_mls
+      
+      #RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'COM')
+      #RetsImporter.download_property_images(p)
+      
+      resp = Caboose::StdClass.new
+      resp.success = "The property's info is being updated from MLS. This may take a few minutes depending on how many images it has."
+      render :json => resp            
     end        
   end
 end
