@@ -35,7 +35,7 @@ class CabooseRets::ResidentialProperty < ActiveRecord::Base
     task_started = cri.lock_task
     
     begin      
-      cri.update_after(cri.last_updated)		  
+      cri.update_after(cri.last_updated - 5.hours)		  
 		  cri.save_last_updated(task_started)
 		  cri.unlock_task
 		rescue
