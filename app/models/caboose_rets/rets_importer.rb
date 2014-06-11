@@ -495,9 +495,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
   
   def self.lock_task
-    date = DateTime.now
-    Caboose::Setting.create(:name => 'rets_update_running', :value => date.strftime('%F %T'))
-    return date
+    d = DateTime.now.utc - 5.hours
+    Caboose::Setting.create(:name => 'rets_update_running', :value => d.strftime('%F %T'))
+    return d
   end
   
   def self.unlock_task
