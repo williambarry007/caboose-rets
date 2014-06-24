@@ -14,16 +14,11 @@ class CabooseRets::CommercialProperty < ActiveRecord::Base
     return media.url    
   end
   def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
-    
+  
   def refresh_from_mls        
-    CabooseRets::RetsImporter.import("(MLS_ACCT=#{self.mls_acct})", 'Property', 'COM')
-    CabooseRets::RetsImporter.download_property_images(self)      
+    CabooseRets::RetsImporter.import_commercial_property(self.mls_acct)    
   end
-  
-  def self.import_from_mls(mls_acct)
-    CabooseRets::RetsImporter.import_property(mls_acct)          
-  end
-  
+    
   def parse(data)
     self.acreage                    = data['ACREAGE']
     self.adjoining_land_use         = data['ADJOINING_LAND_USE']

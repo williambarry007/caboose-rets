@@ -30,6 +30,16 @@ class CabooseRets::Agent < ActiveRecord::Base
       self.last_name[2] = self.last_name[2].upcase
     end
   end
+  
+  def refresh_from_mls        
+    CabooseRets::RetsImporter.import("(MLS_ACCT=#{self.mls_acct})", 'Property', 'RES')
+    CabooseRets::RetsImporter.download_property_images(self)
+  end
+  
+  def self.refresh_from_mls(la_code)
+    CabooseRets::RetsImporter.import("(LA_LA_CODE=#{la_code})", 'Agent', 'AGT')
+    CabooseRets::RetsImporter.import_property(mls_acct)          
+  end
     
   def parse(data)
     self.beeper_phone         = data['LA_BEEPER_PHONE']

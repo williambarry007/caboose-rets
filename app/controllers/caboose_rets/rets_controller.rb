@@ -12,8 +12,8 @@ module CabooseRets
     def admin_import
       return if !user_is_allowed('properties', 'edit')
                   
-      mls_acct = params[:mls_acct].to_i            
-      ResidentialProperty.delay.import_from_mls(mls_acct)        
+      mls_acct = params[:mls_acct].to_i
+      CabooseRets::RetsImporter.delay.import_property(mls_acct)
       
       resp = Caboose::StdClass.new
       resp.success = "The property is being imported from MLS.  This may take a few minutes depending on how many images it has."

@@ -1,6 +1,13 @@
 
 class CabooseRets::Office < ActiveRecord::Base
   self.table_name = "rets_offices"
+  has_attached_file :image, 
+    :path => 'rets/offices/:lo_code_:style.:extension', 
+    :styles => {
+      :thumb => '100x150>',
+      :large => '200x300>'
+    }
+  do_not_validate_attachment_file_type :image
   attr_accessible :id, :name, :lo_code
   
   def parse(data)

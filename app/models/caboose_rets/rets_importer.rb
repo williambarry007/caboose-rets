@@ -8,41 +8,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
    
   @@rets_client = nil
   @@config = nil
-  @@object_types = {
-    'OpenHouse' => ['OPH'],
-    'Media'     => ['GFX'],
-    'Property'  => ['COM', 'LND', 'MUL', 'RES'],
-    'Agent'     => ['AGT'],
-    'Office'    => ['OFF']
-  }
-  @@key_fields = {
-    'OpenHouse' => 'ID',
-    'Media'     => 'MEDIA_ID',
-    'Property'  => 'MLS_ACCT',
-    'Agent'     => 'LA_LA_CODE',
-    'Office'    => 'LO_LO_CODE'
-  }
-  @@models = {
-    'OPH' => 'CabooseRets::OpenHouse',
-    'GFX' => 'CabooseRets::Media',
-    'COM' => 'CabooseRets::CommercialProperty',
-    'LND' => 'CabooseRets::LandProperty',
-    'MUL' => 'CabooseRets::MultiFamilyProperty',
-    'RES' => 'CabooseRets::ResidentialProperty',
-    'AGT' => 'CabooseRets::Agent',
-    'OFF' => 'CabooseRets::Office'
-  }
-  @@date_modified_fields = {
-    'OPH' => 'DATE_MODIFIED',
-    'GFX' => 'DATE_MODIFIED',
-    'COM' => 'DATE_MODIFIED',
-    'LND' => 'DATE_MODIFIED',
-    'MUL' => 'DATE_MODIFIED',
-    'RES' => 'DATE_MODIFIED',
-    'AGT' => 'LA_DATE_MODIFIED',
-    'OFF' => 'LO_DATE_MODIFIED'
-  }
-
+        
   def self.config
     return @@config
   end
@@ -52,8 +18,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       'url'                 => nil, # URL to the RETS login
       'username'            => nil,
       'password'            => nil,
-      'limit'               => nil, # How many records to limit per request
-      'days_per_batch'      => nil, # When performing a large property import, how many days to search on per batch 
       'temp_path'           => nil,
       'log_file'            => nil,
       'media_base_url'      => nil
@@ -77,37 +41,83 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
   
   #=============================================================================
+  # Import method
+  #=============================================================================
+  
+  def self.import(query, search_type, class_type)
+    self.log("Importing #{search_type}:#{class_type} with query #{query}...")    
+    self.get_config if @@config.nil? || @@config['url'].nil?
+    params = {
+      :search_type => search_type,
+      :class => class_type,
+      :query => query,
+      :limit => -1,      
+      :timeout => -1
+    }
+    obj = nil
+    self.client.search(params) do |data|
+      obj = self.get_instance_with_id(class_type, data)
+      if obj.nil?
+        self.log("Error: object is nil")        
+        self.log(data.inspect)
+        next
+      end
+      obj.parse(data)      
+      obj.save        
+    end    
+  end
+  
+  def self.get_instance_with_id(class_type, data)            
+    obj = nil
+    m = case class_type
+      when 'OPH' then CabooseRets::OpenHouse
+      when 'GFX' then CabooseRets::Media
+      when 'COM' then CabooseRets::CommercialProperty
+      when 'LND' then CabooseRets::LandProperty
+      when 'MUL' then CabooseRets::MultiFamilyProperty
+      when 'RES' then CabooseRets::ResidentialProperty
+      when 'AGT' then CabooseRets::Agent
+      when 'OFF' then CabooseRets::Office
+    end    
+    obj = case class_type
+      when 'OPH' then m.where(:id       => data['ID'].to_i       ).exists? ? m.where(:id       => data['ID'].to_i       ).first : m.new(:id       => data['ID'].to_i       )
+      when 'GFX' then m.where(:media_id => data['MEDIA_ID']      ).exists? ? m.where(:media_id => data['MEDIA_ID']      ).first : m.new(:media_id => data['MEDIA_ID']      )
+      when 'COM' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
+      when 'LND' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'MUL' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'RES' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
+      when 'AGT' then m.where(:la_code  => data['LA_LA_CODE']    ).exists? ? m.where(:la_code  => data['LA_LA_CODE']    ).first : m.new(:la_code  => data['LA_LA_CODE']    )
+      when 'OFF' then m.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? m.where(:lo_code  => data['LO_LO_CODE']    ).first : m.new(:lo_code  => data['LO_LO_CODE']    )
+    end
+    return obj    
+  end
+  
+  #=============================================================================
   # Main updater
   #=============================================================================
-  
-  def self.update_after(date_modified)    
-    self.update_data_after(date_modified)
-    self.update_images_after(date_modified)
-  end
-  
-  def self.update_data_after(date_modified)
-    self.get_config if @@config.nil? || @@config['url'].nil?            
-    self.import_modified_after(date_modified, 'Agent'     , 'AGT')
-    self.import_modified_after(date_modified, 'Office'    , 'OFF')
-    self.import_modified_after(date_modified, 'OpenHouse' , 'OPH')        
-    #self.import_modified_after(date_modified, 'Property'  , 'COM')
-    self.import_modified_after(date_modified, 'Property'  , 'LND')
-    self.import_modified_after(date_modified, 'Property'  , 'MUL')
-    self.import_modified_after(date_modified, 'Property'  , 'RES')
-  end
-  
-  def self.update_images_after(date_modified)
-    self.get_config if @@config.nil? || @@config['url'].nil?    
-    self.download_agent_images_modified_after(date_modified)
-    self.download_property_images_modified_after(date_modified)
-  end
-  
-  #=============================================================================
-  # Data
-  #=============================================================================
-  
-  def self.import_property(mls_acct)    
+
+  def self.update_after(date_modified)
+    self.update_residential_properties_modified_after(date_modified)  
+    self.update_commercial_properties_modified_after(date_modified)  
+    self.update_land_properties_modified_after(date_modified)
+    self.update_multi_family_properties_modified_after(date_modified)
+    self.update_offices_modified_after(date_modified)
+    self.update_agents_modified_after(date_modified)
+    self.update_open_houses_modified_after(date_modified)
+  end                       
+  def self.update_residential_properties_modified_after(date_modified)  self.client.search({ :search_type => 'Property' , :class => 'RES', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_residential_property  data['MLS_ACCT'  ] } end          
+  def self.update_commercial_properties_modified_after(date_modified)   self.client.search({ :search_type => 'Property' , :class => 'COM', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_commercial_property   data['MLS_ACCT'  ] } end          
+  def self.update_land_properties_modified_after(date_modified)         self.client.search({ :search_type => 'Property' , :class => 'LND', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_land_property         data['MLS_ACCT'  ] } end          
+  def self.update_multi_family_properties_modified_after(date_modified) self.client.search({ :search_type => 'Property' , :class => 'MUL', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_multi_family_property data['MLS_ACCT'  ] } end
+  def self.update_offices_modified_after(date_modified)                 self.client.search({ :search_type => 'Office'   , :class => 'OFF', :select => ['LO_LO_CODE'] , :query => "(LO_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_office                data['LO_LO_CODE'] } end      
+  def self.update_agents_modified_after(date_modified)                  self.client.search({ :search_type => 'Agent'    , :class => 'AGT', :select => ['LA_LA_CODE'] , :query => "(LA_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_agent                 data['LA_LA_CODE'] } end     
+  def self.update_open_houses_modified_after(date_modified)             self.client.search({ :search_type => 'OpenHouse', :class => 'OPH', :select => ['ID']         , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay.import_open_house            data['ID'        ] } end
     
+  #=============================================================================
+  # Single model import methods (called from a worker dyno)
+  #=============================================================================
+  
+  def self.import_property(mls_acct)
     self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
     p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first
     if p.nil?
@@ -126,143 +136,53 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.download_property_images(p)
   end
   
-  def self.import_modified_after(date_modified, search_type = nil, class_type = nil)
-    self.get_config if @@config.nil? || @@config['url'].nil?
-                
-    d = date_modified
-    date_modified_field = @@date_modified_fields[class_type]
-    
-    while d.strftime('%FT%T') <= DateTime.now.strftime('%FT%T') do      
-      break if d.nil?
-    
-      d2 = d.strftime('%FT%T')
-      d2 << "-"
-      d2 << (d+@@config['days_per_batch']).strftime('%FT%T')
-            
-      query = "(#{date_modified_field}=#{d2})"            
-      self.import(query, search_type, class_type)
-      
-      d = d + @@config['days_per_batch']
-    end
+  def self.import_residential_property(mls_acct)    
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
+    p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first    
+    self.download_property_images(p)    
+    self.update_coords(p)        
   end
   
-  def self.import(query, search_type, class_type)
-    # See how many records we have
-    self.client.search(
-      :search_type => search_type,
-      :class => class_type,
-      :query => query,
-      :count_mode => :only,
-      :timeout => -1,
-    )
-    # Return if no records found
-    if (self.client.rets_data[:code] == "20201")
-      self.log "No #{search_type}:#{class_type} records found for query: #{query}"
-      return
-    else
-      count = self.client.rets_data[:count]            
-      self.log "Importing #{count} #{search_type}:#{class_type} record" + (count == 1 ? "" : "s") + "..."
-    end
+  def self.import_commercial_property(mls_acct)    
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
+    p = CabooseRets::CommercialProperty.where(:id => mls_acct.to_i).first
+    self.download_property_images(p)
+    self.update_coords(p)
+  end
+  
+  def self.import_land_property(mls_acct)    
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'LND')
+    p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first    
+    self.download_property_images(p)
+    self.update_coords(p)
+  end
+  
+  def self.import_multi_family_property(mls_acct)    
+    self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'MUL')
+    p = CabooseRets::MultiFamilyProperty.where(:id => mls_acct.to_i).first
+    self.download_property_images(p)
+    self.update_coords(p)
+  end
+  
+  def self.import_office(lo_code)
+    self.import("(LO_LO_CODE=*#{lo_code}*)", 'Office', 'OFF')
+    office = CabooseRets::Office.where(:lo_code => lo_code.to_s).first
+    self.download_office_image(office)
+  end
+  
+  def self.import_agent(la_code)
+    self.import("(LA_LA_CODE=*#{la_code}*)", 'Agent', 'AGT')
+    a = CabooseRets::Agent.where(:la_code => la_code.to_s).first
+    self.download_agent_image(a)
+  end
+  
+  def self.import_open_house(id)
+    self.import("(ID=*#{id}*)", 'OpenHouse', 'OPH')        
+  end
 
-    count = self.client.rets_data[:count]    
-    batch_count = (count.to_f/@@config['limit'].to_f).ceil
-    
-    (0...batch_count).each do |i|      
-      params = {
-        :search_type => search_type,
-        :class => class_type,
-        :query => query,
-        :limit => @@config['limit'],
-        :offset => @@config['limit'] * i,
-        :timeout => -1
-      }
-      obj = nil
-      self.client.search(params) do |data|        
-        m = @@models[class_type]
-        #key_field = @@key_fields[search_type]
-        #id = data[key_field].to_i
-        #obj = m.exists?(id) ? m.find(id) : m.new
-        obj = self.get_instance_with_id(m, data)
-        if obj.nil?
-          puts "Error: object is nil"
-          puts m.inspect
-          puts data.inspect
-          next
-        end
-        obj.parse(data)
-        #obj.id = id
-        obj.save        
-      end
-      
-      case obj
-        when CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty
-          self.update_coords(obj)
-      end      
-    end
-  end
-  
-  def self.get_instance_with_id(model, data)            
-    obj = nil
-    m = model.constantize
-    case model
-      when 'CabooseRets::OpenHouse'             then obj = m.where(:id       => data['ID'].to_i       ).exists? ? m.where(:id       => data['ID'].to_i       ).first : m.new(:id       => data['ID'].to_i       )
-      when 'CabooseRets::Media'                 then obj = m.where(:media_id => data['MEDIA_ID']      ).exists? ? m.where(:media_id => data['MEDIA_ID']      ).first : m.new(:media_id => data['MEDIA_ID']      )
-      when 'CabooseRets::CommercialProperty'    then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
-      when 'CabooseRets::LandProperty'          then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
-      when 'CabooseRets::MultiFamilyProperty'   then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
-      when 'CabooseRets::ResidentialProperty'   then obj = m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )   
-      when 'CabooseRets::Agent'                 then obj = m.where(:la_code  => data['LA_LA_CODE']    ).exists? ? m.where(:la_code  => data['LA_LA_CODE']    ).first : m.new(:la_code  => data['LA_LA_CODE']    )
-      when 'CabooseRets::Office'                then obj = m.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? m.where(:lo_code  => data['LO_LO_CODE']    ).first : m.new(:lo_code  => data['LO_LO_CODE']    )
-    end
-    return obj    
-  end
-  
   #=============================================================================
-  # Agent Images
+  # Images
   #=============================================================================
-  
-  def self.download_agent_images_modified_after(date_modified, agent = nil)
-    if agent.nil?
-      CabooseRets::Agent.where('photo_date_modified > ?', date_modified.strftime('%FT%T')).reorder('last_name, first_name').all.each do |a|
-        self.download_agent_images_modified_after(date_modified, a)
-      end
-      return
-    end
-    self.download_agent_images(agent)
-  end
-  
-  def self.download_agent_images(agent)    
-    a = agent    
-    self.log "Saving image for #{a.first_name} #{a.last_name}..."
-    begin
-      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => a.la_code) do |headers, content|
-        a.image = URI.parse(headers['location'])
-        a.save
-      end
-    rescue RETS::APIError => err
-      self.log "No image for #{a.first_name} #{a.last_name}."
-    end    
-  end
-  
-  #=============================================================================
-  # Property Images
-  #=============================================================================
-  
-  def self.download_property_images_modified_after(date_modified)
-    models = [CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty, CabooseRets::ResidentialProperty]
-    names = ["commercial", "land", "multi-family", "residential"]
-    i = 0
-    models.each do |model|            
-      count = model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).count
-      j = 1      
-      model.where("photo_date_modified > ?", date_modified.strftime('%FT%T')).reorder(:mls_acct).each do |p|        
-        self.log("Downloading images for #{j} of #{count} #{names[i]} properties...")
-        self.download_property_images(p)
-        j = j + 1
-      end
-      i = i + 1
-    end    
-  end
     
   def self.download_property_images(p)
     self.refresh_property_media(p)
@@ -311,115 +231,29 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
   end
   
-  def self.refresh_all_virtual_tours
-    # See how many records we have
-    self.client.search(
-      :search_type => 'Media',
-      :class => 'GFX',
-      :query => "(MEDIA_TYPE=|V)",
-      :count_mode => :only,
-      :timeout => -1
-    )
-    # Return if no records found
-    if (self.client.rets_data[:code] == "20201")
-      self.log "No virtual tours found."
-      return
-    else
-      count = self.client.rets_data[:count]            
-      self.log "Importing #{count} virtual tours..."
-    end
-
-    count = self.client.rets_data[:count]    
-    batch_count = (count.to_f/@@config['limit'].to_f).ceil
-    
-    (0...batch_count).each do |i|  
-      params = {
-        :search_type => 'Media',
-        :class => 'GFX',
-        :query => "(MEDIA_TYPE=|V)",
-        :limit => @@config['limit'],
-        :offset => @@config['limit'] * i,
-        :timeout => -1
-      }
-      obj = nil
-      self.client.search(params) do |data|
-        mls_acct = data['MLS_ACCT'].to_i                
-        m = CabooseRets::Media.exists?("mls_acct = '#{mls_acct}' and media_type = 'Virtual Tour'") ? CabooseRets::Media.where("mls_acct = '#{mls_acct}' and media_type = 'Virtual Tour'").first : CabooseRets::Media.new
-        m.parse(data)        
-        m.save
-      end                  
-    end
+  def self.download_agent_image(agent)            
+    self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
+    begin
+      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|
+        agent.image = URI.parse(headers['location'])
+        agent.save
+      end
+    rescue RETS::APIError => err
+      self.log "No image for #{agent.first_name} #{agent.last_name}."
+    end    
   end
   
-  def self.refresh_virtual_tours(p)
-    self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
-    CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
-    
-    self.log("-- Downloading image metadata for #{p.mls_acct}...")    
-    params = {
-      :search_type => 'Media',
-      :class => 'GFX',
-      #:query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
-      :query => "(MLS_ACCT=*#{p.id}*)",
-      :timeout => -1
-    }    
-    self.client.search(params) do |data|      
-      m = CabooseRets::Media.new
-      m.parse(data)
-      #m.id = m.media_id
-      m.save
-    end
+  def self.download_office_image(office)            
+    self.log "Saving image for #{office.lo_name}..."
+    begin
+      self.client.get_object(:resource => :Office, :type => :Photo, :location => true, :id => office.lo_code) do |headers, content|
+        office.image = URI.parse(headers['location'])
+        office.save
+      end
+    rescue RETS::APIError => err      
+      self.log "No image for #{office.lo_name}."
+    end    
   end
-  
-  #def self.download_property_images(p)
-  #
-  #  self.log("-- Deleting images and metadata for #{p.mls_acct}...")    
-  #  CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
-  #  
-  #  self.log("-- Downloading image metadata for #{p.mls_acct}...")    
-  #  params = {
-  #    :search_type => 'Media',
-  #    :class => 'GFX',
-  #    :query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
-  #    :timeout => -1
-  #  }
-  #  puts "Before search #{p.id}"
-  #  self.client.search(params) do |data|
-  #    puts "download_property_images self.client.search #{p.id}"            
-  #    #m = CabooseRets::Media.new
-  #    #m.parse(data)
-  #    #m.id = m.media_id
-  #    #m.save      
-  #    self.download_property_images2(p)
-  #  end
-  #  puts "After search #{p.id}"
-  #end
-  #
-  #def self.download_property_images2(p)
-  #  puts "download_property_images2 #{p.id}"
-  #  sleep(1)
-  #  
-  #  #self.log("-- Downloading images and resizing for #{p.mls_acct}")
-  #  #media = []
-  #  #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
-  #  #
-  #  ## Find the associated media record for the image
-  #  #filename = File.basename(headers['location'])
-  #  #m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
-  #  #
-  #  #if m.nil?
-  #  #  self.log("Can't find media record for #{p.mls_acct} #{filename}.")
-  #  #else         
-  #  #  m.image = URI.parse(headers['location'])
-  #  #  media << m
-  #  #  #m.save
-  #  #end      
-  #  #    
-  #  #self.log("-- Uploading images to S3 for #{p.mls_acct}")
-  #  #media.each do |m|      
-  #  #  m.save
-  #  #end
-  #end
 
   #=============================================================================
   # GPS
