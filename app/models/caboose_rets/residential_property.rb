@@ -19,32 +19,6 @@ class CabooseRets::ResidentialProperty < ActiveRecord::Base
     CabooseRets::RetsImporter.import_residential_property(self.mls_acct)    
   end
 
-  #=============================================================================
-  
-  # Assume this is running in a worker dyno
-  def self.update_rets
-    
-    cri = CabooseRets::RetsImporter
-      
-    return if cri.task_is_locked
-    task_started = cri.lock_task
-    
-    begin      
-      cri.update_after(cri.last_updated)		  
-		  cri.save_last_updated(task_started)
-		  cri.unlock_task
-		rescue
-		  raise
-		ensure
-		  cri.unlock_task_if_last_updated(task_started)
-		end
-		
-		# Start the same update process in five minutes
-		self.delay(:run_at => 1.minutes.from_now).update_rets		
-	end
-	
-	#=============================================================================
-  
   def parse(data)
     self.bedrooms                        = data['BEDROOMS']
 	  self.dom                             = data['DOM']

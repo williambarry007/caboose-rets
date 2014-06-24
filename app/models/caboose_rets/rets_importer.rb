@@ -309,6 +309,24 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
   # Locking update task
   #=============================================================================
+    
+  def self.update_rets              
+    return if self.task_is_locked
+    task_started = self.lock_task
+    
+    begin      
+      self.update_after(self.last_updated)		  
+		  self.save_last_updated(task_started)
+		  self.unlock_task
+		rescue
+		  raise
+		ensure
+		  self.unlock_task_if_last_updated(task_started)
+		end
+		
+		# Start the same update process in five minutes
+		self.delay(:run_at => 1.minutes.from_now).update_rets		
+	end
   
   def self.last_updated
     if !Caboose::Setting.exists?(:name => 'rets_last_updated')
