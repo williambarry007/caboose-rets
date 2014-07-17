@@ -829,9 +829,10 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
   
   def self.load_data
     c = ActiveRecord::Base.connection        
-    c.add_attachment :rets_agents , :image if !c.column_exists? :rets_agents, :image_file_name
-    c.add_attachment :rets_media  , :image if !c.column_exists? :rets_agents, :image_file_name
-    c.add_attachment :rets_media  , :file  if !c.column_exists? :rets_media , :file_file_name          
+    c.add_attachment :rets_agents  , :image if !c.column_exists? :rets_agents  , :image_file_name
+    c.add_attachment :rets_offices , :image if !c.column_exists? :rets_offices , :image_file_name
+    c.add_attachment :rets_media   , :image if !c.column_exists? :rets_media   , :image_file_name
+    c.add_attachment :rets_media   , :file  if !c.column_exists? :rets_media   , :file_file_name     
   end
 
 end

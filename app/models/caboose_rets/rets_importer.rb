@@ -315,7 +315,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     task_started = self.lock_task
     
     begin      
-      self.update_after(self.last_updated)		  
+      self.update_after(self.last_updated - 30.seconds)		  
 		  self.save_last_updated(task_started)
 		  self.unlock_task
 		rescue
