@@ -2,6 +2,11 @@ require "caboose_rets/version"
 
 namespace :caboose_rets do
   
+  #desc "Delete old rets properties"
+  #task :delete_old_properties => :environment do
+  #  CabooseRets::RetsImporter.delete_old_properties
+  #end
+  
   desc "Initializes the database for a caboose installation"
   task :rename_media => :environment do
     CabooseRets::Media.rename_media    

@@ -14,6 +14,8 @@ module CabooseRets
     	
       @gen = Caboose::PageBarGenerator.new(params, {
         'name'               => '',
+        'acreage_gte'        => '',
+        'acreage_lte'        => '',
         'current_price_gte'  => '',
         'current_price_lte'  => '',
         'bedrooms_gte'       => '',

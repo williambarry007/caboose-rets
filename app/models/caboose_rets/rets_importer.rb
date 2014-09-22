@@ -92,6 +92,28 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     return obj    
   end
   
+  #def self.delete_old_properties    
+  #  self.log("Deleting old residential properties...")    
+  #  self.get_config if @@config.nil? || @@config['url'].nil?
+  #  
+  #  d = DateTime.new(2000, 1, 1)
+  #  now = DateTime.now
+  #  while d < now
+  #    d2 = d + 3.months
+  #    puts "- Getting ids for #{d.strftime("%Y-%m-%d")} - #{d2.strftime("%Y-%m-%d")}..."                  
+  #    q = "((DATE_CREATED=#{d.strftime("%Y-%m-%d")}+),(DATE_CREATED=#{d2.strftime("%Y-%m-%d")}-))",
+  #    params = { :search_type => 'Property', :class => 'RES', :query => q, :limit => -1, :timeout => -1, :select => 'MLS_ACCT' } 
+  #    ids = []
+  #    self.client.search(params) do |data|        
+  #      ids << data['MLS_ACCT'].to_i
+  #    end
+  #    d = d + 3.months
+  #  end
+  #  
+  #  puts "Deleting properties..."
+  #  #CabooseRets::ResidentialProperty.where("id not in (?)", ids).destroy_all            
+  #end
+  
   #=============================================================================
   # Main updater
   #=============================================================================
