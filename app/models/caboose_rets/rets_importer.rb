@@ -1,4 +1,13 @@
-require 'ruby-rets'
+#require 'ruby-rets'
+require "rets/version"
+require "rets/exceptions"
+require "rets/client"
+require "rets/http"
+require "rets/stream_http"
+require "rets/base/core"
+require "rets/base/sax_search"
+require "rets/base/sax_metadata"
+
 require 'httparty'
 require 'json'
 
@@ -118,22 +127,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Main updater
   #=============================================================================
 
-  def self.update_after(date_modified)
-    self.update_residential_properties_modified_after(date_modified)  
-    self.update_commercial_properties_modified_after(date_modified)  
-    self.update_land_properties_modified_after(date_modified)
-    self.update_multi_family_properties_modified_after(date_modified)
-    self.update_offices_modified_after(date_modified)
-    self.update_agents_modified_after(date_modified)
-    self.update_open_houses_modified_after(date_modified)
+  def self.update_after(date_modified, save_images = true)
+    self.update_residential_properties_modified_after(date_modified, save_images)  
+    self.update_commercial_properties_modified_after(date_modified, save_images)  
+    self.update_land_properties_modified_after(date_modified, save_images)
+    self.update_multi_family_properties_modified_after(date_modified, save_images)
+    self.update_offices_modified_after(date_modified, save_images)
+    self.update_agents_modified_after(date_modified, save_images)
+    self.update_open_houses_modified_after(date_modified, save_images)
   end                       
-  def self.update_residential_properties_modified_after(date_modified)  self.client.search({ :search_type => 'Property' , :class => 'RES', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_residential_property  data['MLS_ACCT'  ] } end          
-  def self.update_commercial_properties_modified_after(date_modified)   self.client.search({ :search_type => 'Property' , :class => 'COM', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_commercial_property   data['MLS_ACCT'  ] } end          
-  def self.update_land_properties_modified_after(date_modified)         self.client.search({ :search_type => 'Property' , :class => 'LND', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_land_property         data['MLS_ACCT'  ] } end          
-  def self.update_multi_family_properties_modified_after(date_modified) self.client.search({ :search_type => 'Property' , :class => 'MUL', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_multi_family_property data['MLS_ACCT'  ] } end
-  def self.update_offices_modified_after(date_modified)                 self.client.search({ :search_type => 'Office'   , :class => 'OFF', :select => ['LO_LO_CODE'] , :query => "(LO_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_office                data['LO_LO_CODE'] } end      
-  def self.update_agents_modified_after(date_modified)                  self.client.search({ :search_type => 'Agent'    , :class => 'AGT', :select => ['LA_LA_CODE'] , :query => "(LA_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_agent                 data['LA_LA_CODE'] } end     
-  def self.update_open_houses_modified_after(date_modified)             self.client.search({ :search_type => 'OpenHouse', :class => 'OPH', :select => ['ID']         , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_open_house            data['ID'        ] } end
+  def self.update_residential_properties_modified_after(date_modified, save_images = true)  self.client.search({ :search_type => 'Property' , :class => 'RES', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_residential_property(  data['MLS_ACCT'  ], save_images) } end          
+  def self.update_commercial_properties_modified_after(date_modified, save_images = true)   self.client.search({ :search_type => 'Property' , :class => 'COM', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_commercial_property(   data['MLS_ACCT'  ], save_images) } end          
+  def self.update_land_properties_modified_after(date_modified, save_images = true)         self.client.search({ :search_type => 'Property' , :class => 'LND', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_land_property(         data['MLS_ACCT'  ], save_images) } end          
+  def self.update_multi_family_properties_modified_after(date_modified, save_images = true) self.client.search({ :search_type => 'Property' , :class => 'MUL', :select => ['MLS_ACCT']   , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_multi_family_property( data['MLS_ACCT'  ], save_images) } end
+  def self.update_offices_modified_after(date_modified, save_images = true)                 self.client.search({ :search_type => 'Office'   , :class => 'OFF', :select => ['LO_LO_CODE'] , :query => "(LO_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_office(                data['LO_LO_CODE'], save_images) } end      
+  def self.update_agents_modified_after(date_modified, save_images = true)                  self.client.search({ :search_type => 'Agent'    , :class => 'AGT', :select => ['LA_LA_CODE'] , :query => "(LA_DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)", :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_agent(                 data['LA_LA_CODE'], save_images) } end     
+  def self.update_open_houses_modified_after(date_modified, save_images = true)             self.client.search({ :search_type => 'OpenHouse', :class => 'OPH', :select => ['ID']         , :query => "(DATE_MODIFIED=#{date_modified.strftime("%FT%T")}+)"   , :standard_names_only => true, :timeout => -1 }) { |data| self.delay(:priority => 10).import_open_house(            data['ID'        ], save_images) } end
     
   #=============================================================================
   # Single model import methods (called from a worker dyno)
@@ -158,47 +167,47 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.download_property_images(p)
   end
   
-  def self.import_residential_property(mls_acct)    
+  def self.import_residential_property(mls_acct, save_images = true)    
     self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'RES')
     p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first    
-    self.download_property_images(p)    
+    self.download_property_images(p, save_images)    
     self.update_coords(p)        
   end
   
-  def self.import_commercial_property(mls_acct)    
+  def self.import_commercial_property(mls_acct, save_images = true)    
     self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'COM')
     p = CabooseRets::CommercialProperty.where(:id => mls_acct.to_i).first
-    self.download_property_images(p)
+    self.download_property_images(p, save_images)
     self.update_coords(p)
   end
   
-  def self.import_land_property(mls_acct)    
+  def self.import_land_property(mls_acct, save_images = true)    
     self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'LND')
     p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first    
-    self.download_property_images(p)
+    self.download_property_images(p, save_images)
     self.update_coords(p)
   end
   
-  def self.import_multi_family_property(mls_acct)    
+  def self.import_multi_family_property(mls_acct, save_images = true)    
     self.import("(MLS_ACCT=*#{mls_acct}*)", 'Property', 'MUL')
     p = CabooseRets::MultiFamilyProperty.where(:id => mls_acct.to_i).first
-    self.download_property_images(p)
+    self.download_property_images(p, save_images)
     self.update_coords(p)
   end
   
-  def self.import_office(lo_code)
+  def self.import_office(lo_code, save_images = true)
     self.import("(LO_LO_CODE=*#{lo_code}*)", 'Office', 'OFF')
     office = CabooseRets::Office.where(:lo_code => lo_code.to_s).first
-    self.download_office_image(office)
+    self.download_office_image(office) if save_images == true
   end
   
-  def self.import_agent(la_code)
+  def self.import_agent(la_code, save_images = true)
     self.import("(LA_LA_CODE=*#{la_code}*)", 'Agent', 'AGT')
     a = CabooseRets::Agent.where(:la_code => la_code.to_s).first
-    self.download_agent_image(a)
+    self.download_agent_image(a) if save_images == true
   end
   
-  def self.import_open_house(id)
+  def self.import_open_house(id, save_images = true)
     self.import("(ID=*#{id}*)", 'OpenHouse', 'OPH')        
   end
 
@@ -206,8 +215,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Images
   #=============================================================================
     
-  def self.download_property_images(p)
+  def self.download_property_images(p, save_images = true)    
     self.refresh_property_media(p)
+    return if save_images == false
     
     self.log("-- Downloading images and resizing for #{p.mls_acct}")
     media = []
@@ -265,7 +275,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end    
   end
   
-  def self.download_office_image(office)            
+  def self.download_office_image(office)
     self.log "Saving image for #{office.lo_name}..."
     begin
       self.client.get_object(:resource => :Office, :type => :Photo, :location => true, :id => office.lo_code) do |headers, content|
@@ -320,6 +330,45 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
   
   #=============================================================================
+  # Purging
+  #=============================================================================
+  
+  def self.purge    
+    self.purge_residential
+    self.purge_commercial
+    self.purge_land
+    self.purge_multi_family
+    self.purge_offices
+    self.purge_agents
+    self.purge_open_houses
+    self.purge_media
+  end
+      
+  def self.purge_residential()  self.purge_helper('Property'  , 'RES', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_residential  where mls_acct not in (?)") end    
+  def self.purge_commercial()   self.purge_helper('Property'  , 'COM', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_commercial   where mls_acct not in (?)") end        
+  def self.purge_land()         self.purge_helper('Property'  , 'LND', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_land         where mls_acct not in (?)") end    
+  def self.purge_multi_family() self.purge_helper('Property'  , 'MUL', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_multi_family where mls_acct not in (?)") end        
+  def self.purge_offices()      self.purge_helper('Office'    , 'OFF', 'LO_LO_CODE' , 'LO_DATE_MODIFIED' , "delete from rets_offices      where lo_code  not in (?)") end    
+  def self.purge_agents()       self.purge_helper('Agent'     , 'AGT', 'LA_LA_CODE' , 'LA_DATE_MODIFIED' , "delete from rets_agents       where la_code  not in (?)") end  
+  def self.purge_open_houses()  self.purge_helper('OpenHouse' , 'OPH', 'ID'         , 'DATE_MODIFIED'    , "delete from rets_open_houses  where id       not in (?)") end
+  def self.purge_media()        self.purge_helper('Media'     , 'GFX', 'MEDIA_ID'   , 'DATE_MODIFIED'    , "delete from rets_media        where media_id not in (?)") end
+    
+  def self.purge_helper(search_type, class_type, key_field, date_modified_field, delete_query)
+    
+    # Get the total number of records
+    params = { :search_type => search_type, :class => class_type, :query => "(#{date_modified_field}=2013-08-06T00:00:01+)", :standard_names_only => true, :timeout => -1 }        
+    self.client.search(params.merge({ :count_mode => :only }))
+    count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]            
+    batch_count = (count.to_f/5000.0).ceil
+
+    ids = []
+    (0...batch_count).each do |i|            
+      self.client.search(params.merge({ :select => [key_field], :limit => 5000, :offset => 5000*i })){ |data| ids << data[key_field] }
+    end    
+    ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, [delete_query, ids]))            
+  end
+
+  #=============================================================================
   # Logging
   #=============================================================================
   
@@ -336,8 +385,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     return if self.task_is_locked
     task_started = self.lock_task
     
-    begin      
-      self.update_after(self.last_updated - 30.seconds)		  
+    begin
+      overlap = 30.seconds    
+      if (DateTime.now - self.last_purged) > 24.hours      
+        self.purge
+        self.save_last_purged(task_started)
+        overlap = 1.month
+      end              
+      self.update_after(self.last_updated - overlap)		  
 		  self.save_last_updated(task_started)
 		  self.unlock_task
 		rescue
@@ -358,8 +413,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     return DateTime.parse(s.value)
   end
   
+  def self.last_purged
+    if !Caboose::Setting.exists?(:name => 'rets_last_purged')
+      Caboose::Setting.create(:name => 'rets_last_purged', :value => '2013-08-06T00:00:01')
+    end
+    s = Caboose::Setting.where(:name => 'rets_last_purged').first
+    return DateTime.parse(s.value)
+  end
+  
   def self.save_last_updated(d)
     s = Caboose::Setting.where(:name => 'rets_last_updated').first
+    s.value = d.strftime('%FT%T')
+    s.save
+  end
+  
+  def self.save_last_purged(d)
+    s = Caboose::Setting.where(:name => 'rets_last_purged').first
     s.value = d.strftime('%FT%T')
     s.save
   end

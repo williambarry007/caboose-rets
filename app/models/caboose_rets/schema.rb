@@ -4,7 +4,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
   def self.removed_columns
     {
       CabooseRets::CommercialProperty => [ :virtual_tour ],
-      CabooseRets::ResidentialProperty => [ :virtual_tour ]
+      CabooseRets::ResidentialProperty => [ :virtual_tour ],
+      CabooseRets::ResidentialProperty => [ :acreage_temp ]
     }
   end
   
@@ -619,7 +620,9 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :elem_school                    , :text ], 
         [ :price_sqft                     , :text ], 
         [ :rm_recrm                       , :text ], 
-        [ :acreage                        , :text ], 
+        #[ :acreage                        , :text ],
+        [ :acreage                        , :float, { :default => 0.0 }],
+        #[ :acreage_temp                   , :float, { :default => 0.0 }],
         [ :expire_date                    , :text ], 
         [ :prop_type                      , :text ], 
         [ :rm_recrm_desc                  , :text ], 
