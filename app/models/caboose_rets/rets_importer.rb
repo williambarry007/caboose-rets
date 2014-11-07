@@ -387,7 +387,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     
     begin
       overlap = 30.seconds    
-      if (DateTime.now - self.last_purged) > 24.hours      
+      if (DateTime.now - self.last_purged).to_i > 1      
         self.purge
         self.save_last_purged(task_started)
         overlap = 1.month
