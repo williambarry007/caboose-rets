@@ -344,19 +344,19 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.purge_media
   end
       
-  def self.purge_residential()  self.purge_helper('Property'  , 'RES', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_residential  where mls_acct not in (?)") end    
-  def self.purge_commercial()   self.purge_helper('Property'  , 'COM', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_commercial   where mls_acct not in (?)") end        
-  def self.purge_land()         self.purge_helper('Property'  , 'LND', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_land         where mls_acct not in (?)") end    
-  def self.purge_multi_family() self.purge_helper('Property'  , 'MUL', 'MLS_ACCT'   , 'DATE_MODIFIED'    , "delete from rets_multi_family where mls_acct not in (?)") end        
-  def self.purge_offices()      self.purge_helper('Office'    , 'OFF', 'LO_LO_CODE' , 'LO_DATE_MODIFIED' , "delete from rets_offices      where lo_code  not in (?)") end    
-  def self.purge_agents()       self.purge_helper('Agent'     , 'AGT', 'LA_LA_CODE' , 'LA_DATE_MODIFIED' , "delete from rets_agents       where la_code  not in (?)") end  
-  def self.purge_open_houses()  self.purge_helper('OpenHouse' , 'OPH', 'ID'         , 'DATE_MODIFIED'    , "delete from rets_open_houses  where id       not in (?)") end
-  def self.purge_media()        self.purge_helper('Media'     , 'GFX', 'MEDIA_ID'   , 'DATE_MODIFIED'    , "delete from rets_media        where media_id not in (?)") end
+  def self.purge_residential()  self.purge_helper('Property'  , 'RES', 'MLS_ACCT'   , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_residential  where mls_acct not in (?)") end    
+  def self.purge_commercial()   self.purge_helper('Property'  , 'COM', 'MLS_ACCT'   , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_commercial   where mls_acct not in (?)") end        
+  def self.purge_land()         self.purge_helper('Property'  , 'LND', 'MLS_ACCT'   , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_land         where mls_acct not in (?)") end    
+  def self.purge_multi_family() self.purge_helper('Property'  , 'MUL', 'MLS_ACCT'   , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_multi_family where mls_acct not in (?)") end        
+  def self.purge_offices()      self.purge_helper('Office'    , 'OFF', 'LO_LO_CODE' , 'LO_DATE_MODIFIED' , '2012-01-01', "delete from rets_offices      where lo_code  not in (?)") end    
+  def self.purge_agents()       self.purge_helper('Agent'     , 'AGT', 'LA_LA_CODE' , 'LA_DATE_MODIFIED' , '2012-01-01', "delete from rets_agents       where la_code  not in (?)") end  
+  def self.purge_open_houses()  self.purge_helper('OpenHouse' , 'OPH', 'ID'         , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_open_houses  where id       not in (?)") end
+  def self.purge_media()        self.purge_helper('Media'     , 'GFX', 'MEDIA_ID'   , 'DATE_MODIFIED'    , '2012-01-01', "delete from rets_media        where media_id not in (?)") end
     
-  def self.purge_helper(search_type, class_type, key_field, date_modified_field, delete_query)
+  def self.purge_helper(search_type, class_type, key_field, date_modified_field, date_modified, delete_query)
     
     # Get the total number of records
-    params = { :search_type => search_type, :class => class_type, :query => "(#{date_modified_field}=2013-08-06T00:00:01+)", :standard_names_only => true, :timeout => -1 }        
+    params = { :search_type => search_type, :class => class_type, :query => "(#{date_modified_field}=#{date_modified}T00:00:01+)", :standard_names_only => true, :timeout => -1 }        
     self.client.search(params.merge({ :count_mode => :only }))
     count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]            
     batch_count = (count.to_f/5000.0).ceil
