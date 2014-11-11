@@ -66,9 +66,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Import method
   #=============================================================================
 
-  def self.import(class_type, query)
-    puts "class_type = #{class_type}"
-    puts "query = #{query}"
+  def self.import(class_type, query)    
     m = self.meta(class_type)
     self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
     self.get_config if @@config.nil? || @@config['url'].nil?
