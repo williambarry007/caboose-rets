@@ -67,6 +67,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.import(class_type, query)
+    puts "class_type = #{class_type}"
+    puts "query = #{query}"
     m = self.meta(class_type)
     self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
     self.get_config if @@config.nil? || @@config['url'].nil?
@@ -217,11 +219,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.import_open_house(id, save_images = true)
-    self.import('OPH', "(ID=*#{id}*)")
+    self.import('OPH', "((ID=#{id}+),(ID=#{id}-))")
   end
 
   def self.import_media(id, save_images = true)
-    self.import('GFX', "(MEDIA_ID=*#{id}*)")
+    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")
   end
 
   #=============================================================================
