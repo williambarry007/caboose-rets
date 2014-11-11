@@ -19,8 +19,8 @@ module CabooseRets
     end
     
     # get /admin/open-houses/refresh
-    def admin_refresh
-      RetsImporter.import_modified_after(DateTime.parse(1.month.ago.strftime('%F %T')), 'OpenHouse' , 'OPH')
+    def admin_refresh                  
+      RetsImporter.update_helper('OPH', DateTime.parse(1.month.ago.strftime('%F %T')))
       resp = Caboose::StdClass.new
       resp.success = "The open houses have been refreshed successfully."
       render :json => resp
