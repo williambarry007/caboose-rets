@@ -102,9 +102,9 @@ module CabooseRets
           :content_type => m.image_content_type,
           :file_size    => m.image_file_size,
           :update_at    => m.image_updated_at,
-          :tiny_url     => m.image.url(:tiny),
-          :thumb_url    => m.image.url(:thumb),
-          :large_url    => m.image.url(:large)            
+          :tiny_url     => m.image_url(:tiny),
+          :thumb_url    => m.image_url(:thumb),
+          :large_url    => m.image_url(:large)            
         },
         :file => {
           :file_name    => m.file_file_name,

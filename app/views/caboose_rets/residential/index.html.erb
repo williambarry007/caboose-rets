@@ -9,7 +9,7 @@
     <% @properties.each do |p| %>
       <li>
         <% if p.images && p.images.count > 0 %>
-          <div class='image'><a href="/residential/<%= p.mls_acct %>/details"><img src="<%= p.images[0].url(:thumb) %>" /></a></div>
+          <div class='image'><a href="/residential/<%= p.mls_acct %>/details"><img src="<%= p.images[0].image_url(:thumb) %>" /></a></div>
         <% end %>
         <div class="address"><% if !p.unit_num.nil? && p.unit_num.strip.length > 0 %>Unit <%= p.unit_num %>, <% end %><%= p.street_num %> <%= p.street_name.titleize %></div>                  
         <% if p.agent %>

@@ -76,5 +76,13 @@ class CabooseRets::Agent < ActiveRecord::Base
 	  self.photo_date_modified  = data['PHOTO_DATE_MODIFIED']
 	  #self.photo_url            = ""
 	end
+	
+	def image_url(style)
+    if CabooseRets::use_hosted_images == true
+      return "#{CabooseRets::agents_base_url}/#{self.image_file_name}"
+    end
+    return "" if self.image.nil?
+    return self.image.url(style)           
+  end
 
 end

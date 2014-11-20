@@ -18,7 +18,7 @@ class CabooseRets::Media < ActiveRecord::Base
     self.date_modified  = data['DATE_MODIFIED']
     self.file_name 		  = data['FILE_NAME']
     self.media_id 		  = data['MEDIA_ID']
-    self.media_order 	  = data['MEDIA_ORDER']
+    self.media_order 	  = data['MEDIA_ORDER'].to_i
     self.media_remarks  = data['MEDIA_REMARKS']
     self.media_type 		= data['MEDIA_TYPE']
     self.mls_acct 		  = data['MLS_ACCT']
@@ -122,5 +122,13 @@ class CabooseRets::Media < ActiveRecord::Base
     
     return true
   end
-    
+  
+  def image_url(style)
+    if CabooseRets::use_hosted_images == true
+      return "#{CabooseRets::media_base_url}/#{self.file_name}"
+    end
+    return "" if self.image.nil?
+    return self.image.url(style)           
+  end
+        
 end

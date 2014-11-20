@@ -9,6 +9,12 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
     }
   end
   
+  def self.indexes
+    {
+      CabooseRets::Media => [:media_id]
+    }    
+  end
+  
   # The schema of the database
   # { Model => [[name, data_type, options]] }
   def self.schema      
@@ -377,10 +383,10 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :file_name          , :string ], 
         [ :media_id           , :string ], 
         [ :media_order        , :integer, { :default => 0 }], 
-        [ :media_remarks      , :text ], 
+        [ :media_remarks      , :text   ], 
         [ :media_type         , :string ], 
         [ :mls_acct           , :string ], 
-        [ :url                , :text ]
+        [ :url                , :text   ]        
       ],
       CabooseRets::MultiFamilyProperty => [
         [ :acreage                   , :text ], 

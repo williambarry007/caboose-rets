@@ -78,16 +78,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :timeout => -1
     }
     obj = nil
-    self.client.search(params) do |data|
-      obj = self.get_instance_with_id(class_type, data)
-      if obj.nil?
-        self.log("Error: object is nil")
-        self.log(data.inspect)
-        next
+    begin        
+      self.client.search(params) do |data|
+        obj = self.get_instance_with_id(class_type, data)
+        if obj.nil?
+          self.log("Error: object is nil")
+          self.log(data.inspect)
+          next
+        end
+        obj.parse(data)
+        obj.save
       end
-      obj.parse(data)
-      obj.save
+    rescue RETS::HTTPError => err
+      self.log "Import error for #{class_type}: #{query}"
+      self.log err.message
     end
+    
   end
 
   def self.get_instance_with_id(class_type, data)
@@ -204,7 +210,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.update_coords(p)
   end
 
-  def self.import_office(lo_code, save_images = true)
+  def self.import_office(lo_code, save_images = true)    
     self.import('OFF', "(LO_LO_CODE=*#{lo_code}*)")
     office = CabooseRets::Office.where(:lo_code => lo_code.to_s).first
     self.download_office_image(office) if save_images == true
@@ -221,97 +227,43 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.import_media(id, save_images = true)
-    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")    
-    #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
-    #
-    #  # Find the associated media record for the image
-    #  filename = File.basename(headers['location'])
-    #  m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
-    #
-    #  if m.nil?
-    #    self.log("Can't find media record for #{p.mls_acct} #{filename}.")
-    #  else
-    #    m.image = URI.parse(headers['location'])
-    #    media << m
-    #    #m.save
-    #  end
-    #end    
+    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")        
   end
 
   #=============================================================================
   # Images
   #=============================================================================
-
+    
   def self.download_property_images(p, save_images = true)
-    self.refresh_property_media(p)
     return if save_images == false
-
-    self.log("-- Downloading images and resizing for #{p.mls_acct}")
-    media = []
-    self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
-
-      # Find the associated media record for the image
-      filename = File.basename(headers['location'])
-      m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
-
-      if m.nil?
-        self.log("Can't find media record for #{p.mls_acct} #{filename}.")
-      else
-        m.image = URI.parse(headers['location'])
-        media << m
-        #m.save
-      end
-    end
-
-    self.log("-- Uploading images to S3 for #{p.mls_acct}")
-    media.each do |m|
-      m.save
-    end
-  end
-
-  def self.refresh_property_media(p)
-    self.log("-- Deleting images and metadata for #{p.mls_acct}...")
-    #CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
-    CabooseRets::Media.where(:mls_acct => p.mls_acct).destroy_all
-
-    self.log("-- Downloading image metadata for #{p.mls_acct}...")
+    
+    self.log("- Downloading GFX records for #{p.mls_acct}...")
     params = {
       :search_type => 'Media',
-      :class => 'GFX',
-      #:query => "(MLS_ACCT=*#{p.id}*),(MEDIA_TYPE=|I)",
+      :class => 'GFX',      
       :query => "(MLS_ACCT=*#{p.id}*)",
       :timeout => -1
     }
+    ids = []
     self.client.search(params) do |data|
-      m = CabooseRets::Media.new
-      m.parse(data)
-      #m.id = m.media_id
+      ids << data['MEDIA_ID']      
+      m = CabooseRets::Media.where(:media_id => data['MEDIA_ID']).first
+      m = CabooseRets::Media.new if m.nil?             
+      m.parse(data)      
       m.save
     end
-  end
-
-  def self.download_agent_image(agent)
-    self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
-    begin
-      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|
-        agent.image = URI.parse(headers['location'])
-        agent.save
-      end
-    rescue RETS::APIError => err
-      self.log "No image for #{agent.first_name} #{agent.last_name}."
+    
+    # Delete any records in the local database that shouldn't be there
+    puts "- Deleting GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database..."
+    query = "select media_id from rets_media where mls_acct = '#{p.mls_acct}'"
+    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    local_ids = rows.collect{ |row| row['media_id'] }
+    ids_to_remove = local_ids - ids
+    if ids_to_remove && ids_to_remove.count > 0
+      query = ["delete from rets_media where media_id not in (?)", ids_to_remove]
+      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
     end
-  end
-
-  def self.download_office_image(office)
-    self.log "Saving image for #{office.lo_name}..."
-    begin
-      self.client.get_object(:resource => :Office, :type => :Photo, :location => true, :id => office.lo_code) do |headers, content|
-        office.image = URI.parse(headers['location'])
-        office.save
-      end
-    rescue RETS::APIError => err
-      self.log "No image for #{office.lo_name}."
-    end
+        
   end
 
   #=============================================================================
@@ -343,6 +295,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.coords_from_address(address)
+    return false
     begin
       uri = "https://maps.googleapis.com/maps/api/geocode/json?address=#{address}&sensor=false"
       uri.gsub!(" ", "+")
@@ -381,6 +334,78 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.purge_media()        self.purge_helper('GFX', '2012-01-01') end
 
   def self.purge_helper(class_type, date_modified)
+    m = self.meta(class_type)
+
+    puts "Purging #{class_type}..."
+    
+    # Get the total number of records
+    puts "- Getting total number of records for #{class_type}..."
+    params = {
+      :search_type => m.search_type,
+      :class => class_type,
+      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)",
+      :standard_names_only => true,
+      :timeout => -1
+    }
+    self.client.search(params.merge({ :count_mode => :only }))
+    count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]
+    batch_count = (count.to_f/5000.0).ceil
+    
+    ids = []
+    k = m.remote_key_field
+    (0...batch_count).each do |i|
+      puts "- Getting ids for #{class_type} (batch #{i+1} of #{batch_count})..."
+      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
+        ids << case class_type
+          when 'RES' then data[k] 
+          when 'COM' then data[k] 
+          when 'LND' then data[k] 
+          when 'MUL' then data[k] 
+          when 'OFF' then data[k]  
+          when 'AGT' then data[k]
+          when 'OPH' then data[k].to_i
+          when 'GFX' then data[k]
+        end                
+      end
+    end
+
+    # Delete any records in the local database that shouldn't be there
+    puts "- Finding #{class_type} records in the local database that are not in the remote database..."    
+    t = m.local_table
+    k = m.local_key_field        
+    query = "select distinct #{k} from #{t}"
+    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    local_ids = rows.collect{ |row| row[k] }
+    ids_to_remove = local_ids - ids    
+    puts "- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database."
+    puts "- Deleting #{class_type} records in the local database that shouldn't be there..."
+    query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
+    ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+
+    # Find any ids in the remote database that should be in the local database
+    puts "- Finding #{class_type} records in the remote database that should be in the local database..."
+    query = "select distinct #{k} from #{t}"
+    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    local_ids = rows.collect{ |row| row[k] }
+    ids_to_add = ids - local_ids    
+    puts "- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database."
+    ids_to_add.each do |id|
+      puts "- Importing #{id}..."
+      case class_type
+        when 'RES' then self.delay.import_residential_property(id, false)
+        when 'COM' then self.delay.import_commercial_property(id, false)
+        when 'LND' then self.delay.import_land_property(id, false)
+        when 'MUL' then self.delay.import_multi_family_property(id, false)
+        when 'OFF' then self.delay.import_office(id, false)
+        when 'AGT' then self.delay.import_agent(id, false)
+        when 'OPH' then self.delay.import_open_house(id, false)
+        when 'GFX' then self.delay.import_media(id, false)
+      end
+    end
+
+  end
+  
+  def self.get_media_urls
     m = self.meta(class_type)
 
     # Get the total number of records
@@ -444,8 +469,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.log(msg)
-    #puts "[rets_importer] #{msg}"
-    Rails.logger.info("[rets_importer] #{msg}")
+    puts "[rets_importer] #{msg}"
+    #Rails.logger.info("[rets_importer] #{msg}")
   end
 
   #=============================================================================
@@ -458,6 +483,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     begin
       overlap = 30.seconds
+      puts DateTime.now
+      puts self.last_purged
+      puts (DateTime.now - self.last_purged)
       if (DateTime.now - self.last_purged).to_i > 1
         self.purge
         self.save_last_purged(task_started)
