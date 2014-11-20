@@ -254,7 +254,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
     
     # Delete any records in the local database that shouldn't be there
-    puts "- Deleting GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database..."
+    self.log("- Deleting GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database...")
     query = "select media_id from rets_media where mls_acct = '#{p.mls_acct}'"
     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
     local_ids = rows.collect{ |row| row['media_id'] }
@@ -336,10 +336,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.purge_helper(class_type, date_modified)
     m = self.meta(class_type)
 
-    puts "Purging #{class_type}..."
+    self.log("Purging #{class_type}...")
     
     # Get the total number of records
-    puts "- Getting total number of records for #{class_type}..."
+    self.log("- Getting total number of records for #{class_type}...")
     params = {
       :search_type => m.search_type,
       :class => class_type,
@@ -354,43 +354,34 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
-      puts "- Getting ids for #{class_type} (batch #{i+1} of #{batch_count})..."
-      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
-        ids << case class_type
-          when 'RES' then data[k] 
-          when 'COM' then data[k] 
-          when 'LND' then data[k] 
-          when 'MUL' then data[k] 
-          when 'OFF' then data[k]  
-          when 'AGT' then data[k]
-          when 'OPH' then data[k].to_i
-          when 'GFX' then data[k]
-        end                
-      end
-    end
+      self.log("- Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
+      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|                
+        ids << (class_type == 'OPH' ? data[k].to_i : data[k])        
+      end      
+    end    
 
     # Delete any records in the local database that shouldn't be there
-    puts "- Finding #{class_type} records in the local database that are not in the remote database..."    
+    self.log("- Finding #{class_type} records in the local database that are not in the remote database...")    
     t = m.local_table
     k = m.local_key_field        
     query = "select distinct #{k} from #{t}"
     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
     local_ids = rows.collect{ |row| row[k] }
     ids_to_remove = local_ids - ids    
-    puts "- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database."
-    puts "- Deleting #{class_type} records in the local database that shouldn't be there..."
+    self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
+    self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
     query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
     ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
 
     # Find any ids in the remote database that should be in the local database
-    puts "- Finding #{class_type} records in the remote database that should be in the local database..."
+    self.log("- Finding #{class_type} records in the remote database that should be in the local database...")
     query = "select distinct #{k} from #{t}"
     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
     local_ids = rows.collect{ |row| row[k] }
     ids_to_add = ids - local_ids    
-    puts "- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database."
+    self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
     ids_to_add.each do |id|
-      puts "- Importing #{id}..."
+      self.log("- Importing #{id}...")
       case class_type
         when 'RES' then self.delay.import_residential_property(id, false)
         when 'COM' then self.delay.import_commercial_property(id, false)
@@ -449,7 +440,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     local_ids = rows.collect{ |row| row[k] }
     ids_to_add = ids - local_ids
     ids_to_add.each do |id|
-      puts "Importing #{id}..."
+      self.log("Importing #{id}...")
       case class_type
         when 'RES' then self.delay.import_residential_property(id, false)
         when 'COM' then self.delay.import_commercial_property(id, false)
@@ -482,10 +473,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     task_started = self.lock_task
 
     begin
-      overlap = 30.seconds
-      puts DateTime.now
-      puts self.last_purged
-      puts (DateTime.now - self.last_purged)
+      overlap = 30.seconds      
       if (DateTime.now - self.last_purged).to_i > 1
         self.purge
         self.save_last_purged(task_started)
