@@ -221,7 +221,21 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.import_media(id, save_images = true)
-    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")
+    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")    
+    #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
+    #
+    #  # Find the associated media record for the image
+    #  filename = File.basename(headers['location'])
+    #  m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
+    #
+    #  if m.nil?
+    #    self.log("Can't find media record for #{p.mls_acct} #{filename}.")
+    #  else
+    #    m.image = URI.parse(headers['location'])
+    #    media << m
+    #    #m.save
+    #  end
+    #end    
   end
 
   #=============================================================================
@@ -384,7 +398,18 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
-      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })){ |data| ids << data[k] }
+      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
+        ids << case class_type
+          when 'RES' then data[k] 
+          when 'COM' then data[k] 
+          when 'LND' then data[k] 
+          when 'MUL' then data[k] 
+          when 'OFF' then data[k]  
+          when 'AGT' then data[k]
+          when 'OPH' then data[k].to_i
+          when 'GFX' then data[k]
+        end                
+      end
     end
 
     # Delete any records in the local database that shouldn't be there
@@ -401,13 +426,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     ids_to_add.each do |id|
       puts "Importing #{id}..."
       case class_type
-        when 'RES' then self.delay.import_residential_property(id)
-        when 'COM' then self.delay.import_commercial_property(id)
-        when 'LND' then self.delay.import_land_property(id)
-        when 'MUL' then self.delay.import_multi_family_property(id)
-        when 'OFF' then self.delay.import_office(id)
-        when 'AGT' then self.delay.import_agent(id)
-        when 'OPH' then self.delay.import_open_house(id)
+        when 'RES' then self.delay.import_residential_property(id, false)
+        when 'COM' then self.delay.import_commercial_property(id, false)
+        when 'LND' then self.delay.import_land_property(id, false)
+        when 'MUL' then self.delay.import_multi_family_property(id, false)
+        when 'OFF' then self.delay.import_office(id, false)
+        when 'AGT' then self.delay.import_agent(id, false)
+        when 'OPH' then self.delay.import_open_house(id, false)
         when 'GFX' then self.delay.import_media(id)
       end
     end
@@ -433,11 +458,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     begin
       overlap = 30.seconds
-      #if (DateTime.now - self.last_purged).to_i > 1
-      #  self.purge
-      #  self.save_last_purged(task_started)
-      #  #overlap = 1.month
-      #end
+      if (DateTime.now - self.last_purged).to_i > 1
+        self.purge
+        self.save_last_purged(task_started)
+        #overlap = 1.month
+      end
       self.update_after(self.last_updated - overlap)
 		  self.save_last_updated(task_started)
 		  self.unlock_task
