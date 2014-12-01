@@ -56,7 +56,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :bio                 , :text   ], 
         [ :contact_info        , :text   ], 
         [ :assistant_to        , :string ],
-        [ :designation         , :string ]
+        [ :designation         , :string ],
+        [ :image_location      , :string ]
       ],
       CabooseRets::CommercialProperty => [
         [ :acreage                   , :text    ], 

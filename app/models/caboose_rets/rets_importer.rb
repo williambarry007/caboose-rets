@@ -219,7 +219,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.import_agent(la_code, save_images = true)
     self.import('AGT', "(LA_LA_CODE=*#{la_code}*)")
     a = CabooseRets::Agent.where(:la_code => la_code.to_s).first
-    self.download_agent_image(a) if save_images == true
+    self.download_agent_image(a) #if save_images == true
   end
 
   def self.import_open_house(id, save_images = true)
@@ -264,6 +264,18 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
     end
         
+  end
+  
+  def self.download_agent_image(agent)
+    self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
+    begin
+      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|        
+        agent.image_location = headers['location']
+        agent.save
+      end
+    rescue RETS::APIError => err
+      self.log "No image for #{agent.first_name} #{agent.last_name}."
+    end
   end
 
   #=============================================================================
@@ -474,7 +486,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     begin
       overlap = 30.seconds      
-      if (DateTime.now - self.last_purged).to_i > 1
+      if (DateTime.now - self.last_purged).to_i >= 1
         self.purge
         self.save_last_purged(task_started)
         #overlap = 1.month

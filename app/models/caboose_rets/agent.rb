@@ -79,10 +79,10 @@ class CabooseRets::Agent < ActiveRecord::Base
 	
 	def image_url(style)
     if CabooseRets::use_hosted_images == true
-      return "#{CabooseRets::agents_base_url}/#{self.image_file_name}"
+      return "#{CabooseRets::agents_base_url}/#{self.image_location}"
     end
     return "" if self.image.nil?
     return self.image.url(style)           
   end
-
+     
 end
