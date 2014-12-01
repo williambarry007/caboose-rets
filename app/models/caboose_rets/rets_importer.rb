@@ -269,12 +269,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.download_agent_image(agent)
     self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
     begin
-      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|        
+      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|                
         agent.image_location = headers['location']
         agent.save
       end
     rescue RETS::APIError => err
       self.log "No image for #{agent.first_name} #{agent.last_name}."
+      self.log err
     end
   end
 
