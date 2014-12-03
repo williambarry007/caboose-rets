@@ -332,7 +332,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.purge_land
     self.purge_multi_family
     self.purge_offices
-    self.purge_agents
+    #self.purge_agents
     self.purge_open_houses
     self.purge_media
   end
