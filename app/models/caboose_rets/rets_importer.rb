@@ -490,7 +490,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       if (DateTime.now - self.last_purged).to_i >= 1
         self.purge
         self.save_last_purged(task_started)
-        #overlap = 1.month
+        # Keep this in here to make sure all updates are caught
+        overlap = 1.month
       end
       self.update_after(self.last_updated - overlap)
 		  self.save_last_updated(task_started)
