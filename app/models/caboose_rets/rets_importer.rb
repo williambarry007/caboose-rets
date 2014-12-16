@@ -373,38 +373,43 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end      
     end    
 
-    # Delete any records in the local database that shouldn't be there
-    self.log("- Finding #{class_type} records in the local database that are not in the remote database...")    
-    t = m.local_table
-    k = m.local_key_field        
-    query = "select distinct #{k} from #{t}"
-    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-    local_ids = rows.collect{ |row| row[k] }
-    ids_to_remove = local_ids - ids    
-    self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
-    self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
-    query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
-    ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
-
-    # Find any ids in the remote database that should be in the local database
-    self.log("- Finding #{class_type} records in the remote database that should be in the local database...")
-    query = "select distinct #{k} from #{t}"
-    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-    local_ids = rows.collect{ |row| row[k] }
-    ids_to_add = ids - local_ids    
-    self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
-    ids_to_add.each do |id|
-      self.log("- Importing #{id}...")
-      case class_type
-        when 'RES' then self.delay.import_residential_property(id, false)
-        when 'COM' then self.delay.import_commercial_property(id, false)
-        when 'LND' then self.delay.import_land_property(id, false)
-        when 'MUL' then self.delay.import_multi_family_property(id, false)
-        when 'OFF' then self.delay.import_office(id, false)
-        when 'AGT' then self.delay.import_agent(id, false)
-        when 'OPH' then self.delay.import_open_house(id, false)
-        when 'GFX' then self.delay.import_media(id, false)
+    # Only do stuff if we got a real response from the server    
+    if ids.count > 0
+      
+      # Delete any records in the local database that shouldn't be there
+      self.log("- Finding #{class_type} records in the local database that are not in the remote database...")    
+      t = m.local_table
+      k = m.local_key_field        
+      query = "select distinct #{k} from #{t}"
+      rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      local_ids = rows.collect{ |row| row[k] }
+      ids_to_remove = local_ids - ids    
+      self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
+      self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
+      query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
+      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    
+      # Find any ids in the remote database that should be in the local database
+      self.log("- Finding #{class_type} records in the remote database that should be in the local database...")
+      query = "select distinct #{k} from #{t}"
+      rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      local_ids = rows.collect{ |row| row[k] }
+      ids_to_add = ids - local_ids    
+      self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
+      ids_to_add.each do |id|
+        self.log("- Importing #{id}...")
+        case class_type
+          when 'RES' then self.delay.import_residential_property(id, false)
+          when 'COM' then self.delay.import_commercial_property(id, false)
+          when 'LND' then self.delay.import_land_property(id, false)
+          when 'MUL' then self.delay.import_multi_family_property(id, false)
+          when 'OFF' then self.delay.import_office(id, false)
+          when 'AGT' then self.delay.import_agent(id, false)
+          when 'OPH' then self.delay.import_open_house(id, false)
+          when 'GFX' then self.delay.import_media(id, false)
+        end
       end
+      
     end
 
   end
