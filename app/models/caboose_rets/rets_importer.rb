@@ -394,7 +394,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
-      ids_to_add = ids - local_ids    
+      ids_to_add = ids - local_ids
+      ids_to_add = ids_to_add.sort.reverse
       self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
       ids_to_add.each do |id|
         self.log("- Importing #{id}...")

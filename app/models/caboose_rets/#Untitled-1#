@@ -1,0 +1,6 @@
+heroku maintenance:on
+heroku ps:scale worker=0
+heroku pgbackups:transfer DATABASE_URL HEROKU_POSTGRESQL_PURPLE_URL
+heroku pg:promote HEROKU_POSTGRESQL_PURPLE_URL
+heroku ps:scale worker=1
+heroku maintenance:off
