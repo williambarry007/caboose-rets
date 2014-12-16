@@ -70,7 +70,7 @@ module CabooseRets
     def details
       @property = ResidentialProperty.where(:mls_acct => params[:mls_acct]).first
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists? 
-      if @property.lo_code == '46'
+      if @property && @property.lo_code == '46'
         @agent = Agent.where(:la_code => @property.la_code).first
       end
       if @property.nil?
