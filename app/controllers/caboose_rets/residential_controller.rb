@@ -74,7 +74,8 @@ module CabooseRets
         @agent = Agent.where(:la_code => @property.la_code).first
       end
       if @property.nil?
-        @mls_acct = params[:mls_acct]
+        @mls_acct = params[:mls_acct]        
+        CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)      
         render 'residential/residential_not_exists'
         return
       end

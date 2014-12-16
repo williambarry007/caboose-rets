@@ -17,4 +17,7 @@ module CabooseRets
   mattr_accessor :offices_base_url
   @@offices_base_url = ''
   
+  mattr_accessor :timezone
+  @@timezone = 'Central Time (US & Canada)'
+      
 end

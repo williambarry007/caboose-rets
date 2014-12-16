@@ -2,6 +2,8 @@
 class CabooseRets::OpenHouse < ActiveRecord::Base
   self.table_name = "rets_open_houses"
   
+  attr_accesible :id
+  
   def property
     models = [CabooseRets::ResidentialProperty, CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty]
     models.each do |model|

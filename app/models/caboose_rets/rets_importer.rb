@@ -68,7 +68,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.import(class_type, query)    
     m = self.meta(class_type)
-    self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
+    #self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
     self.get_config if @@config.nil? || @@config['url'].nil?
     params = {
       :search_type => m.search_type,
@@ -126,23 +126,24 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_after(date_modified, save_images = true)
-    self.update_helper('RES', date_modified, save_images)
-    self.update_helper('COM', date_modified, save_images)
-    self.update_helper('LND', date_modified, save_images)
-    self.update_helper('MUL', date_modified, save_images)
-    self.update_helper('OFF', date_modified, save_images)
-    self.update_helper('AGT', date_modified, save_images)
-    self.update_helper('OPH', date_modified, save_images)
+    self.delay.update_helper('RES', date_modified, save_images)
+    self.delay.update_helper('COM', date_modified, save_images)
+    self.delay.update_helper('LND', date_modified, save_images)
+    self.delay.update_helper('MUL', date_modified, save_images)
+    self.delay.update_helper('OFF', date_modified, save_images)
+    self.delay.update_helper('AGT', date_modified, save_images)
+    self.delay.update_helper('OPH', date_modified, save_images)
   end
 
   def self.update_helper(class_type, date_modified, save_images = true)
     m = self.meta(class_type)
-    k = m.remote_key_field
+    k = m.remote_key_field    
+    d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")    
     params = {
       :search_type => m.search_type,
       :class => class_type,
       :select => [m.remote_key_field],
-      :query => "(#{m.date_modified_field}=#{date_modified.strftime("%FT%T")}+)",
+      :query => "(#{m.date_modified_field}=#{d}+)",
       :standard_names_only => true,
       :timeout => -1
     }
@@ -478,8 +479,15 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Logging
   #=============================================================================
 
-  def self.log(msg)
+  def self.log(msg)        
+    puts "[rets_importer] #{msg}"    
+    #Rails.logger.info("[rets_importer] #{msg}")
+  end
+  
+  def self.log2(msg)
+    puts "======================================================================"    
     puts "[rets_importer] #{msg}"
+    puts "======================================================================"
     #Rails.logger.info("[rets_importer] #{msg}")
   end
 
@@ -488,7 +496,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_rets
-    return if self.task_is_locked
+    self.log2("Updating rets...")    
+    if self.task_is_locked
+      self.log2("Task is locked, aborting.")
+      return
+    end
+    self.log2("Locking task...")
     task_started = self.lock_task
 
     begin
@@ -499,17 +512,30 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         # Keep this in here to make sure all updates are caught
         #overlap = 1.month
       end
+      
+      self.log2("Updating after #{self.last_updated.strftime("%FT%T%:z")}...")
       self.update_after(self.last_updated - overlap)
+      
+      self.log2("Saving the timestamp for when we updated...")
 		  self.save_last_updated(task_started)
+		  
+		  self.log2("Unlocking the task...")
 		  self.unlock_task
-		rescue
+		rescue Exception => err
+		  puts err
 		  raise
 		ensure
+		  self.log2("Unlocking task if last updated...")
 		  self.unlock_task_if_last_updated(task_started)
 		end
 
 		# Start the same update process in five minutes
-		self.delay(:run_at => 1.minutes.from_now).update_rets
+		self.log2("Adding the update rets task for 5 minutes from now...")
+		q = "handler like '%update_rets%'"
+		count = Delayed::Job.where(q).count		 
+		if count == 0 || (count == 1 && Delayed::Job.where(q).first.locked_at)
+		  self.delay(:run_at => 5.minutes.from_now).update_rets
+		end
 	end
 
   def self.last_updated
@@ -529,14 +555,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.save_last_updated(d)
-    s = Caboose::Setting.where(:name => 'rets_last_updated').first
-    s.value = d.strftime('%FT%T')
+    s = Caboose::Setting.where(:name => 'rets_last_updated').first    
+    s.value = d.in_time_zone(CabooseRets::timezone).strftime("%FT%T%:z")
     s.save
   end
 
   def self.save_last_purged(d)
     s = Caboose::Setting.where(:name => 'rets_last_purged').first
-    s.value = d.strftime('%FT%T')
+    s.value = d.in_time_zone(CabooseRets::timezone).strftime("%FT%T%:z")
     s.save
   end
 
@@ -544,9 +570,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     return Caboose::Setting.exists?(:name => 'rets_update_running')
   end
 
-  def self.lock_task
-    d = DateTime.now.utc - 5.hours
-    Caboose::Setting.create(:name => 'rets_update_running', :value => d.strftime('%F %T'))
+  def self.lock_task    
+    d = DateTime.now.utc.in_time_zone(CabooseRets::timezone)
+    Caboose::Setting.create(:name => 'rets_update_running', :value => d.strftime("%FT%T%:z"))
     return d
   end
 
@@ -556,7 +582,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.unlock_task_if_last_updated(d)
     setting = Caboose::Setting.where(:name => 'rets_update_running').first
-    self.unlock_task if setting && d.strftime('%F %T') == setting.value
+    self.unlock_task if setting && d.in_time_zone.strftime("%FT%T%:z") == setting.value
   end
 
 end

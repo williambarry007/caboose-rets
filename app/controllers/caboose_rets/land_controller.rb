@@ -80,6 +80,7 @@ module CabooseRets
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?
       if @property.nil?
         @mls_acct = params[:mls_acct]
+        CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)
         render 'land/not_exists'
         return
       end    

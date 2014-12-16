@@ -2,8 +2,7 @@
 class CabooseRets::Agent < ActiveRecord::Base
   self.table_name = "rets_agents"  
   has_many :commercial_properties
-  has_many :residential_properties
-  # attr_accessible :title, :body
+  has_many :residential_properties  
   has_attached_file :image, 
     :path => 'rets/agents/:la_code_:style.:extension', 
     :styles => {
@@ -11,6 +10,7 @@ class CabooseRets::Agent < ActiveRecord::Base
       :large => '200x300>'
     }
   do_not_validate_attachment_file_type :image
+  attr_accessible :id, :la_code
   after_initialize :fix_name
   
   def assistants
