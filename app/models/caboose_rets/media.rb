@@ -123,9 +123,9 @@ class CabooseRets::Media < ActiveRecord::Base
     return true
   end
   
-  def image_url(style)
-    if CabooseRets::use_hosted_images == true
-      return "#{CabooseRets::media_base_url}/#{self.file_name}"
+  def image_url(style)    
+    if CabooseRets::use_hosted_images == true      
+      return "#{CabooseRets::media_base_url}/#{self.file_name}"    
     end
     return "" if self.image.nil?
     return self.image.url(style)           

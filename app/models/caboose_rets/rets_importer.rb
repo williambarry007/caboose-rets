@@ -337,14 +337,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.purge_media
   end
 
-  def self.purge_residential()  self.purge_helper('RES', '2012-01-01') end
-  def self.purge_commercial()   self.purge_helper('COM', '2012-01-01') end
-  def self.purge_land()         self.purge_helper('LND', '2012-01-01') end
-  def self.purge_multi_family() self.purge_helper('MUL', '2012-01-01') end
-  def self.purge_offices()      self.purge_helper('OFF', '2012-01-01') end
-  def self.purge_agents()       self.purge_helper('AGT', '2012-01-01') end
-  def self.purge_open_houses()  self.purge_helper('OPH', '2012-01-01') end
-  def self.purge_media()        self.purge_helper('GFX', '2012-01-01') end
+  def self.purge_residential()  self.delay.purge_helper('RES', '2012-01-01') end
+  def self.purge_commercial()   self.delay.purge_helper('COM', '2012-01-01') end
+  def self.purge_land()         self.delay.purge_helper('LND', '2012-01-01') end
+  def self.purge_multi_family() self.delay.purge_helper('MUL', '2012-01-01') end
+  def self.purge_offices()      self.delay.purge_helper('OFF', '2012-01-01') end
+  def self.purge_agents()       self.delay.purge_helper('AGT', '2012-01-01') end
+  def self.purge_open_houses()  self.delay.purge_helper('OPH', '2012-01-01') end
+  def self.purge_media()        self.delay.purge_helper('GFX', '2012-01-01') end
 
   def self.purge_helper(class_type, date_modified)
     m = self.meta(class_type)
@@ -491,7 +491,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         self.purge
         self.save_last_purged(task_started)
         # Keep this in here to make sure all updates are caught
-        overlap = 1.month
+        #overlap = 1.month
       end
       self.update_after(self.last_updated - overlap)
 		  self.save_last_updated(task_started)
