@@ -262,7 +262,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       local_ids = rows.collect{ |row| row['media_id'] }
       ids_to_remove = local_ids - ids
       if ids_to_remove && ids_to_remove.count > 0
-        query = ["delete from rets_media where media_id not in (?)", ids_to_remove]
+        query = ["delete from rets_media where media_id in (?)", ids_to_remove]
         ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
       end
     end
@@ -389,7 +389,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_remove = local_ids - ids    
       self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
       self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
-      query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
+      query = ["delete from #{t} where #{k} in (?)", ids_to_remove]
       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
     
       # Find any ids in the remote database that should be in the local database
