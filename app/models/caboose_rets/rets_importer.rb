@@ -254,15 +254,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       m.save
     end
     
-    # Delete any records in the local database that shouldn't be there
-    self.log("- Deleting GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database...")
-    query = "select media_id from rets_media where mls_acct = '#{p.mls_acct}'"
-    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-    local_ids = rows.collect{ |row| row['media_id'] }
-    ids_to_remove = local_ids - ids
-    if ids_to_remove && ids_to_remove.count > 0
-      query = ["delete from rets_media where media_id not in (?)", ids_to_remove]
-      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    if ids.count > 0
+      # Delete any records in the local database that shouldn't be there    
+      self.log("- Deleting GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database...")
+      query = "select media_id from rets_media where mls_acct = '#{p.mls_acct}'"
+      rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      local_ids = rows.collect{ |row| row['media_id'] }
+      ids_to_remove = local_ids - ids
+      if ids_to_remove && ids_to_remove.count > 0
+        query = ["delete from rets_media where media_id not in (?)", ids_to_remove]
+        ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      end
     end
         
   end
@@ -448,28 +450,30 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
     end
 
-    # Delete any records in the local database that shouldn't be there
-    t = m.local_table
-    k = m.local_key_field
-    query = ["delete from #{t} where #{k} not in (?)", ids]
-    ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
-
-    # Find any ids in the remote database that should be in the local database
-    query = "select distinct #{k} from #{t}"
-    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-    local_ids = rows.collect{ |row| row[k] }
-    ids_to_add = ids - local_ids
-    ids_to_add.each do |id|
-      self.log("Importing #{id}...")
-      case class_type
-        when 'RES' then self.delay.import_residential_property(id, false)
-        when 'COM' then self.delay.import_commercial_property(id, false)
-        when 'LND' then self.delay.import_land_property(id, false)
-        when 'MUL' then self.delay.import_multi_family_property(id, false)
-        when 'OFF' then self.delay.import_office(id, false)
-        when 'AGT' then self.delay.import_agent(id, false)
-        when 'OPH' then self.delay.import_open_house(id, false)
-        when 'GFX' then self.delay.import_media(id)
+    if ids.count > 0
+      # Delete any records in the local database that shouldn't be there
+      t = m.local_table
+      k = m.local_key_field
+      query = ["delete from #{t} where #{k} not in (?)", ids]
+      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+    
+      # Find any ids in the remote database that should be in the local database
+      query = "select distinct #{k} from #{t}"
+      rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      local_ids = rows.collect{ |row| row[k] }
+      ids_to_add = ids - local_ids
+      ids_to_add.each do |id|
+        self.log("Importing #{id}...")
+        case class_type
+          when 'RES' then self.delay.import_residential_property(id, false)
+          when 'COM' then self.delay.import_commercial_property(id, false)
+          when 'LND' then self.delay.import_land_property(id, false)
+          when 'MUL' then self.delay.import_multi_family_property(id, false)
+          when 'OFF' then self.delay.import_office(id, false)
+          when 'AGT' then self.delay.import_agent(id, false)
+          when 'OPH' then self.delay.import_open_house(id, false)
+          when 'GFX' then self.delay.import_media(id)
+        end
       end
     end
 
