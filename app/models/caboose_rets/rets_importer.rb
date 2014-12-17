@@ -242,7 +242,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     params = {
       :search_type => 'Media',
       :class => 'GFX',      
-      :query => "(MLS_ACCT=*#{p.id}*)",
+      :query => "(MLS_ACCT=*#{p.mls_acct}*)",
       :timeout => -1
     }
     ids = []
