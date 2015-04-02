@@ -303,7 +303,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     self.log "Getting coords for mls_acct #{p.mls_acct}..."
     coords = self.coords_from_address(CGI::escape "#{p.street_num} #{p.street_name}, #{p.city}, #{p.state} #{p.zip}")
-    return if coords.nil? || coords == false
+    if coords.nil? || coords == false
+      self.log "Can't set coords for mls acct #{p.mls_acct}..."
+      return
+    end
 
     p.latitude = coords['lat']
     p.longitude = coords['lng']
@@ -311,7 +314,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.coords_from_address(address)
-    return false
+    #return false
     begin
       uri = "https://maps.googleapis.com/maps/api/geocode/json?address=#{address}&sensor=false"
       uri.gsub!(" ", "+")
