@@ -294,7 +294,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       models.each do |model|
         self.log "Updating coords #{names[i]} properties..."
         model.where(:latitude => nil).reorder(:mls_acct).each do |p|
-          self.update_coords(p)
+          self.delay.update_coords(p)
         end
         i = i + 1
       end
