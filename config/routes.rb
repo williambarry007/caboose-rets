@@ -81,13 +81,13 @@ CabooseRets::Engine.routes.draw do
   post   "/saved-properties"                       => "saved_properties#add"    
   delete "/saved-properties/:mls_acct"             => "saved_properties#delete"
         
-  get    "/admin/properties/:mls_acct/photos"       => "media#admin_photos"
-  get    "/admin/properties/:mls_acct/files"        => "media#admin_files"
-  get    "/admin/properties/:mls_acct/media"        => "media#admin_property_media"  
-  put    "/admin/properties/:mls_acct/media/order"  => "media#admin_update_order"
-  post   "/admin/properties/:mls_acct/photos"       => "media#admin_add_photo"
-  post   "/admin/properties/:mls_acct/files"        => "media#admin_add_file"
-  get    "/admin/media/:id"                         => "media#admin_index"  
-  delete "/admin/media/:id"                         => "media#admin_delete"  
+  get    "/admin/properties/:mls_acct/photos"       => "rets_media#admin_photos"
+  get    "/admin/properties/:mls_acct/files"        => "rets_media#admin_files"
+  get    "/admin/properties/:mls_acct/media"        => "rets_media#admin_property_media"  
+  put    "/admin/properties/:mls_acct/media/order"  => "rets_media#admin_update_order"
+  post   "/admin/properties/:mls_acct/photos"       => "rets_media#admin_add_photo"
+  post   "/admin/properties/:mls_acct/files"        => "rets_media#admin_add_file"
+  get    "/admin/rets/media/:id"                    => "rets_media#admin_index"  
+  delete "/admin/rets/media/:id"                    => "rets_media#admin_delete"  
 
 end

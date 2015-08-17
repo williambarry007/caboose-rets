@@ -1,6 +1,6 @@
 
 module CabooseRets
-  class MediaController < ApplicationController  
+  class RetsMediaController < ApplicationController  
     
     # GET /admin/media/:id
     def admin_index
