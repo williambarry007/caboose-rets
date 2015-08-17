@@ -77,10 +77,11 @@ class CabooseRets::Agent < ActiveRecord::Base
 	  #self.photo_url            = ""
 	end
 	
-	def image_url(style)
+	def image_url(style)	  	    	    
     if CabooseRets::use_hosted_images == true
       #return "#{CabooseRets::agents_base_url}/#{self.image_location}"
-      return self.image_location
+      self.meta = CabooseRets::AgentMeta.create(:la_code => self.la_code) if self.meta.nil?      
+      return self.meta.image_location
     end
     return "" if self.image.nil?
     return self.image.url(style)           
