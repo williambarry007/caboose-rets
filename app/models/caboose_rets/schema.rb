@@ -843,6 +843,9 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :property_type , :string    ],
         [ :uri           , :text      ], 
         [ :notify        , :boolean   ] 
+      ],
+      Caboose::Site => [
+        [ :use_rets , :boolean, { :default => false }]        
       ]
     }
   end

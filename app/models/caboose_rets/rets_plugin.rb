@@ -1,7 +1,8 @@
 class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
 
-  def self.admin_nav(nav, user = nil, page = nil)
+  def self.admin_nav(nav, user = nil, page = nil, site)  
     return nav if user.nil?
+    return nav if !site.use_rets
     
     nav << {
       'id' => 'saved-properties',
