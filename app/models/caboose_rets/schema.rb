@@ -51,13 +51,17 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :home_phone          , :string ],
         [ :mail_zip            , :string ],
         [ :phone_direct_office , :string ],
-        [ :photo_date_modified , :string ],
-        [ :hide                , :boolean, { :default => false }], 
-        [ :bio                 , :text   ], 
-        [ :contact_info        , :text   ], 
-        [ :assistant_to        , :string ],
-        [ :designation         , :string ],
-        [ :image_location      , :string ]
+        [ :photo_date_modified , :string ]        
+      ],
+      CabooseRets::AgentMeta => [
+        [ :la_code             , :string     ],
+        [ :hide                , :boolean     , { :default => false }], 
+        [ :bio                 , :text       ], 
+        [ :contact_info        , :text       ], 
+        [ :assistant_to        , :string     ],
+        [ :designation         , :string     ],
+        [ :image_location      , :string     ],
+        [ :image               , :attachment ]
       ],
       CabooseRets::CommercialProperty => [
         [ :acreage                   , :text    ], 
@@ -380,14 +384,16 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :longitude                 , :float ]
       ],
       CabooseRets::Media => [ 
-        [ :date_modified      , :string ], 
-        [ :file_name          , :string ], 
-        [ :media_id           , :string ], 
-        [ :media_order        , :integer, { :default => 0 }], 
-        [ :media_remarks      , :text   ], 
-        [ :media_type         , :string ], 
-        [ :mls_acct           , :string ], 
-        [ :url                , :text   ]        
+        [ :date_modified      , :string     ], 
+        [ :file_name          , :string     ], 
+        [ :media_id           , :string     ], 
+        [ :media_order        , :integer     , { :default => 0 }], 
+        [ :media_remarks      , :text       ], 
+        [ :media_type         , :string     ], 
+        [ :mls_acct           , :string     ], 
+        [ :url                , :text       ],        
+        [ :image              , :attachment ],
+        [ :file               , :attachment ]    
       ],
       CabooseRets::MultiFamilyProperty => [
         [ :acreage                   , :text ], 
@@ -588,6 +594,10 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :lo_status           , :string ], 
         [ :photo_count         , :string ], 
         [ :photo_date_modified , :string ] 
+      ],
+      CabooseRets::OfficeMeta => [
+        [ :lo_code , :string     ],
+        [ :image   , :attachment ]
       ],
       CabooseRets::OpenHouse => [
         [ :comments        , :string ], 
@@ -837,12 +847,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
     }
   end
   
-  def self.load_data
-    c = ActiveRecord::Base.connection        
-    c.add_attachment :rets_agents  , :image if !c.column_exists? :rets_agents  , :image_file_name
-    c.add_attachment :rets_offices , :image if !c.column_exists? :rets_offices , :image_file_name
-    c.add_attachment :rets_media   , :image if !c.column_exists? :rets_media   , :image_file_name
-    c.add_attachment :rets_media   , :file  if !c.column_exists? :rets_media   , :file_file_name     
+  def self.load_data                             
   end
 
 end

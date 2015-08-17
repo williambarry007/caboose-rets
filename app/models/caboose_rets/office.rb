@@ -1,14 +1,14 @@
 
 class CabooseRets::Office < ActiveRecord::Base
   self.table_name = "rets_offices"
-  has_attached_file :image, 
-    :path => 'rets/offices/:lo_code_:style.:extension', 
-    :styles => {
-      :thumb => '100x150>',
-      :large => '200x300>'
-    }
-  do_not_validate_attachment_file_type :image
+  
+  has_one :meta, :class_name => 'OfficeMeta', :primary_key => 'lo_code', :foreign_key => 'lo_code'  
   attr_accessible :id, :name, :lo_code
+  
+  def image
+    return nil if self.meta.nil?
+    return meta.image
+  end
   
   def parse(data)
     self.lo_date_created 	    = data['LO_DATE_CREATED']
