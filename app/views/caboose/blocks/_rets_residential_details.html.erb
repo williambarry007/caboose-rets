@@ -1,0 +1,243 @@
+<%
+# Residential property details
+p = property
+%>
+
+<div class="l-wrapper">
+  <div class="l-section">
+    <div class="l-sidebar-border inflate-tenor-baritone">
+      <div class="sidebar-aside">
+        <% if agent %>
+          <div class="realtor_info">
+            <h4>Agent</h4>            
+            <img src="<%= agent.image_url(:thumb) %>?<%= DateTime.now.strftime('%F') %>" alt="<% if agent.meta.designation %><%= agent.meta.designation %> <% end %><%= agent.first_name %> <%= agent.last_name %>" />
+            <br />
+            <a href="/agents/<%= agent.la_code %>"><%= agent.first_name %> <%= agent.last_name %></a><br>
+            <a href="tel:<%= agent.car_phone %>"><%= agent.car_phone %></a>
+            
+            <% co_agent = CabooseRets::Agent.where(:la_code => p.co_la_code).first %>
+            <% if co_agent %>          
+              <h4>Co-Agent</h4>            
+              <img src="<%= co_agent.image_url(:thumb) %>?<%= DateTime.now.strftime('%F') %>" alt="<% if co_agent.designation %><%= co_agent.designation %> <% end %><%= co_agent.first_name %> <%= co_agent.last_name %>" />
+              <br />
+              <a href="/agents/<%= co_agent.la_code %>"><%= co_agent.first_name %> <%= co_agent.last_name %></a><br>
+              <a href="tel:<%= co_agent.car_phone %>"><%= co_agent.car_phone %></a>          
+            <% end %>
+            
+          </div>
+        <% end %>        
+        
+        
+        <address class="h-type-h5">
+          <% if !property.unit_num.nil? && property.unit_num.strip.length > 0 %>Unit <%= property.unit_num %>, <% end %>
+          <%= property.street_num %> <%= property.street_name.titleize %><br />
+          <%= property.city.titleize %>, <%= property.state %> <%= property.zip %>
+        </address>
+        <p class="h-space-mvs h-type-highlight h-type-h4"> <%= number_to_currency(property.current_price, :precision => 0) %>
+        
+          <% if property.foreclosure_yn == 'Y' %>
+            <br><span style='font-size: 0.8em; color: rgb(114, 114, 114);'>(Foreclosure)</span>
+          <% end %>
+          <!-- if property.foreclosure_yn == 'Y' -->
+        </p>        
+        <p class="h-space-mvs h-type-highlight h-type-h4">
+          MLS #<%= property.mls_acct %>
+          <% if property.lo_code != '46' %>        
+            <br /><span class="nonadvantage_agent">
+              Listing Courtesy of <% if property.office && property.office.lo_name %> <%= property.office.lo_name.titleize %><% else %><%= property.lo_code %><% end %>
+            </span>           
+          <% end %>      
+          <a class="toggle_save_property button_to m-btn-red h-space-mtm" data-mls_acct="<%= property.mls_acct %>" href="" style="padding-top: 6px;">
+            <img src="<%= asset_path 'icon-star.png' %>" alt="" style="height:40px;">
+            Save Listing
+          </a>
+        </p>                          
+        <% if property.street_num && property.street_name && property.city && property.state && property.zip %>
+        <div class="m-map-small h-border h-space-mbm" address="<%= property.street_num %> <%= property.street_name %> <%= property.city %>, <%= property.state %> <%= property.zip %>"></div>
+        <% end %>
+        
+        
+        <h4 class="h-space-mvt">Directions</h4>
+        <p class="paragraph"><%= property.directions %></p>
+        <h4 class="h-space-mvt">Neighborhood Information</h4>
+        
+        <ul class="m-list-pad">
+          <li><strong>Area</strong>: <%= property.area.titleize %></li>
+          <% if property.subdivision %><li><strong>Subdivision</strong>: <%= property.subdivision.titleize %></li><% end %>
+          <% if property.elem_school %><li><strong>Elementary School</strong>: <%= property.elem_school.titleize %></li><% end %>
+          <% if property.middle_school %><li><strong>Middle School</strong>: <%= property.middle_school.titleize %></li><% end %>
+          <% if property.high_school %><li><strong>High School</strong>: <%= property.high_school.titleize %></li><% end %>
+          <li><strong>County</strong>: <%= property.county.titleize %></li>
+          <li><strong>Lot Size</strong>: <%= property.ftr_lotdesc %></li>
+        </ul>
+                
+        <h4 class="h-space-mvt">Contact the Agent</h4>        
+        <form action='/contact/property' method='post' class="m-form" id="contact_form">
+          <input type='hidden' name='authenticity_token' value="<%= form_authenticity_token %>" />
+          <input type='hidden' name='contact_mls_acct' id='contact_mls_acct' value='<%= property.mls_acct %>' />
+					<input type='text'   name='contact_name'     id="contact_name"     value='' placeholder="Name"    maxlength="150" />
+					<input type='text'   name='contact_email'    id="contact_email"    value='' placeholder="Email"   maxlength="150" />
+					<textarea            name='contact_body'     id="contact_body"              placeholder="Message" cols="50" rows="4"  class="contact_message"></textarea>				  
+				  <div id='contact_message'></div>            
+				  <p><input class="m-btn-red btn-large h-float-right h-space-mts" type="submit" value="Send" onclick='post_contact_form(); return false;' /></p>
+				</form>
+        
+      </div> <!-- .sidebar-aside -->
+      
+      <div class="sidebar-body">
+        <div class="photos" style="text-align: center;">
+          <p>
+          <input type='button' value='<' onclick='gallery.previous_image();' id='previous_image' />
+          <input type='button' value='>' onclick='gallery.next_image();' id='next_image' />
+          </p>
+          <div id='large_image'></div>
+          <div id='large_caption'></div>
+          <div style="display: block;">
+            <% property.images.each_index do |i| %>            
+              <% m = property.images[i] %>
+              <% img = property.images[i].image %>
+              <a class="photo" id='image_trigger_<%= m.id %>' style="float: left; display: block; width: 12.5%; padding: 2px;" href="<%= m.image_url(:large) %>" data-index="<%= i %>">
+                <img style="display: block; width: 100%;" src="<%= m.image_url(:thumb) %>"/>
+              </a>                
+            <% end %>              
+          </div>
+        </div>
+        <div style="clear: both;"></div><br />
+        <p class="paragraph"><%= property.remarks %></p>
+        <h4 class="h-type-standard h-type-highlight h-type-caps h-space-mts">Property Details</h4>
+        <h5 class="h-type-standard">Single Family Home</h5>
+        
+        <ul class="m-list-bullet h-space-mts">
+          <% if property.tot_heat_sqft != "" %><li><strong>Total Heated Sq. Ft.</strong>: <span id='square_footage'><%=h property.tot_heat_sqft %></span></li><% end %>
+          <% if property.price_sqft    != "" %><li><strong>Price/Sq. Ft.</strong>: <span id='square_footage'><%=h number_to_currency property.price_sqft %></span></li><% end %>
+          <% if property.bedrooms      != "" %><li><strong>Bedrooms</strong>: <%= property.bedrooms %></li><% end %>
+          <% if property.baths         != "" %><li><strong>Baths</strong>: <%= property.baths_full %> full <% if property.baths_half != "" && property.baths_half != "0" %> &amp; <%= property.baths_half %> half baths<% end %></li><% end %>
+          <% if property.acreage       != "" %><li><strong>Acreage</strong>: <%= property.acreage %></li><% end %>
+        </ul> <!-- .m-list-bullet -->
+        <h4 class="h-type-standard h-type-highlight h-type-caps h-space-mts">Features</h4>
+        
+        <ul>
+          <% if property.ftr_interior %><li><strong>Interior</strong>: <%=   property.ftr_interior %> </li><% end %>
+          <% if property.ftr_cooling  %><li><strong>Cooling</strong>: <%=    property.ftr_cooling  %> </li><% end %>
+          <% if property.ftr_heating  %><li><strong>Heating</strong>: <%=    property.ftr_heating  %> </li><% end %>
+          <% if property.year_built   %><li><strong>Year Built</strong>: <%= property.year_built   %> </li><% end %>
+        </ul>
+        <br>
+        <% if property.virtual_tour %><p><a class="m-btn h-space-mtm" href='<%= property.virtual_tour %>' target='_blank'>Virtual Tour</a></p><% end %>
+
+        <a data-pin-do="buttonPin" data-pin-config="beside" href="//pinterest.com/pin/create/button/?url=<%= request.original_url %>&amp;media=<%= property.images[0].image_url(:large) %>"></a>
+      </div> <!-- .sidebar-body -->
+    </div> <!-- .l-sidebar -->
+  </div> <!-- .body-section -->
+</div> <!-- .l-wrapper -->
+
+<div class="body-sink"></div>
+
+<% content_for :caboose_css do %>
+<style type='text/css'>
+#large_caption { padding-bottom: 20px; }
+</style>
+<% end %>
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose_rets/caboose_rets" %>
+<%= javascript_include_tag '//assets.pinterest.com/js/pinit.js' %>
+<%= javascript_include_tag 'details_colorbox' %>
+<script type="text/javascript">
+
+function post_contact_form()
+{ 
+  $.ajax({
+    url: '/contact/property',
+    type: 'post',
+    data: $('#contact_form').serialize(),      
+    success: function(resp) {
+      if (resp.error)    $('#contact_message').html("<p class='note error'>" + resp.error + "</p>");
+      if (resp.success)  $('#contact_message').html("<p class='note success'>" + resp.success + "</p>");
+      if (resp.redirect) window.location = resp.redirect;
+    }  
+  });
+}
+
+//if (document.contains('square_footage')) {
+//  var str = document.getElementById('square_footage').innerHTML;
+//  str = str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//  document.getElementById('square_footage').innerHTML = str;
+//}
+
+var gallery = false;
+$(document).ready(function() {
+  var images = [];
+  <% 
+  if property.images && property.images.count > 0
+    property.images.each_index do |i|  
+      m = property.images[i]
+      next if m.nil? || m.image.nil?
+      %>
+      images.push({ 
+        thumb_url: <%= raw Caboose.json(m.image_url(:thumb)) %>, 
+        large_url: <%= raw Caboose.json(m.image_url(:large)) %>, 
+        caption:   <%= raw Caboose.json(m.media_remarks)     %>
+      });
+      <%
+    end            
+  end
+  %>
+  gallery = new PropertyGallery({ images: images });
+  gallery.show_image(0);
+});
+
+var PropertyGallery = function(params) { this.init(params); };
+PropertyGallery.prototype = {
+            
+  images: false,
+  current_image: 0,
+  
+  init: function(params) {
+    for (var thing in params)
+      this[thing] = params[thing];
+    var i = 0;
+    var that = this;
+    $('a.photo').click(function(e) {
+      e.preventDefault();
+      that.show_image($(this).data("index"));
+      i = i + 1;
+    });
+  },
+    
+  show_image: function(i)
+  {        
+    if (i >= this.images.length) i = 0;
+    if (i < 0) i = this.images.length - 1;    
+     
+    var h = 60;
+    if ($('#current_image').length)
+      h = $('#current_image').outerHeight();    
+    $('#large_image').html("<p class='loading' style='height: " + h + "px;'>Loading...</p>");
+    var img = new Image();
+    var that = this;
+    img.onload = function() { 
+      $('#large_image').html("<p><img id='current_image' src='" + img.src + "' /></p>");
+      $('#large_caption').html("<p class='caption'>" + that.images[i].caption + "</p>");
+    };
+    img.src = this.images[i].large_url;
+    this.current_image = i;
+  },  
+  next_image:     function() { this.show_image(this.current_image + 1); },  
+  previous_image: function() { this.show_image(this.current_image - 1); }
+};
+
+</script>
+<% end %>
+
+<% content_for :caboose_css do %>
+  <style type="text/css">
+  #recaptcha_area, #recaptcha_table { width: auto !important; }
+  #recaptcha_image { width: 80% !important; }
+  #recaptcha_image img { width:80% !important; margin-left: -20%; padding: 0px; }
+  fieldset.captcha { width:100px !important; }
+  #recaptcha_container { margin: 0px; padding: 0px; width: 157px !important; }
+  input#recaptcha_response_field { padding: 0px; }
+  #recaptcha_widget_div { width: 150%; }
+  .realtor_info { background-color: white; padding: 10px; margin-bottom: 20px; text-align: center; border: 1px solid #d0d0d0;}
+  </style>
+<% end %>

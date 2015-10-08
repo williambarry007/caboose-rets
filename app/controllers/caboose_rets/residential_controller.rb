@@ -12,7 +12,7 @@ module CabooseRets
     		end
     	end
     	
-      @gen = Caboose::PageBarGenerator.new(params, {
+      @pager = Caboose::PageBarGenerator.new(params, {
         'name'               => '',
         'acreage_gte'        => '',
         'acreage_lte'        => '',
@@ -54,9 +54,8 @@ module CabooseRets
         'items_per_page'  => 10        
       })
       
-      @properties = @gen.items      
-    
-      if params[:waterfront].present? then @properties.reject!{|p| p.waterfront.blank?} end
+      @properties = @pager.items                      
+      if params[:waterfront].present?   then @properties.reject!{|p| p.waterfront.blank?} end
       if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end
       #if params[:foreclosure] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
       
@@ -64,6 +63,12 @@ module CabooseRets
       if CabooseRets::SavedSearch.exists?(:uri => request.fullpath)
         @saved_search = CabooseRets::SavedSearch.where(:uri => request.fullpath).first
       end
+      
+      @block_options = {
+        :properties   => @properties,
+        :saved_search => @saved_search,
+        :pager => @pager 
+      }
     end
     
     # GET /residential/:mls_acct/details
@@ -79,7 +84,21 @@ module CabooseRets
         render 'residential/residential_not_exists'
         return
       end
-      #@message = Message.new    
+      
+      @block_options = {
+        :mls_acct => params[:mls_acct],
+        :property => @property,
+        :saved    => @saved,
+        :agent    => @property ? Agent.where(:la_code => @property.la_code).first : nil,
+        :form_authenticity_token => form_authenticity_token        
+      }
+      
+      #if @property.nil?
+      #  @mls_acct = params[:mls_acct]        
+      #  CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)      
+      #  render 'residential/residential_not_exists'
+      #  return
+      #end
     end
     
     #=============================================================================

@@ -1,0 +1,39 @@
+<div class='grid-row'>
+  <div class='grid-unit-1of5 list-part' id='clist1'>        
+    <a href="/commercial/<%= p.mls_acct %>/details" style=" width: 40%; ">
+      <img src='<%= p.images && p.images.count > 0 ? p.images[0].image_url(:thumb) : '' %>' width="400" />
+    </a>
+    <div id='list-meta' style="max-width: 263px;  width: 57%; ">
+      <span class='caddress'><%= p.street_num %> <%= p.street_name.titleize %><br>
+                            <%= p.city.titleize %>, <%= p.state %>
+
+      </span><br> <!-- , {city}, {state} {zip} -->      
+    </div>
+  </div>    
+  <div class='grid-unit-1of5 list-part' id='clist2'>
+    <% if p.tot_heat_sqft && p.tot_heat_sqft.to_i > 0 %>
+      <span class="sqft"><%= number_with_delimiter(p.tot_heat_sqft.to_i, :delimiter => ',') %> sqft</span> 
+    <% else %>
+      <span class="sqft">N/A</span>
+    <% end %>
+
+  </div>
+  <div class='grid-unit-1of5 list-part' id='clist3'>
+    <% if p.current_price && p.current_price.to_i > 0 %>
+      <span class="cprice">$<%= p.current_price %></span> 
+    <% else %>
+      <span class="cprice">N/A</span>
+    <% end %>
+  </div>
+  <div class='grid-unit-1of5 list-part' id='clist4'>
+     <% if p.sale_lease  %>
+        <span class="sale_lease"><%= p.sale_lease %></span> 
+      <% else %>
+        <span class="sale_lease">N/A</span>
+      <% end %>
+  </div>  
+  <div class='grid-unit-1of5 list-part' id='clist5'>
+    <!-- <img src="/assets/icon_pdf.png" alt="PDF" id="pdf_icon" class="h-reveal-bass" />  --> 
+     <span class="document"><a href="/commercial/<%= p.mls_acct %>/details">More Info</a></span>
+  </div>
+</div>  

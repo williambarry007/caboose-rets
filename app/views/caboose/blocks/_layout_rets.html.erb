@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en"><![endif]-->
+<!--[if IE 7]><html class="no-js ie ie7 lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if IE 8]><html class="no-js ie ie8 lt-ie9" lang="en"><![endif]-->
+<!--[if IE 9]><html class="no-js ie ie9" lang="en"><![endif]-->
+<!--[if !IE]><!--> <html class="no-js" lang="en"><!--<![endif]-->
+<!--[if lt IE 9]><script src="/html5shiv.js"></script><![endif]-->
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <meta http-equiv="content-language" content="en">    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= raw page.head_title %></title>
+    <% desc = page.meta_description ? page.meta_description : page.head_title %>
+    <% domain = site.primary_domain.domain %>    
+    <meta name="description" content="<%= desc %>" />
+    <meta property="og:title" content="<%= page.title %>" />
+    <meta property="og:site_name" content="<%= site.description %>"/>
+    <meta property="og:description" content="<%= desc %>" />            
+    <%= raw css %>
+    <%= raw csrf_meta_tags %>
+  </head>
+  <body>    
+    <div class="container" id='block_<%= block.id %>'>
+      <!--[if lt IE 7]>
+        <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+      <![endif]-->
+<%
+# Select which block to show
+url = request.original_fullpath
+if    url =~ /^\/residential\/\d(.*?)$/      %><% Caboose.log("Rendering rets_residential_details" ) %><%= block.partial('rets_residential_details' , local_assigns) %><%
+elsif url =~ /^\/residential\/search(.*?)$/  %><% Caboose.log("Rendering rets_residential_index"   ) %><%= block.partial('rets_residential_index'   , local_assigns) %><%
+elsif url =~ /^\/residential(.*?)$/          %><% Caboose.log("Rendering rets_residential_index"   ) %><%= block.partial('rets_residential_index'   , local_assigns) %><%
+elsif url =~ /^\/commercial\/\d(.*?)$/       %><% Caboose.log("Rendering rets_commercial_details"  ) %><%= block.partial('rets_commercial_details'  , local_assigns) %><%
+elsif url =~ /^\/commercial\/search(.*?)$/   %><% Caboose.log("Rendering rets_commercial_index"    ) %><%= block.partial('rets_commercial_index'    , local_assigns) %><%
+elsif url =~ /^\/commercial(.*?)$/           %><% Caboose.log("Rendering rets_commercial_index"    ) %><%= block.partial('rets_commercial_index'    , local_assigns) %><%
+elsif url =~ /^\/land\/\d(.*?)$/             %><% Caboose.log("Rendering rets_land_details"        ) %><%= block.partial('rets_land_details'        , local_assigns) %><%
+elsif url =~ /^\/land\/search(.*?)$/         %><% Caboose.log("Rendering rets_land_index"          ) %><%= block.partial('rets_land_index'          , local_assigns) %><%
+elsif url =~ /^\/land(.*?)$/                 %><% Caboose.log("Rendering rets_land_index"          ) %><%= block.partial('rets_land_index'          , local_assigns) %><%
+elsif url =~ /^\/multi-family\/\d(.*?)$/     %><% Caboose.log("Rendering rets_multifamily_details" ) %><%= block.partial('rets_multifamily_details' , local_assigns) %><%
+elsif url =~ /^\/multi-family\/search(.*?)$/ %><% Caboose.log("Rendering rets_multifamily_index"   ) %><%= block.partial('rets_multifamily_index'   , local_assigns) %><%
+elsif url =~ /^\/multi-family(.*?)$/         %><% Caboose.log("Rendering rets_multifamily_index"   ) %><%= block.partial('rets_multifamily_index'   , local_assigns) %><%
+elsif url =~ /^\/open-houses\/\d(.*?)$/      %><% Caboose.log("Rendering rets_openhouses_details"  ) %><%= block.partial('rets_openhouses_details'  , local_assigns) %><%
+elsif url =~ /^\/open-houses(.*?)$/          %><% Caboose.log("Rendering rets_openhouses_index"    ) %><%= block.partial('rets_openhouses_index'    , local_assigns) %><%
+elsif url =~ /^\/agents\/\d(.*?)\/listings$/ %><% Caboose.log("Rendering rets_agent_listings"      ) %><%= block.partial('rets_agent_listings'      , local_assigns) %><%
+elsif url =~ /^\/agents\/\d(.*?)$/           %><% Caboose.log("Rendering rets_agent_details"       ) %><%= block.partial('rets_agent_details'       , local_assigns) %><%
+elsif url =~ /^\/agents(.*?)$/               %><% Caboose.log("Rendering rets_agents_index"        ) %><%= block.partial('rets_agents_index'        , local_assigns) %><%
+elsif url =~ /^\/saved-searches(.*?)$/       %><% Caboose.log("Rendering rets_savedsearches"       ) %><%= block.partial('rets_savedsearches'       , local_assigns) %><%
+elsif url =~ /^\/saved-properties(.*?)$/     %><% Caboose.log("Rendering rets_savedproperties"     ) %><%= block.partial('rets_savedproperties'     , local_assigns) %><%
+end
+%>
+    </div>
+  <%= raw js %>  
+  </body>
+</html>

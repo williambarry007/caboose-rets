@@ -1,0 +1,201 @@
+<!-- <div class="body-sink"></div> --> 
+
+<div class="l-wrapper" id="search_form_drop">
+  <div class="l-section">
+    <form class="l-grid l-section h-space-mvm inflate-baritone" action="/commercial/search" method="get" id="search_form">
+      <h3 class="h-type-center h-space-mbs">Search Commercial Listings</h3>
+      
+      <div class="grid-row">
+        <div class="grid-unit-1of3">
+          <section class="l-section">
+            <label class="h-float-left">Price Range</label>
+          </section> <!-- .l-section -->
+          
+          <section class="l-section-bevel m-select-combo">
+            <div class="m-select">
+              <select id="current_price_gte" name="current_price_gte">
+                <option value="" selected="selected">Select</option>
+                <% (250000..5000000).step(250000) do |x| %><option value="<%= x %>"><%= number_to_currency(x, :precision => 0) %></option><% end %>                
+              </select>
+            </div> <!-- .m-select -->
+            
+            <span>To</span>
+            
+            <div class="m-select">
+              <select id="current_price_lte" name="current_price_lte">
+                <option value="" selected="selected">Select</option>
+                <% (250000..5000000).step(250000) do |x| %><option value="<%= x %>"><%= number_to_currency(x, :precision => 0) %></option><% end %>                
+              </select>
+            </div> <!-- .m-select -->
+          </section> <!-- .l-section-bevel -->
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          <div class="l-section">
+            <label for="street_name">Search Address</label>
+          </div> <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <input id="street_name" name="address" type="text" class="fix_placeholder" placeholder="Address" />
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          <section class="l-section">
+            <label for="property_type">Property Type</label>
+          </section>  <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <div class="m-select">
+              <select id="style-like" name="prop_type">
+                <option value="">Select</option>
+                <% CabooseRets::CommercialProperty.pluq('prop_type').each do |f| %>
+                  <option value="<%= f %>"> <%= f.titleize %></option>
+                <% end %>
+              </select>
+            </div>  <!-- .m-select -->
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+      </div> <!-- .grid-row -->
+      
+      <div class="grid-row">
+        <div class="grid-unit-1of3">
+        <div class="l-section">
+          <label for="search_mls">MLS#</label>
+        </div> <!-- .l-section -->
+        
+        <div class="l-media">
+              
+          <div class="media-body">
+            <div class="l-section-bevel">
+              <input class="search-input" id="mls_acct" name="mls_acct" type="text" class="fix_placeholder" placeholder="Enter Here" />
+            </div> <!-- .l-section -->
+          </div> <!-- .sidebar-body -->
+        </div> <!-- .l-media -->
+      </div> <!-- .grid-unit -->
+      
+        <div class="grid-unit-1of3">
+          <div class="l-section">
+            <label for="square_feet">Square Feet</label>
+          </div> <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <div class="m-select">
+              <select id="acreage" name="sqft_gte">
+                <option value="" selected="selected">Select</option>
+                <% (250..4000).step(250) do |x| %><option value="<%= x %>"><%= number_with_delimiter(x) %></option><% end %>                
+              </select>
+            </div>
+          </div>
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          <div class="l-section">
+            <label for="zip">Zip</label>
+          </div> <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <div class="m-select">
+            <select name="zip" id="zip">
+              <option value="">Select</option>
+              <% CabooseRets::CommercialProperty.pluq('zip').each do |f| %>
+              <option value="<%=f%>"><%=f.titleize%></option>
+              <% end %>
+            </select>
+            </div> <!-- .m-select -->
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+      </div> <!-- .grid-row -->
+      
+      <div class="grid-row">
+        <div class="grid-unit-1of3">
+          <div class="l-section">
+            <label for="city">City</label>
+          </div> <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <div class="m-select">
+            <select name="city" id="city">
+              <option value="">Select</option>
+              <% CabooseRets::CommercialProperty.pluq('city').each do |f| %>
+              <option value="<%=f%>"><%=f.titleize%></option>
+              <% end %>
+            </select>
+            </div> <!-- .m-select -->
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          <div class="l-section">
+            <label for="county">County</label>
+          </div> <!-- .l-section -->
+          
+          <div class="l-section-bevel">
+            <div class="m-select">
+            <select name="county" id="county">
+              <option value="">Select</option>
+              <% CabooseRets::CommercialProperty.pluq('county').each do |f| %>
+              <option value="<%=f%>"><%=f.titleize%></option>
+              <% end %>
+            </select>
+            </div> <!-- .m-select -->
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+
+        <div class="grid-unit-1of3">
+          <div class="l-section" style="visibility: hidden;"><label for="added_by_advantage">Show Advantage Properties Only</label></div>
+
+          <div class="l-section-bevel">
+            <label for="added_by_advantage">
+              <input id="lo_code" type="checkbox" name="lo_code" value="46"></input>
+              Only Show Advantage Properties
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-row">
+
+        <!--
+        <div class="grid-unit-1of3">
+          <div class="l-section"><label for="status">Property Status</label></div>
+          <div class="l-section-bevel">
+            <div class="m-select">
+              <select id="status" name="status">
+                <option value="">All</option>                
+                <% CabooseRets::CommercialProperty.pluq('status').each do |x| %>
+                  <option value="<%= x %>" <% if x == 'Active' %> selected="selected" <% end %> ><%= x %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+        </div>
+        -->
+
+        <div class="grid-unit-1of3">&nbsp;&nbsp;
+        </div>
+
+        <div class="grid-unit-1of3">
+          <div class="l-section-drop">            
+            <input class="m-btn-red btn-large" type="submit" value="Search" onclick='search_properties(); return false;' />
+          </div> <!-- .l-section -->
+        </div> <!-- .grid-unit -->
+      </div> <!-- .grid-row -->
+      
+      <div class="grid-row">
+        <div class="grid-unit-1of3">
+          
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          
+        </div> <!-- .grid-unit -->
+        
+        <div class="grid-unit-1of3">
+          
+        </div> <!-- .grid-unit -->
+      </div> <!-- .grid-row -->
+    </form> <!-- .l-grid -->
+    
+  </div> <!-- .l-section -->
+</div> <!-- .l-wrapper -->
