@@ -33,6 +33,7 @@ module CabooseRets
         'ftr_lotdesc_like'   => '',
         'mls_acct'           => '',
         'subdivision'        => '',
+        'style'              => '',
         'foreclosure_yn'     => '',
         'address_like'       => '',        
         'street_name_like'   => '',
