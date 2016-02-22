@@ -2,6 +2,13 @@
 module CabooseRets
   class ResidentialController < ApplicationController  
      
+    # GET /residential/search-options?q=rock quary
+    def search_options      
+      count = params[:count_per_name] ? params[:count_per_name] : 10
+      arr = SearchOption.results(params[:q], count)
+      render :json => arr      
+    end
+    
     # GET /residential
     def index
     	params[:street_num_like] = params[:street_name_like].tr('A-z', '').tr(' ', '') unless params[:street_name_like].nil?

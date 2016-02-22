@@ -39,6 +39,7 @@ CabooseRets::Engine.routes.draw do
   put  "/admin/commercial/:mls_acct"               => "commercial#admin_update"
   post "/admin/commercial/:mls_acct"               => "commercial#admin_update"
   
+  get  "/residential/search-options"               => "residential#search_options"
   get  "/residential/search:search_params"         => "residential#index", :constraints => {:search_params => /.*/}  
   get  "/residential/:mls_acct/details"            => "residential#details"
   get  "/residential/:mls_acct"                    => "residential#details"

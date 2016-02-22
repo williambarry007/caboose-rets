@@ -844,6 +844,11 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :uri           , :text      ], 
         [ :notify        , :boolean   ] 
       ],
+      CabooseRets::SearchOption => [
+        [ :name   , :string ],
+        [ :field  , :string ],
+        [ :value  , :string ]         
+      ],
       Caboose::Site => [
         [ :use_rets , :boolean, { :default => false }]        
       ]

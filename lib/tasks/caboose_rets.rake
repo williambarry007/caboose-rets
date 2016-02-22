@@ -7,6 +7,11 @@ namespace :caboose_rets do
   #  CabooseRets::RetsImporter.delete_old_properties
   #end
   
+  desc "Update search options"
+  task :update_search_options => :environment do
+    CabooseRets::SearchOption.update_search_options
+  end
+      
   desc "Initializes the database for a caboose installation"
   task :rename_media => :environment do
     CabooseRets::Media.rename_media    
