@@ -19,10 +19,16 @@ module CabooseRets
     		end
     	end
     	
-      @pager = Caboose::PageBarGenerator.new(params, {
+      @pager = Caboose::PageBarGenerator.new(params, {           
+        'area'               => '',
+        'area_like'          => '',
         'name'               => '',
         'acreage_gte'        => '',
         'acreage_lte'        => '',
+        'city'               => '',
+        'city_like'          => '',
+        'county'             => '',
+        'county_like'        => '',
         'current_price_gte'  => '',
         'current_price_lte'  => '',
         'bedrooms_gte'       => '',
@@ -45,10 +51,13 @@ module CabooseRets
         'address_like'       => '',        
         'street_name_like'   => '',
         'street_num_like'    => '',
+        'zip'                => '',
+        'zip_like'           => '',        
         'date_created_gte'   => '',
         'date_created_lte'   => '',
         'date_modified_gte'  => '',
         'date_modified_lte'  => '',
+        
         'status'             => 'Active'
       },{
         'model'           => 'CabooseRets::ResidentialProperty',

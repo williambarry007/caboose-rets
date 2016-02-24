@@ -845,9 +845,10 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :notify        , :boolean   ] 
       ],
       CabooseRets::SearchOption => [
-        [ :name   , :string ],
-        [ :field  , :string ],
-        [ :value  , :string ]         
+        [ :name            , :string ],
+        [ :field           , :string ],
+        [ :value           , :string ],
+        [ :flag_for_delete , :boolean , { :default => false }]
       ],
       Caboose::Site => [
         [ :use_rets , :boolean, { :default => false }]        
