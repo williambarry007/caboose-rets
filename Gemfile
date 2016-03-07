@@ -1,6 +1,5 @@
-# Caboose CMS
+# Caboose RETS
 #
-
 source "http://rubygems.org"
 
 # Declare your gem's dependencies in caboose.gemspec.
