@@ -282,6 +282,20 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       self.log err
     end
   end
+  
+  def self.download_office_image(office)
+    #self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
+    #begin
+    #  self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|
+    #    agent.verify_meta_exists
+    #    agent.meta.image_location = headers['location']
+    #    agent.meta.save
+    #  end
+    #rescue RETS::APIError => err
+    #  self.log "No image for #{agent.first_name} #{agent.last_name}."
+    #  self.log err
+    #end
+  end
 
   #=============================================================================
   # GPS
