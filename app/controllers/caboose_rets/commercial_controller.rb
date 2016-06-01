@@ -31,13 +31,28 @@ module CabooseRets
           'items_per_page'  => 10
       })
       @properties = @gen.items
+
+      @block_options = {
+        :properties   => @properties,
+        :pager => @gen 
+      }
+
     end
     
     # GET /commercial/:mls_acct/details
     def details
       @property = CommercialProperty.where(:mls_acct => params[:mls_acct]).first
       #@agent = Agent.where(:la_code => @property.la_code).first ? Agent.where(:la_code => @property.la_code).exists? : nil 
-      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?      
+      @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists? 
+
+      @block_options = {
+        :mls_acct => params[:mls_acct],
+        :property => @property,
+        :saved    => @saved,
+        :agent    => @property ? Agent.where(:la_code => @property.la_code).first : nil,
+        :form_authenticity_token => form_authenticity_token        
+      }
+
     end
     
     #=============================================================================
