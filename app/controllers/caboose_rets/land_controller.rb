@@ -72,6 +72,13 @@ module CabooseRets
       
       @properties = @gen.items
       if params[:waterfront].present? then @properties.reject!{|p| p.waterfront.blank?} end
+
+      @block_options = {
+        :properties   => @properties,
+        :saved_search => nil,
+        :pager => @gen 
+      }
+
     end
     
     # GET /land/:mls_acct/details
@@ -83,7 +90,14 @@ module CabooseRets
         CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)
         render 'land/not_exists'
         return
-      end    
+      end
+      @block_options = {
+        :mls_acct => params[:mls_acct],
+        :property => @property,
+        :saved    => @saved,
+        :agent    => @property ? Agent.where(:la_code => @property.la_code).first : nil,
+        :form_authenticity_token => form_authenticity_token        
+      }
     end
     
     #=============================================================================
