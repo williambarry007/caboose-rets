@@ -40,7 +40,7 @@ Gem::Specification.new do |s|
   #s.executables = ["caboose"]
 
   #s.add_dependency "caboose-cms", "~> 0.2.104"
-  s.add_dependency "caboose-cms", "~> 0.7.1"  
+  s.add_dependency "caboose-cms", "~> 0.8.1"  
   
 end
 
