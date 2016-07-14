@@ -126,13 +126,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_after(date_modified, save_images = true)
-    self.delay.update_helper('RES', date_modified, save_images)
-    self.delay.update_helper('COM', date_modified, save_images)
-    self.delay.update_helper('LND', date_modified, save_images)
-    self.delay.update_helper('MUL', date_modified, save_images)
-    self.delay.update_helper('OFF', date_modified, save_images)
-    self.delay.update_helper('AGT', date_modified, save_images)
-    self.delay.update_helper('OPH', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('RES', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('COM', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('LND', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('MUL', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('OFF', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('AGT', date_modified, save_images)
+    self.delay(:queue => 'rets').update_helper('OPH', date_modified, save_images)
   end
 
   def self.update_helper(class_type, date_modified, save_images = true)
@@ -149,13 +149,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     }
     self.client.search(params) do |data|
       case class_type
-        when 'RES' then self.delay(:priority => 10).import_residential_property(  data[k], save_images)
-        when 'COM' then self.delay(:priority => 10).import_commercial_property(   data[k], save_images)
-        when 'LND' then self.delay(:priority => 10).import_land_property(         data[k], save_images)
-        when 'MUL' then self.delay(:priority => 10).import_multi_family_property( data[k], save_images)
-        when 'OFF' then self.delay(:priority => 10).import_office(                data[k], save_images)
-        when 'AGT' then self.delay(:priority => 10).import_agent(                 data[k], save_images)
-        when 'OPH' then self.delay(:priority => 10).import_open_house(            data[k], save_images)
+        when 'RES' then self.delay(:priority => 10, :queue => 'rets').import_residential_property(  data[k], save_images)
+        when 'COM' then self.delay(:priority => 10, :queue => 'rets').import_commercial_property(   data[k], save_images)
+        when 'LND' then self.delay(:priority => 10, :queue => 'rets').import_land_property(         data[k], save_images)
+        when 'MUL' then self.delay(:priority => 10, :queue => 'rets').import_multi_family_property( data[k], save_images)
+        when 'OFF' then self.delay(:priority => 10, :queue => 'rets').import_office(                data[k], save_images)
+        when 'AGT' then self.delay(:priority => 10, :queue => 'rets').import_agent(                 data[k], save_images)
+        when 'OPH' then self.delay(:priority => 10, :queue => 'rets').import_open_house(            data[k], save_images)
       end
     end
   end
@@ -309,7 +309,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       models.each do |model|
         self.log "Updating coords #{names[i]} properties..."
         model.where(:latitude => nil).reorder(:mls_acct).each do |p|
-          self.delay.update_coords(p)
+          self.delay(:queue => 'rets').update_coords(p)
         end
         i = i + 1
       end
@@ -358,14 +358,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.purge_media
   end
 
-  def self.purge_residential()  self.delay.purge_helper('RES', '2012-01-01') end
-  def self.purge_commercial()   self.delay.purge_helper('COM', '2012-01-01') end
-  def self.purge_land()         self.delay.purge_helper('LND', '2012-01-01') end
-  def self.purge_multi_family() self.delay.purge_helper('MUL', '2012-01-01') end
-  def self.purge_offices()      self.delay.purge_helper('OFF', '2012-01-01') end
-  def self.purge_agents()       self.delay.purge_helper('AGT', '2012-01-01') end
-  def self.purge_open_houses()  self.delay.purge_helper('OPH', '2012-01-01') end
-  def self.purge_media()        self.delay.purge_helper('GFX', '2012-01-01') end
+  def self.purge_residential()  self.delay(:queue => 'rets').purge_helper('RES', '2012-01-01') end
+  def self.purge_commercial()   self.delay(:queue => 'rets').purge_helper('COM', '2012-01-01') end
+  def self.purge_land()         self.delay(:queue => 'rets').purge_helper('LND', '2012-01-01') end
+  def self.purge_multi_family() self.delay(:queue => 'rets').purge_helper('MUL', '2012-01-01') end
+  def self.purge_offices()      self.delay(:queue => 'rets').purge_helper('OFF', '2012-01-01') end
+  def self.purge_agents()       self.delay(:queue => 'rets').purge_helper('AGT', '2012-01-01') end
+  def self.purge_open_houses()  self.delay(:queue => 'rets').purge_helper('OPH', '2012-01-01') end
+  def self.purge_media()        self.delay(:queue => 'rets').purge_helper('GFX', '2012-01-01') end
 
   def self.purge_helper(class_type, date_modified)
     m = self.meta(class_type)
@@ -421,14 +421,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_add.each do |id|
         self.log("- Importing #{id}...")
         case class_type
-          when 'RES' then self.delay.import_residential_property(id, false)
-          when 'COM' then self.delay.import_commercial_property(id, false)
-          when 'LND' then self.delay.import_land_property(id, false)
-          when 'MUL' then self.delay.import_multi_family_property(id, false)
-          when 'OFF' then self.delay.import_office(id, false)
-          when 'AGT' then self.delay.import_agent(id, false)
-          when 'OPH' then self.delay.import_open_house(id, false)
-          when 'GFX' then self.delay.import_media(id, false)
+          when 'RES' then self.delay(:queue => 'rets').import_residential_property(id, false)
+          when 'COM' then self.delay(:queue => 'rets').import_commercial_property(id, false)
+          when 'LND' then self.delay(:queue => 'rets').import_land_property(id, false)
+          when 'MUL' then self.delay(:queue => 'rets').import_multi_family_property(id, false)
+          when 'OFF' then self.delay(:queue => 'rets').import_office(id, false)
+          when 'AGT' then self.delay(:queue => 'rets').import_agent(id, false)
+          when 'OPH' then self.delay(:queue => 'rets').import_open_house(id, false)
+          when 'GFX' then self.delay(:queue => 'rets').import_media(id, false)
         end
       end
       
@@ -483,14 +483,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_add.each do |id|
         self.log("Importing #{id}...")
         case class_type
-          when 'RES' then self.delay.import_residential_property(id, false)
-          when 'COM' then self.delay.import_commercial_property(id, false)
-          when 'LND' then self.delay.import_land_property(id, false)
-          when 'MUL' then self.delay.import_multi_family_property(id, false)
-          when 'OFF' then self.delay.import_office(id, false)
-          when 'AGT' then self.delay.import_agent(id, false)
-          when 'OPH' then self.delay.import_open_house(id, false)
-          when 'GFX' then self.delay.import_media(id)
+          when 'RES' then self.delay(:queue => 'rets').import_residential_property(id, false)
+          when 'COM' then self.delay(:queue => 'rets').import_commercial_property(id, false)
+          when 'LND' then self.delay(:queue => 'rets').import_land_property(id, false)
+          when 'MUL' then self.delay(:queue => 'rets').import_multi_family_property(id, false)
+          when 'OFF' then self.delay(:queue => 'rets').import_office(id, false)
+          when 'AGT' then self.delay(:queue => 'rets').import_agent(id, false)
+          when 'OPH' then self.delay(:queue => 'rets').import_open_house(id, false)
+          when 'GFX' then self.delay(:queue => 'rets').import_media(id)
         end
       end
     end
@@ -556,7 +556,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		q = "handler like '%update_rets%'"
 		count = Delayed::Job.where(q).count		 
 		if count == 0 || (count == 1 && Delayed::Job.where(q).first.locked_at)
-		  self.delay(:run_at => 5.minutes.from_now).update_rets
+		  self.delay(:run_at => 5.minutes.from_now, :queue => 'rets').update_rets
 		end
 	end
 

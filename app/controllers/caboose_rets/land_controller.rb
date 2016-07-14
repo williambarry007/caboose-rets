@@ -87,7 +87,7 @@ module CabooseRets
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?
       if @property.nil?
         @mls_acct = params[:mls_acct]
-        CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)
+        CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(@mls_acct.to_i)
         render 'land/not_exists'
         return
       end
@@ -133,7 +133,7 @@ module CabooseRets
       return if !user_is_allowed('properties', 'edit')
       
       p = LandProperty.find(params[:mls_acct])            
-      p.delay.refresh_from_mls
+      p.delay(:queue => 'rets').refresh_from_mls
            
       resp = Caboose::StdClass.new
       resp.success = "The property's info is being updated from MLS. This may take a few minutes depending on how many images it has."

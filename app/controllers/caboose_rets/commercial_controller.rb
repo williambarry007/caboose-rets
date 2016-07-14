@@ -336,7 +336,7 @@ module CabooseRets
       return if !user_is_allowed('properties', 'edit')
       
       p = CommercialProperty.find(params[:mls_acct])            
-      p.delay.refresh_from_mls
+      p.delay(:queue => 'rets').refresh_from_mls
       
       #RetsImporter.import("(MLS_ACCT=#{p.mls_acct})", 'Property', 'COM')
       #RetsImporter.download_property_images(p)

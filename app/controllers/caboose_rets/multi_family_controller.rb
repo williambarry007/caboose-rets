@@ -61,7 +61,7 @@ module CabooseRets
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_acct => params[:mls_acct]).exists?      
       if @property.nil?
         @mls_acct = params[:mls_acct]
-        CabooseRets::RetsImporter.delay.import_property(@mls_acct.to_i)
+        CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(@mls_acct.to_i)
         render 'multi_family/not_exists'
         return
       end          
