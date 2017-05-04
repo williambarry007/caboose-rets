@@ -1,11 +1,11 @@
 <%
 p = @property
 %>
-<h1>Edit Residential Property</h1>
+<h1>Edit Property</h1>
 
 <p>
-<input type='button' value='< Back' onclick="window.location='/admin/residential';" />
-<input type='button' value='Manually Refresh from MLS' onclick="refresh_property_from_mls('<%= p.mls_acct %>');" />
+<input type='button' value='< Back' onclick="window.location='/admin/property';" />
+<input type='button' value='Manually Refresh from MLS' onclick="refresh_property_from_mls('<%= p.mls %>');" />
 </p>
 <div id='message'><%= raw flash[:message] ? flash[:message] : "" %></div>
 
@@ -109,7 +109,7 @@ p = @property
 <tr><td>master_bed_lvl                </td><td><%= p.master_bed_lvl                 %></td></tr>
 <tr><td>media_flag                    </td><td><%= p.media_flag                     %></td></tr>
 <tr><td>middle_school                 </td><td><%= p.middle_school                  %></td></tr>
-<tr><td>mls_acct                      </td><td><%= p.mls_acct                       %></td></tr>
+<tr><td>mls                      </td><td><%= p.mls                       %></td></tr>
 <tr><td>off_mkt_date                  </td><td><%= p.off_mkt_date                   %></td></tr>
 <tr><td>off_mkt_days                  </td><td><%= p.off_mkt_days                   %></td></tr>
 <tr><td>office_notes                  </td><td><%= p.office_notes                   %></td></tr>
@@ -228,14 +228,14 @@ p = @property
 <%= javascript_include_tag "caboose/model/all" %>
 <script type='text/javascript'>
 
-function refresh_property_from_mls(mls_acct)
+function refresh_property_from_mls(mls)
 {
   modal.autosize("<p class='loading'>Refreshing property info and images from MLS...</p>");
   $.ajax({
-    url: '/admin/residential/' + mls_acct + '/refresh',
+    url: '/admin/property/' + mls + '/refresh',
     success: function(resp) {
       if (resp.error)   modal.autosize("<p class='note error'>"   + resp.error   + "</p>");
-      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");          
+      if (resp.success) modal.autosize("<p class='note success'>" + resp.success + "</p>");
     }
   });
 }

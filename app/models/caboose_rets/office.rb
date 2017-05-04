@@ -2,8 +2,8 @@
 class CabooseRets::Office < ActiveRecord::Base
   self.table_name = "rets_offices"
   
-  has_one :meta, :class_name => 'OfficeMeta', :primary_key => 'lo_code', :foreign_key => 'lo_code'  
-  attr_accessible :id, :name, :lo_code
+  has_one :meta, :primary_key => 'matrix_unique_id', :foreign_key => 'matrix_unique_id'  
+  attr_accessible :id, :name, :lo_mls_id, :matrix_unique_id
   
   def image
     return nil if self.meta.nil?
@@ -11,24 +11,38 @@ class CabooseRets::Office < ActiveRecord::Base
   end
   
   def parse(data)
-    self.lo_date_created 	    = data['LO_DATE_CREATED']
-    self.lo_date_modified 	  = data['LO_DATE_MODIFIED']
-    self.lo_email 		        = data['LO_EMAIL']
-    self.lo_fax_phone 	      = data['LO_FAX_PHONE']
-    self.lo_idx_yn 		        = data['LO_IDX_YN']
-    self.lo_code 	            = data['LO_LO_CODE']
-    self.lo_mailaddr1 	      = data['LO_MAILADDR1']
-    self.lo_mailaddr2 	      = data['LO_MAILADDR2']
-    self.lo_mailcity 	        = data['LO_MAILCITY']
-    self.lo_mailstate 	      = data['LO_MAILSTATE']
-    self.lo_mailzip 	        = data['LO_MAILZIP']
-    self.lo_main_lo_code 	    = data['LO_MAIN_LO_CODE']
-    self.lo_name 	            = data['LO_NAME']
-    self.lo_other_phone 	    = data['LO_OTHER_PHONE']
-    self.lo_page 		          = data['LO_PAGE']
-    self.lo_phone 	          = data['LO_PHONE']
-    self.lo_status 		        = data['LO_STATUS']
-    self.photo_count 		      = data['PHOTO_COUNT']
-    self.photo_date_modified  = data['PHOTO_DATE_MODIFIED']
+        self.lo_addr1                     = data['Addr1']
+        self.lo_addr2                     = data['Addr2']
+        self.lo_city                      = data['City']
+        self.lo_email                     = data['Email']
+        self.lo_fax_phone                 = data['FaxPhone']
+        self.lo_mail_addr                 = data['MailAddr']
+        self.lo_mail_care_of              = data['MailCareOf']
+        self.lo_mail_city                 = data['MailCity']
+        self.lo_mail_postal_code          = data['MailPostalCode']
+        self.lo_mail_postal_code_plus4    = data['MailPostalCodePlus4']
+        self.lo_mail_state_or_province    = data['MailStatOrProvince']
+        self.matrix_unique_id             = data['Matrix_Unique_ID']
+        self.lo_matrix_modified_dt        = data['MatrixModifiedDT']
+        self.lo_mls                       = data['MLS']
+        self.lo_mls_id                    = data['MLSID']
+        self.lo_office_contact_mui        = data['OfficeContact_MUI']
+        self.lo_office_contact_mls_id     = data['OfficeContactMLSID']        
+        self.lo_office_long_name          = data['OfficeLongName']
+        self.lo_office_name               = data['OfficeName']
+        self.lo_phone                     = data['Phone']
+        self.lo_photo_count               = data['PhotoCount']
+        self.photo_modification_timestamp = data['PhotoModificationTimestamp']        
+        self.state                        = data['State']
+        self.street_address               = data['StreetAddress']
+        self.street_city                  = data['StreetCity']
+        self.street_postal_code           = data['StreetPostalCode']
+        self.street_postal_code_plus4     = data['StreetPostalCodePlus4']
+        self.street_state_or_province     = data['StreeStateOrProvince']
+        self.web_facebook                 = data['WebFacebook']
+        self.web_linked_in                = data['WebLinkedIn']
+        self.web_page_address             = data['WebPageAddress']
+        self.web_twitter                  = data['WebTwitter']
+        self.zip                          = data['ZIP'] 
   end
 end

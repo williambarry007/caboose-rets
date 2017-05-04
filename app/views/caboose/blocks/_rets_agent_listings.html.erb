@@ -58,10 +58,10 @@ input#recaptcha_response_field{padding:0px;}
   					<% pg[:properties].each do |l| %>  					  
   						<li class="l-media inflate-bass center-on-mobile">
   							<figure class="media-aside">
-  								<a href="/<%= pg[:url_prefix] %>/<%= l.mls_acct %>/details"><img src='<%= l.images && l.images.count > 0 ? l.images[0].image_url(:thumb) : "" %>'class="h-border" width="150" /></a>
+  								<a href="/<%= pg[:url_prefix] %>/<%= l.mls %>/details"><img src='<%= l.images && l.images.count > 0 ? l.images[0].image_url(:thumb) : "" %>'class="h-border" width="150" /></a>
   							</figure>
   							<div class="media-body h-pos">
-  								<p class="pos-top-right h-type-highlight"><strong>MLS#<%=l.mls_acct%></strong></p>
+  								<p class="pos-top-right h-type-highlight"><strong>MLS#<%=l.mls%></strong></p>
   
   								<% if l.street_num != '0' && l.street_name != "" %>
   
@@ -78,7 +78,7 @@ input#recaptcha_response_field{padding:0px;}
   								<div class="l-grid grid-row inflate-tenor">
   									<div class="grid-unit-1of4">
   										<% if pg[:type] == 'RES' || pg[:type] == 'COM' %>
-  											<a class="m-btn btn-red" href="/<%= pg[:url_prefix] %>/<%= l.mls_acct %>/details">See More</a>
+  											<a class="m-btn btn-red" href="/<%= pg[:url_prefix] %>/<%= l.mls %>/details">See More</a>
   										<% else %>
   											<p>&nbsp;</p>
   										<% end %>

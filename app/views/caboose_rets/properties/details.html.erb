@@ -1,0 +1,127 @@
+<div class="residential-details-wrapper constrain">
+	<div class="main">
+		<% if @property.images && @property.images.count > 0 %>
+			<div class="gallery-wrapper">
+				<section>
+					<h2 class="section-title">Photo Gallery</h2>
+					<div class="image-holder">
+						<img src="<%= @property.images.first.image_url(:large) %>" alt="Featured Image" />
+					</div>
+					<%= render :partial => "caboose/blocks/coastal/image_gallery", :locals => {:property => @property} %>
+				</section>
+				<% if !@property.public_remarks.blank? %>
+					<section>
+						<h2 class="section-title">Property Details</h2>
+						<p class="remarks"><%= property.public_remarks %></p>
+					</section>
+				<% end %>
+				<section>
+					<h2 class="section-title">Single Family Home</h2>
+	        <ul>
+	          <% if !@property.sqft_total.blank? %><li><strong>Total Sq. Ft.</strong>: <span id='square_footage'><%=h @property.sqft_total %></span></li><% end %>
+	          <% if !@property.price_sqft.blank? %><li><strong>Price/Sq. Ft.</strong>: <span id='square_footage'><%=h number_to_currency @property.price_sqft %></span></li><% end %>
+	          <% if !@property.beds_total.blank? %><li><strong>Bedrooms</strong>: <%= @property.beds_total %></li><% end %>
+	          <% if !@property.baths.blank? %><li><strong>Baths</strong>: <%= @property.baths_full %> full <% if @property.baths_half != "" && @property.baths_half != "0" %> &amp; <%= @property.baths_half %> half baths<% end %></li><% end %>
+	          <% if !@property.acreage.blank? %><li><strong>Acreage</strong>: <%= @property.acreage %></li><% end %>
+	        </ul>
+				</section>
+				<section>
+        	<h2 class="section-title">Features</h2>
+	        <ul>
+	          <% if !@property.interior_features.blank? %><li><strong>Interior</strong>: <%=   @property.interior_features %> </li><% end %>
+	          <% if !@property.cooling.blank?  %><li><strong>Cooling</strong>: <%=    @property.cooling  %> </li><% end %>
+	          <% if !@property.heating.blank?  %><li><strong>Heating</strong>: <%=    @property.heating  %> </li><% end %>
+	          <% if !@property.year_built.blank?   %><li><strong>Year Built</strong>: <%= @property.year_built   %> </li><% end %>
+	        </ul>
+        	<% if @property.virtual_tour1 %><p class="vt"><a class="btn" href='<%= @property.virtual_tour %>' target='_blank' title="Virtual Tour">Virtual Tour</a></p><% end %>
+				</section>
+			</div>
+		<% end %>
+	</div>
+	<aside class="sidebar">
+	    <section class="agent">
+	      <h4 class="section-title">Contact Info</h4>
+	      <p class="agent-name">Grant Dickey</p>
+	      <a href="tel:2053918084">(205) 344-0047</a>	
+	      <p style="margin-top:10px;font-size:14px;">Listing courtesy of <%= @property.list_office_name ? @property.list_office_name.titleize : "Unknown" %></p>
+	      
+	    </section>
+		<section>
+			<h4 class="section-title">Quick Facts</h4>
+			<address>
+	      <% if !@property.unit_number.nil? && @property.unit_number.strip.length > 0 %>Unit <%= @property.unit_number %>, <% end %>
+	      <%= @property.street_number %> <%= @property.street_name.titleize %><br />
+	      <%= @property.city.titleize %>, <%= @property.state_or_province %> <%= @property.postal_code %>
+	    </address>
+	    <p class="current-price">
+	    	<%= number_to_currency(@property.current_price, :precision => 0) %>
+	      <% if @property.foreclosure_yn == 'Y' %>
+	  			<span class='foreclosure'>(Foreclosure)</span>
+	      <% end %>
+	    </p>
+	    <p class="mls-number">MLS #<%= @property.mls_number %></p>
+		</section>
+		<section>
+			<h4 class="section-title">Directions</h4>
+			# <% if @property.street_number %>
+				<div class="property-map" id="map-<%= @property.id %>" data-address="<%= @property.street_number %> <%= @property.street_name.titleize %>"></div>
+			<% end %>
+	  	<p class="directions"><%= @property.directions %></p>
+		</section>
+	  <section>
+	  	<h4 class="section-title">Neighborhood Information</h4>
+		  <ul>
+		    <li><strong>Area</strong>: <%= @property.area.titleize %></li>
+		    <% if @property.subdivision %><li><strong>Subdivision</strong>: <%= @property.subdivision.titleize %></li><% end %>
+		    <% if @property.elementary_school %><li><strong>Elementary School</strong>: <%= @property.elementary_school.titleize %></li><% end %>
+		    <% if @property.middle_school %><li><strong>Middle School</strong>: <%= @property.middle_school.titleize %></li><% end %>
+		    <% if @property.high_school %><li><strong>High School</strong>: <%= @property.high_school.titleize %></li><% end %>
+		    <li><strong>County</strong>: <%= @property.county_or_parish.titleize %></li>	
+		  </ul>
+	  </section>
+	  <% page_ids = Caboose::Page.where(:site_id => @site.id).pluck(:id).to_s.gsub("[","").gsub("]","") %>
+	  <% cf = Caboose::Block.where(:block_type_id => 401).where("page_id in (#{page_ids})").first %>
+	  <% if cf %>
+	  	<% bid = cf.id %>
+		  <section>
+		  	<h4 class="section-title">Information Request</h4>
+			  <form id="property-contact-form">
+			    <input type="hidden" name='form_name' 				  	   	     value="Property Info Request">
+			    <input type='hidden' name='mls_number' 	     id='mls_number'     value='<%= @property.mls_number %>' />
+			    <input type="hidden" name="block_id" 				   	   	     value="<%= bid %>">
+				<input type='text'   name='name'     	     id="name"     	     value='' 		placeholder="Name"    maxlength="150" />
+				<input type='text'   name='email_required'   id="email_required" value='' 		placeholder="Email"   maxlength="150" />
+				<input type="hidden" name="subject" 	 	  				     value="Property Information Request" />
+				<textarea            name='message_required' id="message_required"              placeholder="Message" rows="4"></textarea>
+				  <p><a href="#" id="submit-property-contact-form" class="btn">Submit</a></p>
+				</form>
+				<div id="message"></div>
+		  </section>
+	  <% end %>
+	</aside>
+</div>
+
+<script>
+var property_map_id = "map-<%= @property.id %>";
+var photo_gallery_id = "gallery-<%= @property.id %>";
+
+function loadScript() {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAjSs-Jq6hpuT35RG9wD6LuqaDFzYDCOPk&callback=show_property_map";
+  document.body.appendChild(script);
+}
+</script>
+
+<script type="text/javascript">
+(function(d, s, id) {
+  window.Wishpond = window.Wishpond || {};
+  Wishpond.merchantId = '1285931';
+  Wishpond.writeKey = 'a69f26d8d7f4';
+  var js, wpjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//cdn.wishpond.net/connect.js";
+  wpjs.parentNode.insertBefore(js, wpjs);
+}(document, 'script', 'wishpond-connect'));
+</script>

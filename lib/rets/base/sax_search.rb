@@ -13,7 +13,7 @@ class RETS::Base::SAXSearch < Nokogiri::XML::SAX::Document
     # Figure out if the request is a success
     if tag == "RETS"
       @rets_data[:code], @rets_data[:text] = attrs.first.last, attrs.last.last
-      if @rets_data[:code] != "0" and @rets_data[:code] != "20201"
+      if @rets_data[:code] != "0" and @rets_data[:code] != "20201" and @rets_data[:code] != "20206" #added this check 7385
         raise RETS::APIError.new("#{@rets_data[:code]}: #{@rets_data[:text]}", @rets_data[:code], @rets_data[:text])
       end
 

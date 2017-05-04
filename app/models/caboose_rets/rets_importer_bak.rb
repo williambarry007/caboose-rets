@@ -51,10 +51,10 @@
 #
 #  def self.meta(class_type)
 #    case class_type
-#      when 'RES' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS_ACCT'   , :local_key_field => 'mls_acct' , :local_table => 'rets_residential'  , :date_modified_field => 'DATE_MODIFIED'    })
-#      when 'COM' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS_ACCT'   , :local_key_field => 'mls_acct' , :local_table => 'rets_commercial'   , :date_modified_field => 'DATE_MODIFIED'    })
-#      when 'LND' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS_ACCT'   , :local_key_field => 'mls_acct' , :local_table => 'rets_land'         , :date_modified_field => 'DATE_MODIFIED'    })
-#      when 'MUL' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS_ACCT'   , :local_key_field => 'mls_acct' , :local_table => 'rets_multi_family' , :date_modified_field => 'DATE_MODIFIED'    })
+#      when 'RES' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS'   , :local_key_field => 'mls' , :local_table => 'rets_residential'  , :date_modified_field => 'DATE_MODIFIED'    })
+#      when 'COM' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS'   , :local_key_field => 'mls' , :local_table => 'rets_commercial'   , :date_modified_field => 'DATE_MODIFIED'    })
+#      when 'LND' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS'   , :local_key_field => 'mls' , :local_table => 'rets_land'         , :date_modified_field => 'DATE_MODIFIED'    })
+#      when 'MUL' then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'MLS'   , :local_key_field => 'mls' , :local_table => 'rets_multi_family' , :date_modified_field => 'DATE_MODIFIED'    })
 #      when 'OFF' then Caboose::StdClass.new({ :search_type => 'Office'    , :remote_key_field => 'LO_LO_CODE' , :local_key_field => 'lo_code'  , :local_table => 'rets_offices'      , :date_modified_field => 'LO_DATE_MODIFIED' })
 #      when 'AGT' then Caboose::StdClass.new({ :search_type => 'Agent'     , :remote_key_field => 'LA_LA_CODE' , :local_key_field => 'la_code'  , :local_table => 'rets_agents'       , :date_modified_field => 'LA_DATE_MODIFIED' })
 #      when 'OPH' then Caboose::StdClass.new({ :search_type => 'OpenHouse' , :remote_key_field => 'ID'         , :local_key_field => 'id'       , :local_table => 'rets_open_houses'  , :date_modified_field => 'DATE_MODIFIED'    })
@@ -66,7 +66,7 @@
 #  # Import method
 #  #=============================================================================
 #
-#  def self.import(class_type, query)    
+#  def self.import(class_type, query)
 #    m = self.meta(class_type)
 #    self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
 #    self.get_config if @@config.nil? || @@config['url'].nil?
@@ -78,7 +78,7 @@
 #      :timeout => -1
 #    }
 #    obj = nil
-#    begin        
+#    begin
 #      self.client.search(params) do |data|
 #        obj = self.get_instance_with_id(class_type, data)
 #        if obj.nil?
@@ -93,7 +93,7 @@
 #      self.log "Import error for #{class_type}: #{query}"
 #      self.log err.message
 #    end
-#    
+#
 #  end
 #
 #  def self.get_instance_with_id(class_type, data)
@@ -111,10 +111,10 @@
 #    obj = case class_type
 #      when 'OPH' then m.where(:id       => data['ID'].to_i       ).exists? ? m.where(:id       => data['ID'].to_i       ).first : m.new(:id       => data['ID'].to_i       )
 #      when 'GFX' then m.where(:media_id => data['MEDIA_ID']      ).exists? ? m.where(:media_id => data['MEDIA_ID']      ).first : m.new(:media_id => data['MEDIA_ID']      )
-#      when 'COM' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
-#      when 'LND' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
-#      when 'MUL' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
-#      when 'RES' then m.where(:id       => data['MLS_ACCT'].to_i ).exists? ? m.where(:id       => data['MLS_ACCT'].to_i ).first : m.new(:id       => data['MLS_ACCT'].to_i )
+#      when 'COM' then m.where(:id       => data['MLS'].to_i ).exists? ? m.where(:id       => data['MLS'].to_i ).first : m.new(:id       => data['MLS'].to_i )
+#      when 'LND' then m.where(:id       => data['MLS'].to_i ).exists? ? m.where(:id       => data['MLS'].to_i ).first : m.new(:id       => data['MLS'].to_i )
+#      when 'MUL' then m.where(:id       => data['MLS'].to_i ).exists? ? m.where(:id       => data['MLS'].to_i ).first : m.new(:id       => data['MLS'].to_i )
+#      when 'RES' then m.where(:id       => data['MLS'].to_i ).exists? ? m.where(:id       => data['MLS'].to_i ).first : m.new(:id       => data['MLS'].to_i )
 #      when 'AGT' then m.where(:la_code  => data['LA_LA_CODE']    ).exists? ? m.where(:la_code  => data['LA_LA_CODE']    ).first : m.new(:la_code  => data['LA_LA_CODE']    )
 #      when 'OFF' then m.where(:lo_code  => data['LO_LO_CODE']    ).exists? ? m.where(:lo_code  => data['LO_LO_CODE']    ).first : m.new(:lo_code  => data['LO_LO_CODE']    )
 #    end
@@ -163,18 +163,18 @@
 #  # Single model import methods (called from a worker dyno)
 #  #=============================================================================
 #
-#  def self.import_property(mls_acct, save_images = true)
-#    self.import('RES', "(MLS_ACCT=*#{mls_acct}*)")
-#    p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first
+#  def self.import_property(mls, save_images = true)
+#    self.import('RES', "(MLS=*#{mls}*)")
+#    p = CabooseRets::ResidentialProperty.where(:id => mls.to_i).first
 #    if p.nil?
-#      self.import('COM', "(MLS_ACCT=*#{mls_acct}*)")
-#      p = CabooseRets::CommercialProperty.where(:id => mls_acct.to_i).first
+#      self.import('COM', "(MLS=*#{mls}*)")
+#      p = CabooseRets::CommercialProperty.where(:id => mls.to_i).first
 #      if p.nil?
-#        self.import('LND', "(MLS_ACCT=*#{mls_acct}*)")
-#        p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first
+#        self.import('LND', "(MLS=*#{mls}*)")
+#        p = CabooseRets::LandProperty.where(:id => mls.to_i).first
 #        if p.nil?
-#          self.import('MUL', "(MLS_ACCT=*#{mls_acct}*)")
-#          p = CabooseRets::MultiFamilyProperty.where(:id => mls_acct.to_i).first
+#          self.import('MUL', "(MLS=*#{mls}*)")
+#          p = CabooseRets::MultiFamilyProperty.where(:id => mls.to_i).first
 #          return if p.nil?
 #        end
 #      end
@@ -182,35 +182,35 @@
 #    self.download_property_images(p, save_images)
 #  end
 #
-#  def self.import_residential_property(mls_acct, save_images = true)
-#    self.import('RES', "(MLS_ACCT=*#{mls_acct}*)")
-#    p = CabooseRets::ResidentialProperty.where(:id => mls_acct.to_i).first
+#  def self.import_residential_property(mls, save_images = true)
+#    self.import('RES', "(MLS=*#{mls}*)")
+#    p = CabooseRets::ResidentialProperty.where(:id => mls.to_i).first
 #    self.download_property_images(p, save_images)
 #    self.update_coords(p)
 #  end
 #
-#  def self.import_commercial_property(mls_acct, save_images = true)
-#    self.import('COM', "(MLS_ACCT=*#{mls_acct}*)")
-#    p = CabooseRets::CommercialProperty.where(:id => mls_acct.to_i).first
+#  def self.import_commercial_property(mls, save_images = true)
+#    self.import('COM', "(MLS=*#{mls}*)")
+#    p = CabooseRets::CommercialProperty.where(:id => mls.to_i).first
 #    self.download_property_images(p, save_images)
 #    self.update_coords(p)
 #  end
 #
-#  def self.import_land_property(mls_acct, save_images = true)
-#    self.import('LND', "(MLS_ACCT=*#{mls_acct}*)")
-#    p = CabooseRets::LandProperty.where(:id => mls_acct.to_i).first
+#  def self.import_land_property(mls, save_images = true)
+#    self.import('LND', "(MLS=*#{mls}*)")
+#    p = CabooseRets::LandProperty.where(:id => mls.to_i).first
 #    self.download_property_images(p, save_images)
 #    self.update_coords(p)
 #  end
 #
-#  def self.import_multi_family_property(mls_acct, save_images = true)
-#    self.import('MUL', "(MLS_ACCT=*#{mls_acct}*)")
-#    p = CabooseRets::MultiFamilyProperty.where(:id => mls_acct.to_i).first
+#  def self.import_multi_family_property(mls, save_images = true)
+#    self.import('MUL', "(MLS=*#{mls}*)")
+#    p = CabooseRets::MultiFamilyProperty.where(:id => mls.to_i).first
 #    self.download_property_images(p, save_images)
 #    self.update_coords(p)
 #  end
 #
-#  def self.import_office(lo_code, save_images = true)    
+#  def self.import_office(lo_code, save_images = true)
 #    self.import('OFF', "(LO_LO_CODE=*#{lo_code}*)")
 #    office = CabooseRets::Office.where(:lo_code => lo_code.to_s).first
 #    self.download_office_image(office) if save_images == true
@@ -232,35 +232,35 @@
 #    #if m.nil?
 #    #  self.log("Can't find media record for #{id}.")
 #    #  return
-#    #end        
-#    #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => m.mls_acct) do |headers, content|      
+#    #end
+#    #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => m.mls) do |headers, content|
 #    #  if headers['object-id'].to_i == m.media_order
 #    #    m.url = headers['location']
 #    #    #m.image = URI.parse(headers['location'])
 #    #  end
 #    #end
-#    #m.save    
+#    #m.save
 #  end
 #
 #  #=============================================================================
 #  # Images
 #  #=============================================================================
-#    
+#
 #  def self.download_property_images(p, save_images = true)
 #    return if save_images == false
-#    self.refresh_property_media(p)    
+#    self.refresh_property_media(p)
 #
-#    #self.log("-- Downloading images and resizing for #{p.mls_acct}")
+#    #self.log("-- Downloading images and resizing for #{p.mls}")
 #    #media = []
 #    #self.client.get_object(:resource => :Property, :type => :Photo, :location => true, :id => p.id) do |headers, content|
 #    #
 #    #  # Find the associated media record for the image
 #    #  #filename = File.basename(headers['location'])
-#    #  #m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :file_name => filename).first
-#    #  m = CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_order => headers['object-id'].to_i).first
+#    #  #m = CabooseRets::Media.where(:mls => p.mls, :file_name => filename).first
+#    #  m = CabooseRets::Media.where(:mls => p.mls, :media_order => headers['object-id'].to_i).first
 #    #
 #    #  if m.nil?
-#    #    self.log("Can't find media record for #{p.mls_acct} #{filename}.")
+#    #    self.log("Can't find media record for #{p.mls} #{filename}.")
 #    #  else
 #    #    m.url = headers['location']
 #    #    #m.image = URI.parse(headers['location'])
@@ -269,35 +269,35 @@
 #    #  end
 #    #end
 #    #
-#    #self.log("-- Uploading images to S3 for #{p.mls_acct}")
+#    #self.log("-- Uploading images to S3 for #{p.mls}")
 #    #media.each do |m|
 #    #  m.save
 #    #end
 #  end
 #
 #  def self.refresh_property_media(p)
-#    #self.log("-- Deleting images and metadata for #{p.mls_acct}...")
-#    #CabooseRets::Media.where(:mls_acct => p.mls_acct, :media_type => 'Photo').destroy_all
-#    #CabooseRets::Media.where(:mls_acct => p.mls_acct).destroy_all
+#    #self.log("-- Deleting images and metadata for #{p.mls}...")
+#    #CabooseRets::Media.where(:mls => p.mls, :media_type => 'Photo').destroy_all
+#    #CabooseRets::Media.where(:mls => p.mls).destroy_all
 #
-#    self.log("-- Downloading GFX records for #{p.mls_acct}...")
+#    self.log("-- Downloading GFX records for #{p.mls}...")
 #    params = {
 #      :search_type => 'Media',
-#      :class => 'GFX',      
-#      :query => "(MLS_ACCT=*#{p.id}*)",
+#      :class => 'GFX',
+#      :query => "(MLS=*#{p.id}*)",
 #      :timeout => -1
 #    }
 #    ids = []
 #    self.client.search(params) do |data|
-#      ids << data['MEDIA_ID']      
+#      ids << data['MEDIA_ID']
 #      m = CabooseRets::Media.new
-#      m.parse(data)      
+#      m.parse(data)
 #      m.save
 #    end
-#    
+#
 #    # Delete any records in the local database that shouldn't be there
-#    puts "- Finding GFX records for MLS ##{p.mls_acct} in the local database that are not in the remote database..."
-#    query = "select media_id from rets_media where mls_acct = '#{p.mls_acct}'"
+#    puts "- Finding GFX records for MLS ##{p.mls} in the local database that are not in the remote database..."
+#    query = "select media_id from rets_media where mls = '#{p.mls}'"
 #    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
 #    local_ids = rows.collect{ |row| row[k] }
 #    ids_to_remove = local_ids - ids
@@ -305,7 +305,7 @@
 #      query = ["delete from rets_media where media_id not in (?)", ids_to_remove]
 #      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
 #    end
-#        
+#
 #  end
 #
 #  #def self.download_agent_image(agent)
@@ -344,7 +344,7 @@
 #      i = 0
 #      models.each do |model|
 #        self.log "Updating coords #{names[i]} properties..."
-#        model.where(:latitude => nil).reorder(:mls_acct).each do |p|
+#        model.where(:latitude => nil).reorder(:mls).each do |p|
 #          self.update_coords(p)
 #        end
 #        i = i + 1
@@ -352,7 +352,7 @@
 #      return
 #    end
 #
-#    self.log "Getting coords for mls_acct #{p.mls_acct}..."
+#    self.log "Getting coords for mls #{p.mls}..."
 #    coords = self.coords_from_address(CGI::escape "#{p.street_num} #{p.street_name}, #{p.city}, #{p.state} #{p.zip}")
 #    return if coords.nil? || coords == false
 #
@@ -404,7 +404,7 @@
 #    m = self.meta(class_type)
 #
 #    puts "Purging #{class_type}..."
-#    
+#
 #    # Get the total number of records
 #    puts "- Getting total number of records for #{class_type}..."
 #    params = {
@@ -417,33 +417,33 @@
 #    self.client.search(params.merge({ :count_mode => :only }))
 #    count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]
 #    batch_count = (count.to_f/5000.0).ceil
-#    
+#
 #    ids = []
 #    k = m.remote_key_field
 #    (0...batch_count).each do |i|
 #      puts "- Getting ids for #{class_type} (batch #{i+1} of #{batch_count})..."
 #      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
 #        ids << case class_type
-#          when 'RES' then data[k] 
-#          when 'COM' then data[k] 
-#          when 'LND' then data[k] 
-#          when 'MUL' then data[k] 
-#          when 'OFF' then data[k]  
+#          when 'RES' then data[k]
+#          when 'COM' then data[k]
+#          when 'LND' then data[k]
+#          when 'MUL' then data[k]
+#          when 'OFF' then data[k]
 #          when 'AGT' then data[k]
 #          when 'OPH' then data[k].to_i
 #          when 'GFX' then data[k]
-#        end                
+#        end
 #      end
 #    end
 #
 #    # Delete any records in the local database that shouldn't be there
-#    puts "- Finding #{class_type} records in the local database that are not in the remote database..."    
+#    puts "- Finding #{class_type} records in the local database that are not in the remote database..."
 #    t = m.local_table
-#    k = m.local_key_field        
+#    k = m.local_key_field
 #    query = "select distinct #{k} from #{t}"
 #    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
 #    local_ids = rows.collect{ |row| row[k] }
-#    ids_to_remove = local_ids - ids    
+#    ids_to_remove = local_ids - ids
 #    puts "- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database."
 #    puts "- Deleting #{class_type} records in the local database that shouldn't be there..."
 #    query = ["delete from #{t} where #{k} not in (?)", ids_to_remove]
@@ -454,7 +454,7 @@
 #    query = "select distinct #{k} from #{t}"
 #    rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
 #    local_ids = rows.collect{ |row| row[k] }
-#    ids_to_add = ids - local_ids    
+#    ids_to_add = ids - local_ids
 #    puts "- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database."
 #    ids_to_add.each do |id|
 #      puts "- Importing #{id}..."
@@ -471,7 +471,7 @@
 #    end
 #
 #  end
-#  
+#
 #  def self.get_media_urls
 #    m = self.meta(class_type)
 #
@@ -492,15 +492,15 @@
 #    (0...batch_count).each do |i|
 #      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
 #        ids << case class_type
-#          when 'RES' then data[k] 
-#          when 'COM' then data[k] 
-#          when 'LND' then data[k] 
-#          when 'MUL' then data[k] 
-#          when 'OFF' then data[k]  
+#          when 'RES' then data[k]
+#          when 'COM' then data[k]
+#          when 'LND' then data[k]
+#          when 'MUL' then data[k]
+#          when 'OFF' then data[k]
 #          when 'AGT' then data[k]
 #          when 'OPH' then data[k].to_i
 #          when 'GFX' then data[k]
-#        end                
+#        end
 #      end
 #    end
 #

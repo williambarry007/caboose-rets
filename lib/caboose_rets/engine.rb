@@ -2,8 +2,8 @@ require 'caboose'
 
 module CabooseRets
   
-  def CabooseRets.get_property(mls_acct)
-    return nil if mls_acct.nil?
+  def CabooseRets.get_property(mls)
+    return nil if mls.nil?
     models = [
       CabooseRets::ResidentialProperty, 
       CabooseRets::CommercialProperty, 
@@ -11,7 +11,7 @@ module CabooseRets
       CabooseRets::MultiFamilyProperty
     ]
     models.each do |model|
-      return model.find(mls_acct.to_i) if model.exists?(mls_acct.to_i)            
+      return model.find(mls.to_i) if model.exists?(mls.to_i)            
     end
     return nil
   end

@@ -5,7 +5,7 @@ MediaController.prototype = {
   
   cdn_domain: false,
   s3_domain: false,
-  mls_acct: false,
+  mls: false,
   
   s3_url: function(url)
   {
@@ -34,7 +34,7 @@ MediaController.prototype = {
       handle: '.sort_handle',      
       update: function(e, ui) {                                
         $.ajax({
-          url: '/admin/properties/' + that.mls_acct + '/media/order',
+          url: '/admin/properties/' + that.mls + '/media/order',
           type: 'put',
           data: $('#images').sortable('serialize', { key: 'sort[]' }),
           success: function(resp) {}
@@ -51,7 +51,7 @@ MediaController.prototype = {
       handle: '.sort_handle',      
       update: function(e, ui) {                                
         $.ajax({
-          url: '/admin/properties/' + that.mls_acct + '/media/order',
+          url: '/admin/properties/' + that.mls + '/media/order',
           type: 'put',
           data: $('#files').sortable('serialize', { key: 'sort[]' }),
           success: function(resp) {}
@@ -116,7 +116,7 @@ MediaController.prototype = {
     $('#images').empty().append($('<p/>').addClass('loading').html('Getting images...'));    
     var that = this;
     $.ajax({      
-      url: '/admin/properties/' + this.mls_acct + '/photos',
+      url: '/admin/properties/' + this.mls + '/photos',
       success: function(media) {
         $('#images').empty();
         $(media).each(function(i,m) {            
@@ -150,7 +150,7 @@ MediaController.prototype = {
     $('#files').empty().append($('<p/>').addClass('loading').html('Getting files...'));        
     var that = this;
     $.ajax({      
-      url: '/admin/properties/' + this.mls_acct + '/files',
+      url: '/admin/properties/' + this.mls + '/files',
       success: function(media) {
         $('#files').empty();
         if (!media || media.length == 0)
@@ -186,7 +186,7 @@ MediaController.prototype = {
     var that = this;
     var form = $('<form/>')
       .attr('id', 'new_image_form')
-      .attr('action', '/admin/properties/' + this.mls_acct +'/photos')
+      .attr('action', '/admin/properties/' + this.mls +'/photos')
       .attr('method', 'post')
       .attr('target', 'image_upload_iframe')
       .attr('enctype', 'multipart/form-data')
@@ -218,7 +218,7 @@ MediaController.prototype = {
     var that = this;
     var form = $('<form/>')
       .attr('id', 'new_file_form')
-      .attr('action', '/admin/properties/' + this.mls_acct +'/files')
+      .attr('action', '/admin/properties/' + this.mls +'/files')
       .attr('method', 'post')
       .attr('target', 'file_upload_iframe')
       .attr('enctype', 'multipart/form-data')

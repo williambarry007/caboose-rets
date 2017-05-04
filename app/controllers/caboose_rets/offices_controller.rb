@@ -11,7 +11,7 @@ module CabooseRets
       return if !user_is_allowed('offices', 'view')
         
       @gen = Caboose::PageBarGenerator.new(params, {
-          'lo_code'      => '',               
+          'lo_mls_id'    => '',               
           'lo_name_like' => ''      	  
         },{
       	  'model'       => 'CabooseRets::Office',
@@ -24,17 +24,17 @@ module CabooseRets
       render :layout => 'caboose/admin'
     end
     
-    # GET /admin/offices/:id/edit
+    # GET /admin/offices/:mls_number/edit
     def admin_edit
       return if !user_is_allowed('offices', 'edit')    
       @office = Office.find(params[:id])      
       render :layout => 'caboose/admin'
     end
     
-    # GET /admin/offices/:id/refresh
+    # GET /admin/offices/:mls_number/refresh
     def admin_refresh
       office = Office.find(params[:id])        
-      RetsImporter.import("(LO_LO_CODE=#{office.lo_code})", 'Office', 'OFF')
+      RetsImporter.import('Office', "(Matrix_Unique_ID=#{office.matrix_unique_id})")
       render :json => Caboose::StdClass.new({ 'success' => "The office's info has been updated from MLS." })                
     end
   

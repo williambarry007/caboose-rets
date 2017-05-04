@@ -2,10 +2,10 @@
 class CabooseRets::OpenHouse < ActiveRecord::Base
   self.table_name = "rets_open_houses"
   
-  attr_accessible :id
+  attr_accessible :id, :matrix_unique_id
   
   def property
-    models = [CabooseRets::ResidentialProperty, CabooseRets::CommercialProperty, CabooseRets::LandProperty, CabooseRets::MultiFamilyProperty]
+    models = [CabooseRets::Property]
     models.each do |model|
       id = self.mls_acct.to_i
       return model.find(id) if model.exists?(id)
@@ -14,22 +14,22 @@ class CabooseRets::OpenHouse < ActiveRecord::Base
   end
   
   def agent
-    return CabooseRets::Agent.where(:la_code => self.la_code).first if CabooseRets::Agent.exists?(:la_code => self.la_code)
+    return CabooseRets::Agent.where(:mls_id => self.mls_id).first if CabooseRets::Agent.exists?(:mls_id => self.mls_id)
     return nil
   end
   
   def parse(data)
-    self.id 		          = data['ID']
-    self.comments 		    = data['COMMENTS']
-    self.date_created 		= data['DATE_CREATED']
-    self.date_modified 		= data['DATE_MODIFIED']
-    self.end_time 		    = data['END_TIME']    
-    self.la_code 		      = data['LA_CODE']
-    self.mls_acct 		    = data['MLS_ACCT']
-    self.open_house_date 	= data['OPEN_HOUSE_DATE']
-    self.open_house_type 	= data['OPEN_HOUSE_TYPE']
-    self.perpetual_yn 		= data['PERPETUAL_YN']
-    self.prop_type 		    = data['PROP_TYPE']
-    self.start_time 		  = data['START_TIME']
+        self.active_yn          = data['ActiveYN']
+        self.description        = data['Description']
+        self.end_time           = data['EndTime']
+        self.entry_order        = data['EntryOrder']
+        self.listing_mui        = data['ListingMUI']
+        self.matrix_unique_id   = data['matrix_unique_id']
+        self.matrix_modified_dt = data['MatrixModifiedDT']
+        self.open_house_date    = data['OpenHouseDate']
+        self.open_house_type    = data['OpenHouseType']
+        self.provider_key       = data['ProviderKey']
+        self.refreshments       = data['Refrehments']
+        self.start_time         = data['StartTime'] 
   end
 end

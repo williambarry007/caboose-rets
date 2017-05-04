@@ -9,39 +9,39 @@ module CabooseRets
       render :json => media_hash(m)
     end
   
-    # GET /admin/properties/:mls_acct/media    
+    # GET /admin/properties/:mls/media    
     def admin_property_media
       return if !user_is_allowed('media', 'view')      
-      @property = CabooseRets.get_property(params[:mls_acct])
+      @property = CabooseRets.get_property(params[:mls])
       render :layout => 'caboose/admin'
     end
     
-    # GET /admin/properties/:mls_acct/photos
+    # GET /admin/properties/:mls/photos
     def admin_photos
       return if !user_is_allowed('media', 'view')      
-      media = Media.where(:mls_acct => params[:mls_acct], :media_type => 'Photo').reorder(:media_order).all
+      media = Media.where(:mls => params[:mls], :media_type => 'Photo').reorder(:media_order).all
       media2 = media.collect { |m| media_hash(m) }      	      
       render :json => media2
     end
     
-    # GET /admin/properties/:mls_acct/files
+    # GET /admin/properties/:mls/files
     def admin_files
       return if !user_is_allowed('media', 'view')      
-      media = Media.where(:mls_acct => params[:mls_acct], :media_type => 'File').reorder(:media_order).all
+      media = Media.where(:mls => params[:mls], :media_type => 'File').reorder(:media_order).all
       media2 = media.collect { |m| media_hash(m) }      	      
       render :json => media2
     end
 
-    # POST /admin/properties/:mls_acct/photos
+    # POST /admin/properties/:mls/photos
     def admin_add_photo
       return if !user_is_allowed('media', 'edit')      
             
-      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct], :media_type => 'Photo'})
+      x = Media.maximum(:media_order, :conditions => {:mls => params[:mls], :media_type => 'Photo'})
       x = 0 if x.nil?
       
       m = Media.new
       m.id            = Media.maximum(:id) + 1
-      m.mls_acct 		  = params[:mls_acct]
+      m.mls 		  = params[:mls]
       m.date_modified = DateTime.now                  
       m.media_order   = x + 1
       m.media_type 		= 'Photo'
@@ -55,12 +55,12 @@ module CabooseRets
     def admin_add_file
       return if !user_is_allowed('media', 'edit')
 
-      x = Media.maximum(:media_order, :conditions => {:mls_acct => params[:mls_acct], :media_type => 'File'})
+      x = Media.maximum(:media_order, :conditions => {:mls => params[:mls], :media_type => 'File'})
       x = 0 if x.nil?      
                   
       m = Media.new
       m.id            = Media.maximum(:id) + 1
-      m.mls_acct 		  = params[:mls_acct]
+      m.mls 		  = params[:mls]
       m.date_modified = DateTime.now                  
       m.media_order   = x + 1
       m.media_type 		= 'File'
@@ -77,7 +77,7 @@ module CabooseRets
       render :json => true
     end
     
-    # PUT /admin/properties/:mls_acct/media/order
+    # PUT /admin/properties/:mls/media/order
     def admin_update_order
       return if !user_is_allowed('media', 'delete')      
       Media.reorder(params[:sort], "advantagerealtygroup")            
@@ -95,7 +95,7 @@ module CabooseRets
         :media_order 	  => m.media_order,
         :media_remarks  => m.media_remarks,
         :media_type 		=> m.media_type,
-        :mls_acct 		  => m.mls_acct,
+        :mls 		  => m.mls,
         :url 		        => m.url,          
         :image => {
           :file_name    => m.image_file_name,

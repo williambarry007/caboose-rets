@@ -2,7 +2,7 @@
 
 <form action='/admin/rets/import' method='post' id='import_form' onsubmit="import_property(); return false;">
 <input type='hidden' name='authenticity_token' value='<%= form_authenticity_token %>' />
-<p><input type='text' name='mls_acct' id='mls_acct' placeholder='MLS #' value="" style='width: 300px;' /></p>
+<p><input type='text' name='mls' id='mls' placeholder='MLS #' value="" style='width: 300px;' /></p>
 <div id='message'></div>
 <p><input type='submit' value='Import Property' /></p>
 </form>

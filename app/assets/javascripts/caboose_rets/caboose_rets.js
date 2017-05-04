@@ -19,10 +19,10 @@ CabooseRets.save_search = function(uri, property_type, params)
   });
 };
 
-CabooseRets.get_save_property = function(mls_acct, el)
+CabooseRets.get_save_property = function(mls, el)
 {
   $.ajax({
-    url: '/saved-properties/' + mls_acct + '/status',
+    url: '/saved-properties/' + mls + '/status',
     type: 'get',
     success: function(resp) {
       if (resp.saved == true) el.html("<span style='color: #e5cd58; font-size: 2em;'>&#9733;</span> Saved");
@@ -31,10 +31,10 @@ CabooseRets.get_save_property = function(mls_acct, el)
   });
 }
 
-CabooseRets.toggle_save_property = function(mls_acct, el)
+CabooseRets.toggle_save_property = function(mls, el)
 {
   $.ajax({
-    url: '/saved-properties/' + mls_acct + '/toggle',
+    url: '/saved-properties/' + mls + '/toggle',
     type: 'get',
     success: function(resp) {
       if (resp.saved == true) el.html("<span style='color: #e5cd58; font-size: 2em;'>&#9733;</span> Saved");
@@ -54,13 +54,13 @@ $(document).ready(function() {
 
   $('.toggle_save_property').click(function(e) {
     e.preventDefault();
-    var mls_acct = $(e.target).data('mls_acct');
-    CabooseRets.toggle_save_property(mls_acct, $(e.target));    
+    var mls = $(e.target).data('mls');
+    CabooseRets.toggle_save_property(mls, $(e.target));    
   });
     
   $('.toggle_save_property').each(function(i, el) {
-    var mls_acct = $(el).data('mls_acct');
-    CabooseRets.get_save_property(mls_acct, $(el));
+    var mls = $(el).data('mls');
+    CabooseRets.get_save_property(mls, $(el));
   });
     
 });

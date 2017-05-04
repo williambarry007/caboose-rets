@@ -10,14 +10,14 @@ class CabooseRets::SearchOption < ActiveRecord::Base
     
     names = {
       'City'          => ['city'],
-      'County'        => ['county'],
-      'Zip Code'      => ['zip'],
-      'Schools'       => ['elem_school', 'middle_school', 'high_school'],
+      'County'        => ['county_or_parish'],
+      'Zip Code'      => ['postal_code'],
+      'Schools'       => ['elementary_school', 'middle_school', 'high_school'],
       'MLS Area'      => ['area'],
       'Neighborhood'  => ['subdivision'],
       'Street Name'   => ['street_name'],
-      'Property Type' => ['prop_type'],      
-      'MLS Number'    => ['mls_acct']      
+      'Property Type' => ['property_type'],      
+      'MLS Number'    => ['mls_number']      
       #'feature',            
       #'location',
     }
@@ -32,7 +32,7 @@ class CabooseRets::SearchOption < ActiveRecord::Base
   end
   
   def self.update_search_options_for_field(name, field)
-    q = ["select distinct(#{field}) from rets_residential where (status = ? or status = ?)", 'Pending', 'Active']
+    q = ["select distinct(#{field}) from rets_properties where (status = ? or status = ?)", 'Pending', 'Active']
     rows = ActiveRecord::Base.connection.select_rows(ActiveRecord::Base.send(:sanitize_sql_array, q))
     rows.each do |row|
       so = self.where(:name => name, :field => field, :value => row[0]).first

@@ -1,6 +1,6 @@
 <h1>Property Images and Files</h1>
 
-<p>MLS#: <%= @property.mls_acct %></p>
+<p>MLS#: <%= @property.mls %></p>
 <p><input type='button' value='< Back to Property' onclick="window.location='/admin<%= @property.url %>/edit';" /></p>
 
 <h2>Images</h2>
@@ -33,7 +33,7 @@
 var controller = false;
 $(document).ready(function() {
   controller = new MediaController({
-    mls_acct: <%= @property.mls_acct %>,
+    mls: <%= @property.mls %>,
     auth_token: "<%= raw form_authenticity_token %>",
     cdn_domain: "d19w6hbyh7z79c.cloudfront.net",
     s3_domain: "s3.amazonaws.com/advantagerealtygroup"

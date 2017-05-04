@@ -33,50 +33,53 @@ class CabooseRets::SavedSearch < ActiveRecord::Base
 
   def model
     case self.property_type
-      when 'residential'  then return CabooseRets::ResidentialProperty
-      when 'commercial'   then return CabooseRets::CommercialProperty
-      when 'land'         then return CabooseRets::LandProperty
-      when 'multi-family' then return CabooseRets::MultiFamilyProperty
+      when 'property'     then return CabooseRets::Property      
     end  
     return nil
   end
 
   def search_fields()
     return {
-      'name'               => '',
-      'current_price_gte'  => '',
-      'current_price_lte'  => '',
-      'bedrooms_gte'       => '',
-      'bedrooms_lte'       => '',
-      'prop_type'          => '',
-      'tot_heat_sqft_gte'  => '',
-      'tot_heat_sqft_lte'  => '',
-      'neighborhood'       => '',
-      'elem_school'        => '',
-      'middle_school'      => '',
-      'high_school'        => '',
-      'address'            => '',
-      'lo_lo_code'         => '',
-      'remarks_like'       => '',
-      'waterfront'         => '',
-      'ftr_lotdesc_like'   => '',
-      'mls_acct'           => '',
-      'subdivision'        => '',
-      'foreclosure_yn'     => '',
-      'street_name_like'   => '',
-      'street_num_like'    => '',
-      'date_created_gte'   => '',
-      'date_created_lte'   => '',
-      'date_modified_gte'  => '',
-      'date_modified_lte'  => '',
-      'status'             => ['active']
-    }
+      'area'                     => '',
+        'area_like'                => '',      
+        'acreage_gte'              => '',
+        'acreage_lte'              => '',
+        'city'                     => '',
+        'city_like'                => '',
+        'county_or_parish'         => '',
+        'county_or_parishy_like'   => '',
+        'current_price_gte'        => '',
+        'current_price_lte'        => '',
+        'bedrooms_gte'             => '',
+        'bedrooms_lte'             => '',
+        'property_type'            => '',
+        'property_subtype'         => '',
+        'sqft_total_gte'           => '',
+        'sqft_total_gte_lte'       => '',
+        'neighborhood'             => '',
+        'elementary_school'        => '',
+        'middle_school'            => '',
+        'high_school'              => '',          
+        'public_remarks_like'      => '',
+        'waterfronts'              => '',
+        'waterfronts_not_null'     => '',
+        'mls_number'               => '',
+        'subdivision'              => '',
+        'style'                    => '',
+        'foreclosure_yn'           => '',
+        'address_like'             => '',
+        'street_name_like'         => '',
+        'street_num_like'          => '',
+        'postal_code'              => '',
+        'postal_code_like'         => '',        
+        'status'                   => 'Active'
+      }
   end
   
   def search_options
     return {
       'model'           => self.model.to_s,
-      'sort'            => 'current_price ASC, mls_acct',
+      'sort'            => 'current_price ASC, mls',
       'desc'            => false,
       'base_url'        => "/#{self.property_type}",
       'items_per_page'  => 10

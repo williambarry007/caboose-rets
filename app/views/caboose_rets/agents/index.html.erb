@@ -9,36 +9,19 @@
 			
 			<select class="h-conceal-tenor-baritone h-space-mbm" onchange="location=this.options[this.selectedIndex].value;">
 				<% @agents.each do |a| %>
-				  <% next if !a.assistant_to.nil? && a.assistant_to.length > 0 %>
-					<option class="agent_name" value="/agents/<%= a.la_code %>/listings">
+				  <option class="agent_name" value="/agents/<%= a.mls_id %>/listings">
 						<%= a.first_name %> <%= a.last_name %>
 					</option>
 				<% end %>
 			</select>
 			
 			<ul class="h-reveal-tenor-baritone">
-				<li><a href="/agents/048540000">Richard Ellis, Jr.</a>
-						<ul>
-							<% @agents.each do |as| %>
-								<% if as.assistant_to == "048540000" %>
-									<li class="assistant_name"><%= as.first_name %> <%= as.last_name %></li>
-								<% end %>
-							<% end %>
-						</ul>
-				</li>
+				<li><a href="/agents/048540000">Richard Ellis, Jr.</a></li>
 				<% @agents.each do |a| %>
-				  <% next if !a.assistant_to.nil? && a.assistant_to.length > 0 %>
-				  <% next if a.la_code == '048540000' %>
-					<li class="agent_name"><a class="agent_name" href="/agents/<%= a.la_code %>">
+				  <% next if a.mls_id == '048540000' %>
+					<li class="agent_name"><a class="agent_name" href="/agents/<%= a.mls_id %>">
 					<%= a.first_name %> <%= a.last_name %>
-					</a>
-						<ul>
-							<% @agents.each do |as| %>
-								<% if as.assistant_to == a.la_code %>
-									<li class="assistant_name"><%= as.first_name %> <%= as.last_name %></li>
-								<% end %>
-							<% end %>
-						</ul>
+					</a>					
 					</li>
 				<% end %>
 			</ul>
@@ -46,10 +29,10 @@
 
 		
 		<div class="sidebar-body">
-			<% if @agent.la_code == '048540000' %>
+			<% if @agent.mls_id == '048540000' %>
 					<div class="h-space-mvm">
-					<% if @prev %><a class="m-btn-red" href="/agents/<%= @prev.la_code %>">Previous Agent</a> &nbsp; <% end %>
-					<% if @next %><a class="m-btn-red" href="/agents/<%= @next.la_code %>">Next Agent</a><% end %>
+					<% if @prev %><a class="m-btn-red" href="/agents/<%= @prev.mls_id %>">Previous Agent</a> &nbsp; <% end %>
+					<% if @next %><a class="m-btn-red" href="/agents/<%= @next.mls_id %>">Next Agent</a><% end %>
 				</div>
 		
 				<div class="l-media inflate-baritone">
@@ -70,7 +53,7 @@
 						<%= @agent.first_name %> <%= @agent.last_name %>
 						</h4>
 									
-						<% if @agent.contact_info.nil? || @agent.contact_info.strip.length == 0 %>
+						<% if @agent.office_phone.nil? || @agent.office_phone.strip.length == 0 %>
 						  <ul>                                  
 						  	<% if @agent.office_phone.strip.length > 0  %><li>Work Phone: <a href="tel:<%=    @agent.office_phone %>"><%= @agent.office_phone  %></a></li><% end %>
 						  	<% if @agent.car_phone.strip.length    > 0  %><li>Cell Phone: <a href="tel:<%=    @agent.car_phone    %>"><%= @agent.car_phone     %></a></li><% end %>
@@ -78,18 +61,18 @@
 						  	<% if @agent.member_email.strip.length > 0  %><li>Email:      <a href="mailto:<%= @agent.member_email %>"><%= @agent.member_email  %></a></li><% end %>
 						  </ul>
 						<% else %>
-						  <%= raw @agent.contact_info %>						  
+						  <%= raw @agent.office_phone %>						  
 						<% end %>   
 					
-						<p class="h-space-mvs"><a class="m-btn-red" href="/agents/<%= @agent.la_code %>/listings">See My Listings</a></p>
+						<p class="h-space-mvs"><a class="m-btn-red" href="/agents/<%= @agent.mls_id %>/listings">See My Listings</a></p>
 					</div> <!-- .media-body -->
 				</div> <!-- .l-media -->
 							
-				<% if @agent.bio %><article class="h-space-mtm"><%= raw @agent.bio %></article> <% end %>				
-			<% elsif @agent.la_code != "048540000" %>
+				<% if @agent.middle_name %><article class="h-space-mtm"><%= raw @agent.middle_name %></article> <% end %>				
+			<% elsif @agent.mls_id != "048540000" %>
 				<div class="h-space-mvm">
-					<% if @prev %><a class="m-btn-red" href="/agents/<%= @prev.la_code %>">Previous Agent</a> &nbsp; <% end %>
-					<% if @next %><a class="m-btn-red" href="/agents/<%= @next.la_code %>">Next Agent</a><% end %>
+					<% if @prev %><a class="m-btn-red" href="/agents/<%= @prev.mls_id %>">Previous Agent</a> &nbsp; <% end %>
+					<% if @next %><a class="m-btn-red" href="/agents/<%= @next.mls_id %>">Next Agent</a><% end %>
 				</div>
 				
 				<div class="l-media">
@@ -100,7 +83,7 @@
 						<%= @agent.first_name %> <%= @agent.last_name %>
 						</h4>
 						
-						<% if @agent.contact_info.nil? || @agent.contact_info.strip.length == 0 %>
+						<% if @agent.office_phone.nil? || @agent.office_phone.strip.length == 0 %>
 						  <ul>
 						  	<% if @agent.office_phone.strip.length > 0  %><li>Work Phone: <a href="tel:<%=    @agent.office_phone %>"><%= @agent.office_phone  %></a></li><% end %>
 						  	<% if @agent.car_phone.strip.length    > 0  %><li>Cell Phone: <a href="tel:<%=    @agent.car_phone    %>"><%= @agent.car_phone     %></a></li><% end %>
@@ -108,17 +91,17 @@
 						  	<% if @agent.member_email.strip.length > 0  %><li>Email:      <a href="mailto:<%= @agent.member_email %>"><%= @agent.member_email  %></a></li><% end %>
 						  </ul>
 						<% else %>
-						  <%= raw @agent.contact_info %>						  
+						  <%= raw @agent.office_phone %>						  
 						<% end %>
 					
-						<p class="h-space-mvs"><a class="m-btn-red" href="/agents/<%= @agent.la_code %>/listings">See My Listings</a></p>
+						<p class="h-space-mvs"><a class="m-btn-red" href="/agents/<%= @agent.mls_id %>/listings">See My Listings</a></p>
 					</div>
 				</div> <!-- .l-media -->
 			
 				<article class="h-space-mtm"><%= raw @agent.bio %></article>
 			<% end %>
 			
-			<% @assistants.each do |a| %>
+			<% @agents.each do |a| %>
 				<div class="l-media inflate-baritone h-space-mtl h-space-ptl" style="border-top: 1px solid #D0D0D0;">
 					<div class="media-aside">
 						<img src="https://s3.amazonaws.com/advantagerealtygroup.com/agents/<%=a.id%>_large.jpg?<%= DateTime.now.strftime('%F') %>" width="150" />
@@ -129,7 +112,7 @@
 						<%= a.first_name %> <%= a.last_name %>
 						</h4>
 						
-						<% if a.contact_info.nil? || a.contact_info.strip.length == 0 %>
+						<% if a.office_phone.nil? || a.office_phone.strip.length == 0 %>
 						<ul>
 							<% if a.office_phone.strip.length > 0 %><li>Work Phone: <a href="tel:<%=    a.office_phone %>"><%= a.office_phone  %></a></li><% end %>
 							<% if a.car_phone.strip.length    > 0 %><li>Cell Phone: <a href="tel:<%=    a.car_phone    %>"><%= a.car_phone     %></a></li><% end %>
@@ -137,10 +120,10 @@
 							<% if a.member_email.strip.length > 0 %><li>Email:      <a href="mailto:<%= a.member_email %>"><%= a.member_email  %></a></li><% end %>
 						</ul>
 						<% else %>
-						  <%= raw a.contact_info %>						  
+						  <%= raw a.office_phone %>						  
 						<% end %>
-						<% if !a.bio.nil? && a.bio.strip.length > 0 %>
-						  <%= raw a.bio %>
+						<% if !a.middle_name.nil? && a.middle_name.strip.length > 0 %>
+						  <%= raw a.middle_name %>
 						<% end %>
 						
 					</div> <!-- .media-body -->
