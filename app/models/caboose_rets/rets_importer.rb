@@ -70,27 +70,26 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     params = {
       :search_type => m.search_type,
       :class => class_type,
-      :query => query,      
+      :query => query,
       :timeout => -1
     }
-    obj = nil    
+    obj = nil
+
     begin
       self.client.search(params) do |data|
         obj = self.get_instance_with_id(class_type, data)
-        puts obj
         if obj.nil?
           self.log("Error: object is nil")
           self.log(data.inspect)
           next
         end
-        obj.parse(data)        
-        obj.save        
+        obj.parse(data)
+        obj.save
       end
     rescue RETS::HTTPError => err
       self.log "Import error for #{class_type}: #{query}"
       self.log err.message
     end
-
   end
 
   def self.get_instance_with_id(class_type, data)
@@ -158,30 +157,31 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # end
 
   def self.import_properties(mui, save_images = true)
-    self.import('Listing', "(Matrix_Unique_ID=*#{mui}*)")    
+    self.import('Listing', "(Matrix_Unique_ID=#{mui})")
     p = CabooseRets::Property.where(:matrix_unique_id => mui.to_s).first
-    # if p != nil
+    # p = CabooseRets::Property.create(:matrix_unique_id => mui.to_s) if p.nil?
+    if p != nil
       self.download_property_images(p)
       self.update_coords(p)
-    # else
-    #   self.log("No Property associated with #{mui}")      
-    # end
+    else
+      self.log("No Property associated with #{mui}")
+    end
   end
 
   def self.import_office(mui, save_images = true)
-    self.import('Office', "(matrix_unique_id=*#{mui}*)")
+    self.import('Office', "(matrix_unique_id=#{mui})")
     office = CabooseRets::Office.where(:matrix_unique_id => mui.to_s).first
     # self.download_office_image(office) if save_images == true
   end
 
   def self.import_agent(mui, save_images = true)
-    self.import('Agent', "(Matrix_Unique_ID=*#{mui}*)")
+    self.import('Agent', "(Matrix_Unique_ID=#{mui})")
     a = CabooseRets::Agent.where(:matrix_unique_id => mui.to_s).first
     # self.download_agent_image(a) #if save_images == true
   end
 
   def self.import_open_house(mui, save_images = true)
-    self.import('OpenHouse', "(Matrix_Unique_ID=*#{mui}*)")
+    self.import('OpenHouse', "(Matrix_Unique_ID=#{mui})")
   end
 
   def self.import_media(id, save_images = true)
