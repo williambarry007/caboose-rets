@@ -232,23 +232,39 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log "Saving images for #{p.matrix_unique_id}..."
-    i=0
     begin
-      url = "http://rets.wamls.mlsmatrix.com/rets/GetObject.ashx?Type=Photo&Resource=Property&ID=1026514:1"
-      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => '1026514:*') do |headers, content|        
-        m = CabooseRets::Media.where(:media_mui => headers['object-id']).first
-        m = CabooseRets::Media.new if m.nil? 
-        m.media = Caboose::Media.new
-        File.open("temp_img_#{p.matrix_unique_id}_#{i}.jpeg", "wb") do |f| 
+      # url = "http://rets.wamls.mlsmatrix.com/rets/GetObject.ashx?Type=Photo&Resource=Property&ID=1026514:1"
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['object-id']).first
+        m = CabooseRets::Media.new if m.nil?
+
+        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
+
+        # Temporarily cache content
+        File.open(tmp_path, "wb") do |f|
           f.write(content)
         end
-        m.media.image = File.open("temp_img_#{p.matrix_unique_id}_#{i}.jpeg")
-        m.media_type = headers['content_type']
-        m.media_mui  = headers['media_mui']       
-        m.media.save
+
+        # Parse downloaded content
+        m.media_mui     = headers['content-id']
+        m.media_order   = headers['object-id']
+        m.media_remarks = headers['content-description']
+        m.media_type    = 'Photo'
+
+        cm               = Caboose::Media.new
+        cm.image         = File.open(tmp_path)
+        cm.name          = "rets_media_#{headers['content-id']}_#{headers['object-id']}"
+        cm.original_name = "rets_media_#{headers['content-id']}_#{headers['object-id']}.jpeg"
+        cm.processed     = true
+        cm.save
+
+        m.media_id = cm.id
         m.save
-        self.log("Image #{p.matrix_unique_id}"+ ":#{i} saved")
-        i += 1
+
+        # Remove temporary file
+        `rm #{tmp_path}`
+
+        self.log("Image #{headers['content-id']}:#{headers['object-id']} saved")
       end
     rescue RETS::APIError => err
       self.log "No image for #{p.matrix_unique_id}."
