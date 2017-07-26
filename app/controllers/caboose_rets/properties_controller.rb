@@ -101,7 +101,7 @@ module CabooseRets
         :mls_number => params[:mls_number],
         :property => @property,
         :saved    => @saved,
-        :agent    => @property ? @property.where(:list_agent_mls_id => @property.list_agent_mls_id).first : nil,
+  #      :agent    => @property ? @property.where(:list_agent_mls_id => @property.list_agent_mls_id).first : nil,
         :form_authenticity_token => form_authenticity_token
       }
 
