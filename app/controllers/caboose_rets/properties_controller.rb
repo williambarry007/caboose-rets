@@ -90,9 +90,6 @@ module CabooseRets
     def details
       @property = Property.where(:mls_number => params[:mls_number]).first
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_number => params[:mls_number]).exists?
-      if @property && @property.list_office_code == '46'
-        @agent = Property.where(:la_code => @property.list_agent_mls_id).first
-      end
       if @property.nil?
         @mls_number = params[:mls_number]
         CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(@mls_number.to_i)
