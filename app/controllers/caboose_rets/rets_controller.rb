@@ -13,7 +13,7 @@ module CabooseRets
       return if !user_is_allowed('properties', 'edit')
                   
       mls = params[:mls].to_i
-      CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(mls)
+      CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(mls)
       
       resp = Caboose::StdClass.new
       resp.success = "The property is being imported from MLS.  This may take a few minutes depending on how many images it has."

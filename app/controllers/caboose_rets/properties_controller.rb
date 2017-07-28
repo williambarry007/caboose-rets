@@ -29,10 +29,12 @@ module CabooseRets
         'city_like'                => '',
         'county_or_parish'         => '',
         'county_or_parishy_like'   => '',
-        'current_price_gte'        => '',
-        'current_price_lte'        => '',
-        'bedrooms_gte'             => '',
-        'bedrooms_lte'             => '',
+        'list_price_gte'           => '',
+        'list_price_lte'           => '',
+        'beds_total_gte'           => '',
+        'beds_total_lte'           => '',
+        'baths_total_gte'          => '',
+        'baths_total_lte'          => '',
         'property_type'            => '',
         'property_subtype'         => '',
         'sqft_total_gte'           => '',
@@ -92,7 +94,7 @@ module CabooseRets
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_number => params[:mls_number]).exists?
       if @property.nil?
         @mls_number = params[:mls_number]
-        CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(@mls_number.to_i)
+        CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
         render 'properties/property_not_exists'
         return
       end
@@ -107,7 +109,7 @@ module CabooseRets
 
       if @property.nil?
        @mls = params[:mls]
-       CabooseRets::RetsImporter.delay(:queue => 'rets').import_property(@mls_number.to_i)
+       CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
        render 'properties/property_not_exists'
        return
       end
@@ -146,7 +148,7 @@ module CabooseRets
       return if !user_is_allowed('properties', 'edit')
 
       p = Property.find(params[:mls_number])
-      p.delay(:queue => 'rets').refresh_from_mls
+      p.delay(:priority => 10, :queue => 'rets').refresh_from_mls
 
       resp = Caboose::StdClass.new
       resp.success = "The property's info is being updated from MLS. This may take a few minutes depending on how many images it has."
