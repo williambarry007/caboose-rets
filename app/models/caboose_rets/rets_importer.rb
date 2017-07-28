@@ -318,7 +318,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.log "Getting coords for Matrix_Unique_ID #{p.matrix_unique_id}..."
     coords = self.coords_from_address(CGI::escape "#{p.street_number} #{p.street_name}, #{p.city}, #{p.state_or_province} #{p.postal_code}")
     if coords.nil? || coords == false
-      self.log "Can't set coords for Matrix_Unique_ID #{p.Matrix_Unique_ID}..."
+      self.log "Can't set coords for Matrix_Unique_ID #{p.matrix_unique_id}..."
       return
     end
 
