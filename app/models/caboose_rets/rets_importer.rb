@@ -528,11 +528,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
 
 		# Start the same update process in five minutes
-		self.log2("Adding the update rets task for 5 minutes from now...")
+		self.log2("Adding the update rets task for 20 minutes from now...")
 		q = "handler like '%update_rets%'"
 		count = Delayed::Job.where(q).count
 		if count == 0 || (count == 1 && Delayed::Job.where(q).first.locked_at)
-		  self.delay(:run_at => 5.minutes.from_now, :priority => 10, :queue => 'rets').update_rets
+		  self.delay(:run_at => 20.minutes.from_now, :priority => 10, :queue => 'rets').update_rets
 		end
   end
 

@@ -12,7 +12,7 @@ module CabooseRets
 
     # @route GET /properties
     def index
-    	params[:street_num_like] = params[:street_name_like].tr('A-z', '').tr(' ', '') unless params[:street_name_like].nil?
+    	params[:street_number_like] = params[:street_name_like].tr('A-z', '').tr(' ', '') unless params[:street_name_like].nil?
     	unless params[:street_name_like].nil?
     		params[:street_name_like] = params[:street_name_like].tr('0-9', "")
     		until params[:street_name_like][0] != " " || params[:street_name_like] == ''
@@ -55,7 +55,7 @@ module CabooseRets
         'foreclosure_yn'           => '',
         'address_like'             => '',
         'street_name_like'         => '',
-        'street_num_like'          => '',
+        'street_number_like'          => '',
         'postal_code'              => '',
         'postal_code_like'         => '',        
         'status'                   => 'Active'
@@ -64,7 +64,7 @@ module CabooseRets
         'sort'            => CabooseRets::default_property_sort,
         'desc'            => false,
         'abbreviations'   => {
-        'address_like'    => 'street_num_concat_street_name_like'
+        'address_like'    => 'street_number_concat_street_name_like'
         },
         'skip'            => ['status'],
         'base_url'        => '/properties',

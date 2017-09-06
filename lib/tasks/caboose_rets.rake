@@ -61,7 +61,7 @@ namespace :caboose_rets do
 
   desc "Import Image"
   task :img => :environment do 
-    p = CabooseRets::Property.where(:matrix_unique_id => "1026532").first
+    p = CabooseRets::Property.where(:matrix_unique_id => "9233280").first
     CabooseRets::RetsImporter.download_property_images(p)
   end
 
@@ -75,7 +75,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('1026532'  , "(Matrix_Unique_ID=1026532)")
+    CabooseRets::RetsImporter.import_properties('9233280'  , "(Matrix_Unique_ID=9233280)")
   end
 
   desc "Purge rets data"

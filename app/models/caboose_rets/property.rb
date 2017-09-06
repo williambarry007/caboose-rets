@@ -18,7 +18,7 @@ class CabooseRets::Property <ActiveRecord::Base
 
     def parse(data)
         self.access                           = data['Access']
-        self.acreage                          = data['Acreage']
+        self.acreage                          = data['Acreage'].blank? ? nil : data['Acreage'].to_f
         self.acreage_source                   = data['AcreageSource']
         self.active_open_house_count          = data['ActiveOpenHouseCount']
         self.adjoining_land_use               = data['AdjoiningLandUse']
@@ -30,10 +30,10 @@ class CabooseRets::Property <ActiveRecord::Base
         self.available_date                   = data['AvailableDate']
         self.basement                         = data['Basement']
         self.basement_yn                      = data['BasementYN']
-        self.baths_full                       = data['BathsFull']
-        self.baths_half                       = data['BathsHalf']
-        self.baths_total                      = data['BathsTotal']
-        self.beds_total                       = data['BedsTotal']
+        self.baths_full                       = data['BathsFull'].blank? ? nil : data['BathsFull'].to_i
+        self.baths_half                       = data['BathsHalf'].blank? ? nil : data['BathsHalf'].to_i
+        self.baths_total                      = data['BathsTotal'].blank? ? nil : data['BathsTotal'].to_f
+        self.beds_total                       = data['BedsTotal'].blank? ? nil : data['BedsTotal'].to_i
         self.book_number                      = data['BookNumber']
         self.book_page                        = data['BookPage']
         self.book_type                        = data['BookType']
@@ -110,7 +110,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.list_office_mls_id               = data['ListOfficeMLSID']
         self.list_office_name                 = data['ListOfficeName']
         self.list_office_phone                = data['ListOfficePhone']
-        self.list_price                       = data['ListPrice']
+        self.list_price                       = data['ListPrice'].blank? ? nil : data['ListPrice'].to_f
         self.lot_description                  = data['LotDescription']
         self.lot_dimensions                   = data['LotDimensions']
         self.lot_dim_source                   = data['LotDimSource']
@@ -164,7 +164,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.sold_terms                       = data['SoldTerms']
         self.sprinkler                        = data['Sprinkler']
         self.sqft_source                      = data['SqftSource']
-        self.sqft_total                       = data['SqFtTotal']
+        self.sqft_total                       = data['SqFtTotal'].blank? ? nil : data['SqFtTotal'].to_f
         self.state_or_province                = data['StateOrProvince']
         self.status                           = data['Status']
         self.status_contractual_search_date   = data['StatusContractualSearchDate']
