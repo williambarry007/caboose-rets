@@ -94,7 +94,7 @@ module CabooseRets
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_number => params[:mls_number]).exists?
       if @property.nil?
         @mls_number = params[:mls_number]
-        CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
+      #  CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
         render 'properties/property_not_exists'
         return
       end
@@ -109,7 +109,7 @@ module CabooseRets
 
       if @property.nil?
        @mls = params[:mls]
-       CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
+    #   CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
        render 'properties/property_not_exists'
        return
       end

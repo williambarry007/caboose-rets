@@ -1,8 +1,8 @@
-<h1>Import Property from MLS</h1>
+<h1>Import Property from Matrix</h1>
 
 <form action='/admin/rets/import' method='post' id='import_form' onsubmit="import_property(); return false;">
 <input type='hidden' name='authenticity_token' value='<%= form_authenticity_token %>' />
-<p><input type='text' name='mls' id='mls' placeholder='MLS #' value="" style='width: 300px;' /></p>
+<p><input type='text' name='mls' id='mls' placeholder='Matrix Unique ID #' value="" style='width: 300px;' /></p>
 <div id='message'></div>
 <p><input type='submit' value='Import Property' /></p>
 </form>
@@ -12,7 +12,7 @@
 
 function import_property()
 {
-  $('#message').html("<p class='loading'>Importing property from MLS...</p>");
+  $('#message').html("<p class='loading'>Importing property from Matrix...</p>");
   $.ajax({
     url: '/admin/rets/import',
     type: 'post',

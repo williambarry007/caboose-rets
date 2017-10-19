@@ -151,9 +151,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   # def self.import_property(mui, save_images = true)
-  #   self.import('Listinng', "(Matrix_Unique_ID=*#{mui}*)")
-  #   p = CabooseRets::Property.where(:id => id.to_i).first
-  #   self.download_property_images(p, save_images)
+  #   self.import('Listing', "(Matrix_Unique_ID=#{mui})")
+  #   p = CabooseRets::Property.where(:matrix_unique_id => mui.to_s).first
+  #   if p != nil
+  #     self.download_property_images(p)
+  #     self.update_coords(p)
+  #   else
+  #     self.log("No Property associated with #{mui}")
+  #   end
   # end
 
   def self.import_properties(mui, save_images = true)

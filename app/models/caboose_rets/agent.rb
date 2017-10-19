@@ -29,14 +29,14 @@ class CabooseRets::Agent < ActiveRecord::Base
     end
   end
   
-  def refresh_from_mls        
-    CabooseRets::RetsImporter.import('Listing',"(Matrix_Unique_ID=#{self.matrix_unique_id})")
+  def refresh_from_mls
+    CabooseRets::RetsImporter.import('Agent',"(Matrix_Unique_ID=#{self.matrix_unique_id})")
     CabooseRets::RetsImporter.download_property_images(self)
   end
   
   def self.refresh_from_mls(agent_number)
     CabooseRets::RetsImporter.import('Agent', "(Agent_Number=#{self.agent_number})")
-    CabooseRets::RetsImporter.import_property(matrix_unique_id)          
+    CabooseRets::RetsImporter.import_agent(self.matrix_unique_id)          
   end
     
   def parse(data)

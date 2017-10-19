@@ -13,7 +13,7 @@ class CabooseRets::Property <ActiveRecord::Base
     def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
 
     def refresh_from_mls
-        CabooseRets::RetsImporter.import_property(self.matrix_unique_id)
+        CabooseRets::RetsImporter.import_properties(self.matrix_unique_id, false)
     end
 
     def parse(data)
