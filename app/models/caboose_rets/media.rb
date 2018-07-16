@@ -9,7 +9,8 @@ class CabooseRets::Media < ActiveRecord::Base
     :styles => {
       :tiny  => '160x120>',
       :thumb => '400x300>',
-      :large => '640x480>'
+      :large => '640x480>',
+      :huge => '1200x1200>'
     }
   do_not_validate_attachment_file_type :image
   attr_accessible :date_modified, :file_name, :media_id, :media_order, :media_remarks, :media_type, :mls, :url

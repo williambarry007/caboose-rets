@@ -239,7 +239,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.log "Saving images for #{p.matrix_unique_id}..."
     begin
       # url = "http://rets.wamls.mlsmatrix.com/rets/GetObject.ashx?Type=Photo&Resource=Property&ID=1026514:1"
-      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+      self.client.get_object(:resource => 'Property', :type => 'LargePhoto', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
         m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['object-id']).first
         m = CabooseRets::Media.new if m.nil?
 
@@ -532,7 +532,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		  self.unlock_task_if_last_updated(task_started)
     end
 
-		# Start the same update process in five minutes
+		# Start the same update process in 20 minutes
 		self.log2("Adding the update rets task for 20 minutes from now...")
 		q = "handler like '%update_rets%'"
 		count = Delayed::Job.where(q).count
