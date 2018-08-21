@@ -1,15 +1,72 @@
 <h1>Edit Agent</h1>
-<%= render :partial => 'caboose_rets/agents/admin_top_nav' %>
 
-<div id='agent_<%= @agent.id %>_hide'         ></div>
-<div id='agent_<%= @agent.id %>_assistant_to' ></div>
-<div id='agent_<%= @agent.id %>_designation'  ></div>
+<p class="fixed">
+  <span class="title">First Name</span>
+  <span class="value"><%= @agent.first_name %></span>
+</p>
 
-<p style='clear: both;'><input type='button' value='< Back' onclick="window.location='/admin/agents';" /></p>
+<p class="fixed">
+  <span class="title">Last Name</span>
+  <span class="value"><%= @agent.last_name %></span>
+</p>
+<p class="fixed">
+  <span class="title"><%= 'email'.titleize %></span>
+  <span class="value"><%= @agent.email %></span>
+</p>
+<p class="fixed">
+  <span class="title"><%= 'cell_phone'.titleize %></span>
+  <span class="value"><%= @agent.cell_phone %></span>
+</p>
+<p class="fixed">
+  <span class="title"><%= 'office_phone'.titleize %></span>
+  <span class="value"><%= @agent.office_phone %></span>
+</p>
+<p class="fixed">
+  <span class="title"><%= 'direct_work_phone'.titleize %></span>
+  <span class="value"><%= @agent.direct_work_phone %></span>
+</p>
+<p class="fixed">
+  <span class="title"><%= 'fax_phone'.titleize %></span>
+  <span class="value"><%= @agent.fax_phone %></span>
+</p>
+<p class="fixed">
+  <span class="title">MLS ID</span>
+  <span class="value"><%= @agent.mls_id %></span>
+</p>
+
+
+<div id="agent_<%= @agent.id %>_hide"></div>
+
+<div class="richtext-holder">
+  <h5>Bio</h5>
+  <div id="agent_<%= @agent.id %>_bio"></div>
+</div>
+
+<div id="agent_<%= @agent.id %>_image"></div>
+
+<div id="message"></div>
+
+<% content_for :caboose_css do %>
+<style>
+  p.fixed span.title {
+    font-weight: bold;
+  }
+  span.title::after {
+    content: ":";
+  }
+  .richtext-holder {
+    margin: 20px 0;
+  }
+  .richtext-holder h5 {
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+  }
+</style>
+<% end %>
 
 <% content_for :caboose_js do %>
 <%= javascript_include_tag "caboose/model/all" %>
-<script type='text/javascript'>
+<script type="text/javascript">
 $(document).ready(function() {
   m = new ModelBinder({
     name: 'Agent',
@@ -17,14 +74,12 @@ $(document).ready(function() {
     update_url: '/admin/agents/<%= @agent.id %>',
     authenticity_token: '<%= form_authenticity_token %>',
     attributes: [
-      { name: 'hide'            , nice_name: 'Hide from website'  , type: 'checkbox'  , value: <%= raw @agent.hide                        %>, width: 400 },
-      { name: 'assistant_to'    , nice_name: 'Assistant To'       , type: 'select'    , value: <%= raw Caboose.json(@agent.assistant_to)  %>, width: 400, text: <%= raw Caboose.json(@boss ? "#{@boss.first_name} #{@boss.last_name}" : 'empty') %>, options_url: '/admin/agents/assistant-to-options', empty_text: 'Not an assistant' },
-      { name: 'designation'     , nice_name: 'Designation'        , type: 'text'      , value: <%= raw Caboose.json(@agent.designation)   %>, width: 400 }
+      { name: 'hide', nice_name: 'Hide', type: 'checkbox', value: <%== Caboose.json(@agent_meta.hide) %>, width: 500, height: 300 },
+      { name: 'bio', nice_name: 'Bio', type: 'richtext', value: <%== Caboose.json(@agent_meta.bio) %>, width: 500, height: 300 },
+      { name: 'image'  , nice_name: 'Image'   , type: 'image'  , value: <%= raw Caboose.json(@agent_meta.image ? @agent_meta.image.url(:thumb) : 'http://placehold.it?300x300') %>, width: 800, update_url: '/admin/agents/<%= @agent.id %>/image' }
     ]
-  });
-});
-$(window).load(function() {
-  var modal = new CabooseModal(800);
+  });  
 });
 </script>
+<%== caboose_tinymce %>
 <% end %>

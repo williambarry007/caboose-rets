@@ -33,7 +33,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :phone_toll_free              , :text ],
         [ :phone_voice_mail             , :text ],        
         [ :photo_count                  , :text ],
-        [ :photo_modification_timestamp , :text ]      
+        [ :photo_modification_timestamp , :text ],
+        [ :sort_order , :integer ]            
       ],
       CabooseRets::AgentMeta => [
         [ :la_code             , :string     ],

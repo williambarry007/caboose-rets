@@ -2,160 +2,117 @@
 module CabooseRets
   class AgentsController < ApplicationController
 
-    # GET /agents
+    # @route GET /agents
     def index
-      @agents     = Agent.where("office_mls_id = '46' ").order("last_name, first_name")
-      @agent      = Agent.where(:mls_id => '048540000').first
-      @assistants = Agent.where(:assistant_to => '048540000').order("last_name, first_name")
+      @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).reject{ |a| (a.meta && a.meta.hide == true) }
     end
 
-    # GET /agents/:mls_id
+    # @route GET /agents/:mls_id
     def details
-      mls_id = params[:mls_id]
-      @agents = Agent.where("mls_id = '46'").order("last_name, first_name")
-      @agent = Agent.where(:mls_id => mls_id).first || Agent.where(:mls_id => '048540000').first      
-      # @assistants = Agent.where(:assistant_to => la_code).order("last_name, first_name")
-      @next = Agent.where("\'mls_id\' > \'#{mls_id}\' AND \'mls_id\' <> \'048540000\' AND \'office_mls_id\' = \'46\'").order("last_name, first_name").first
-      @prev = Agent.where("\'mls_id\' < \'#{mls_id}\' AND \'mls_id\' <> \'048540000\' AND \'office_mls_id\' = \'46\'").order("last_name, first_name").first
-    end
-
-    # GET /agents/:mls_id/listings
-    def listings
       @agent = Agent.where(:mls_id => params[:mls_id]).first
-      is_agents = "mls_id = ? AND status = 'Active'"
-      # is_coagents = "co_la_code = ? AND status = 'Active'"
-
-      properties = Property.where(is_agents, params[:mls_id])
-      # residential_properties += Property.where(is_coagents, params[:mls_id]).select{ |p| defined? p && p.mls_acct }
-
-      @property_groups = [
-        { type: 'Listing' , title: 'Property Listings' , url_prefix: 'properties' , properties: properties }        
-      ]
     end
 
     #=============================================================================
     # Admin functions
     #=============================================================================
 
-    # GET /admin/agents
+    # @route GET /admin/agents
     def admin_index
-      return if !user_is_allowed('agents', 'view')
+      return unless (user_is_allowed_to 'view', 'agents')     
+      render :layout => 'caboose/admin'       
+    end
 
-      @gen = Caboose::PageBarGenerator.new(params, {
-          'office_mls_id'   => '',
-          'mls_id'          => '',
-          'first_name_like' => '',
-          'last_name_like'  => ''
-        },{
-          'model'       => 'CabooseRets::Agent',
-          'sort'        => 'last_name, first_name',
-          'desc'        => false,
-          'base_url'    => '/admin/agents',
-          'use_url_params'  => false
+    # @route GET /admin/agents/json
+    def admin_json 
+      render :json => false and return if !user_is_allowed_to 'view', 'agents'
+      where = "(office_mls_id = '#{@site.rets_office_id}')"
+      pager = Caboose::Pager.new(params, {
+        'first_name_like' => '',
+        'last_name_like' => ''
+      }, {
+        'model' => 'CabooseRets::Agent',
+        'sort'  => 'last_name',
+        'desc'  => 'false',
+        'base_url' => '/admin/agents',
+        'items_per_page' => 50,
+        'additional_where' => [ (where) ],
       })
-      @agents = @gen.items
-      render :layout => 'caboose/admin'
+      render :json => {
+        :pager => pager,
+        :models => pager.items
+      } 
     end
 
-    # GET /admin/agents/:id/edit
-    def admin_edit
-      return if !user_is_allowed('agents', 'edit')
-      @agent = Agent.find(params[:id])
-      @boss = @agent.assistant_to.nil? || @agent.assistant_to.strip.length == 0 ? nil : Agent.where(:mls_id => @agent.assistant_to).first
-      render :layout => 'caboose/admin'
+    # @route GET /admin/agents/:id/json
+    def admin_json_single
+      render :json => false and return if !user_is_allowed_to 'edit', 'agents'
+      prop = Agent.find(params[:id])
+      render :json => prop
     end
 
-    # GET /admin/agents/:id/edit-bio
-    def admin_edit_bio
-      return if !user_is_allowed('agents', 'edit')
-      @agent = Agent.find(params[:id])
-      render :layout => 'caboose/admin'
-    end
-
-    # GET /admin/agents/:id/edit-contact-info
-    def admin_edit_contact_info
-      return if !user_is_allowed('agents', 'edit')
-      @agent = Agent.find(params[:id])
-      render :layout => 'caboose/admin'
-    end
-
-    # GET /admin/agents/:id/edit-mls-info
-    def admin_edit_mls_info
-      return if !user_is_allowed('agents', 'edit')
-      @agent = Agent.find(params[:id])
-      render :layout => 'caboose/admin'
-    end
-
-    # POST /admin/agents/:id
-    def admin_update
-      Caboose.log(params)
-      return if !user_is_allowed('agents', 'edit')
-
-      resp = Caboose::StdClass.new({'attributes' => {}})
-      agent = Agent.find(params[:id])
-
-      save = true
-      params.each do |name,value|
-        case name
-          when 'hide'
-            agent.hide = value
-          when 'contact_info'
-            agent.contact_info = value
-          when 'bio'
-            agent.bio = value
-          when 'designation'
-            agent.designation = value
-          when 'assistant_to'
-            agent.assistant_to = value
-            if !value.nil? && value.length > 0 && Agent.exists?(:mls_id => value)
-              boss = Agent.where(:mls_id => value).first
-              resp.attributes['assistant_to'] = { 'text' => "#{boss.first_name} #{boss.last_name}" }
-            else
-              resp.attributes['assistant_to'] = { 'text' => "Not an assistant" }
-            end
-        end
+    # @route GET /admin/agents/edit-sort
+    def admin_edit_sort
+      if !user_is_allowed_to 'edit', 'agents'
+        Caboose.log("invalid permissions")
+      else
+        @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).all
+        render :layout => 'caboose/admin'  
       end
-      resp.success = save && agent.save
+    end
+
+    # @route PUT /admin/agents/update-sort
+    def admin_update_sort
+      resp = Caboose::StdClass.new
+      if !user_is_allowed_to 'edit', 'agents'
+        Caboose.log("invalid permissions")
+      else
+        pa = Agent.find(params[:pa_id])
+        pa.sort_order = params[:sort_order]
+        pa.save
+        resp.success = true
+      end
       render :json => resp
     end
 
-    # GET /admin/agents/:id/refresh
-    def admin_refresh
+    # @route GET /admin/agents/:id
+    def admin_edit
+      return unless (user_is_allowed_to 'edit', 'agents')
+      @agent = Agent.find(params[:id])
+      @agent_meta = @agent.meta ? @agent.meta : AgentMeta.create(:la_code => @agent.matrix_unique_id) if @agent
+      render :layout => 'caboose/admin'       
+    end
+
+    # @route PUT /admin/agents/:id
+    def admin_update
+      return unless (user_is_allowed_to 'edit', 'agents')
+      resp = Caboose::StdClass.new
       agent = Agent.find(params[:id])
-      RetsImporter.import("(LA_LA_CODE=#{agent.mls_id})", 'Agent', 'AGT')
-      RetsImporter.download_agent_images(agent)
-      render :json => Caboose::StdClass.new({ 'success' => "The agent's info has been updated from MLS." })
+      meta = agent.meta ? agent.meta : AgentMeta.create(:la_code => agent.matrix_unique_id)
+      params.each do |k,v|
+        case k
+          when "bio" then meta.bio = v
+          when "hide" then meta.hide = v
+        end
+      end
+      agent.save
+      meta.save
+      resp.success = true
+      render :json => resp
     end
 
-    # GET /admin/agents/assistant-to-options
-    def admin_assistant_to_options
-      options = [{
-        'value' => '',
-        'text' => '-- Not an assistant --'
-      }]
-      Agent.where(:office_mls_id => '46').reorder('last_name, first_name').all.each do |a|
-        options << {
-          'value' => a.mls_id,
-          'text' => "#{a.first_name} #{a.last_name}"
-        }
-      end
-      render :json => options
+
+    # @route POST /admin/agents/:id/image
+    def admin_update_image
+      render :json => false and return unless user_is_allowed_to 'edit', 'agents'    
+      resp = Caboose::StdClass.new({ 'attributes' => {} })
+      agent = Agent.find(params[:id])
+      meta = agent.meta ? agent.meta : AgentMeta.create(:la_code => agent.matrix_unique_id) if agent
+      meta.image = params[:image]
+      meta.save
+      resp.attributes['image'] = { 'value' => meta.image.url(:thumb) }    
+      render :text => resp.to_json
     end
 
-    # GET /admin/agents/agent_options
-    def agent_options
-      options = [{
-        'value' => '',
-        'text' => '-- No Agent --'
-      }]
-      Agent.where(:office_mls_id => '46').reorder('last_name, first_name').all.each do |a|
-        options << {
-          'value' => a.mls_id,
-          'text' => "#{a.first_name} #{a.last_name}"
-        }
-      end
-      render :json => options
-    end
 
   end
 end

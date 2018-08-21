@@ -1,48 +1,58 @@
+<%= raw @crumbtrail.print({
+  '/admin' => 'Admin',
+  '/admin/agents' => 'Agents'  
+}) %>
 
-<style type='text/css'>
-#search_form_wrapper { margin-bottom: 10px; position: absolute; top:0; right: 0; }
-</style>
+<h1>Agent</h1>
 
-<h1>Residential Agents</h1>
-
-<div id='search_form_wrapper'>
-  <form action='/admin/agents' method='get' id='search_form'>    
-    <input type='text' name='first_name_like' placeholder='First name' value="<%= @gen.params['first_name_like'] %>" style='width: 100px;' />
-    <input type='text' name='last_name_like'  placeholder='Last name'  value="<%= @gen.params['last_name_like']  %>" style='width: 100px;' />
-    <input type='submit' value='Search' />
-  </form>
-</div>
-
-<% if @agents.count > 0 %>
-  <table class='data' id='agents_table'>
-    <tr>
-      <%= raw @gen.sortable_table_headings({
-          'la_code'               => 'Agent Code',
-          'last_name, first_name' => 'Name',
-          'lo_code'               => 'Office',
-          'hide'                  => 'Hide'
-  			})
-  		%>
-    </tr>
-    <% @agents.each do |a| %>
-      <% office = a.office %>
-      <tr onclick="window.location='/admin/agents/<%= a.id %>/edit';">
-        <td><%= a.la_code %></td>
-        <td><%= "#{a.first_name} #{a.last_name}" %></td>
-        <td><%= office ? office.lo_name : a.lo_code %></td>
-        <td><%= a.hide ? 'Yes' : 'No' %></td>
-      </tr>
-    <% end %>
-  </table>
-  <p><%= raw @gen.generate %></p>
-<% else %>
-  <p>No agents met your search.</p>
+<% if @logged_in_user && @logged_in_user.is_allowed('add', 'agent') %>
+  <a href="/admin/agents/edit-sort" class="caboose-btn">Edit Sort Order</a>
 <% end %>
 
+
+<div id='agents'></div>
+
+<br /><br />
+
+
+<% content_for :caboose_css do %>
+<style>
+ #agents_new  { display: none; }
+</style>
+<% end %>
+
+
 <% content_for :caboose_js do %>
+<%= javascript_include_tag 'caboose/model/all' %>
 <script type='text/javascript'>
-$(document).ready(function() {  
-  var modal = new CabooseModal(800);
+
+$(document).ready(function() {
+  var that = this;
+  var table = new IndexTable({    
+    form_authenticity_token: '<%= form_authenticity_token %>',
+    container: 'agents',
+    base_url: '/admin/agents',
+    allow_bulk_edit: false,
+    allow_bulk_delete: false,
+    allow_duplicate: false,
+    allow_advanced_edit: true,
+    allow_bulk_import: false,
+    no_models_text: "You do not have access to edit any agent profiles.",
+    fields: [
+      { show: true  , editable: false, bulk_edit: false, name: 'first_name'        , nice_name: 'First Name'        , sort: 'first_name'        , type: 'text'   , value: function(r) { return r.first_name    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'last_name'        , nice_name: 'Last Name'        , sort: 'last_name'        , type: 'text'   , value: function(r) { return r.last_name    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'mls_id'        , nice_name: 'MLS ID'        , sort: 'mls_id'        , type: 'text'   , value: function(r) { return r.mls_id    }, width: 200 }
+    ],
+    new_model_text: 'New Agent',
+    new_model_fields: [
+      { name: 'first_name', nice_name: 'First Name', type: 'text', width: 400 },
+      { name: 'last_name', nice_name: 'Last Name', type: 'text', width: 400 }
+    ],
+    search_fields: [                                                           
+      { name: 'first_name_like'      , nice_name: 'First Name'  , type: 'text'  },
+      { name: 'last_name_like'      , nice_name: 'Last Name'  , type: 'text'  }
+    ]
+  });
 });
 </script>
 <% end %>

@@ -1,0 +1,82 @@
+<h1>Edit Sort Order</h1>
+
+<a href="/admin/agents" class="caboose-btn">Back to Agents</a>
+
+		
+		<ul class="sortable" id="sortable_agents">
+	
+			<% @agents.each do |agent| %>
+				
+				<li class="clearfix ui-state-default" data-paid="<%= agent.id %>">
+          <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
+          <span class="resource-title"><%= agent.full_name %></span>
+        </li>
+
+			<% end %>
+		</ul>
+
+<% content_for :caboose_css do %>
+<%= stylesheet_link_tag "jquery-ui/sortable" %>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<style>
+	.sortable {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .sortable li {
+      cursor: ns-resize;
+      width: 800px;
+      padding: 3px 6px;
+    }
+    .sortable li a {
+      color: #0357FF;
+      font-size: 14px;
+    }
+    .sortable li a:hover {
+      text-decoration: underline;
+    }
+    .ui-state-default .ui-icon  {
+      display: inline-block;
+    }
+</style>
+<% end %>
+
+<% content_for :caboose_js do %>
+<script>
+	function change_sort_order(pa_id, sort_order) {
+  $.ajax({
+    url: '/admin/agents/update-sort',
+    type: 'put',
+    data: {
+    	pa_id: pa_id,
+      sort_order: sort_order
+    },
+    success: function(resp) {
+      if (resp.success) {
+
+      }
+    }
+  });
+}
+$(document).ready(function() {
+
+	$.each( $(".sortable"), function(k,v) {
+		var sort = $(v);
+		sort.sortable({
+	    update: function(event, ui) {
+	      var index = ui.item.index();
+	      var start = ui.item.data('start');
+	      var pa = ui.item.data('paid');
+	      for(var i=0;i <= sort.find("li").length; i++){
+	        var res = sort.find('li:nth-child(' + i + ')').data('paid');
+	        if (res)
+	          change_sort_order(res, i);
+	      }
+	    }
+	  });
+
+	});
+
+});
+</script>
+<% end %>

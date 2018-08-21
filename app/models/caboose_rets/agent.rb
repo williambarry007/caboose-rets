@@ -1,9 +1,9 @@
 class CabooseRets::Agent < ActiveRecord::Base
   self.table_name = "rets_agents"  
   
-  has_one :meta, :class_name => 'AgentMeta', :primary_key => 'matrix_unique_id', :foreign_key => 'matrix_unique_id'
+  has_one :meta, :class_name => 'AgentMeta', :primary_key => 'matrix_unique_id', :foreign_key => 'la_code'
   has_many :properties
-  attr_accessible :id, :agent_number, :matrix_unique_id
+  attr_accessible :id, :agent_number, :matrix_unique_id, :sort_order
   after_initialize :fix_name
   
   def image
