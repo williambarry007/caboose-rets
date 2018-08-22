@@ -10,6 +10,7 @@ module CabooseRets
     # @route GET /agents/:mls_id
     def details
       @agent = Agent.where(:mls_id => params[:mls_id]).first
+      @listings = Property.where(:list_agent_mls_id => @agent.mls_id).all
     end
 
     #=============================================================================
