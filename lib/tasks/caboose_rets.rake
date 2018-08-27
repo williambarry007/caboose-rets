@@ -65,6 +65,16 @@ namespace :caboose_rets do
     CabooseRets::RetsImporter.download_property_images(p)
   end
 
+  desc "Reimports Property Images"
+  task :reimport_property_images => :environment do
+    props = CabooseRets::Property.all
+    props.each do |p|
+      CabooseRets::RetsImporter.log("- Reimporting images for #{p.matrix_unique_id}...")
+      CabooseRets::Media.where(:media_mui => p.matrix_unique_id, :media_type => 'Photo').destroy_all
+      CabooseRets::RetsImporter.download_property_images(p)
+    end
+  end
+
   desc "Import rets data"
   task :import => :environment do
     CabooseRets::RetsImporter.import('Agent'    , "(Matrix_Unique_ID=0+)")
