@@ -110,7 +110,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.list_office_mls_id               = data['ListOfficeMLSID']
         self.list_office_name                 = data['ListOfficeName']
         self.list_office_phone                = data['ListOfficePhone']
-        self.list_price                       = data['ListPrice'].blank? ? nil : data['ListPrice'].to_f
+        self.list_price                       = data['ListPrice'].blank? ? nil : data['ListPrice'].to_i
         self.lot_description                  = data['LotDescription']
         self.lot_dimensions                   = data['LotDimensions']
         self.lot_dim_source                   = data['LotDimSource']

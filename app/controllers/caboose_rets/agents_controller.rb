@@ -10,7 +10,12 @@ module CabooseRets
     # @route GET /agents/:mls_id
     def details
       @agent = Agent.where(:mls_id => params[:mls_id]).first
-      @listings = Property.where(:list_agent_mls_id => @agent.mls_id).all
+      @listings = Property.where(:list_agent_mls_id => @agent.mls_id).order('list_price desc').all
+    end
+
+    # @route GET /agents/:mls_id/contact
+    def contact
+      @agent = Agent.where(:mls_id => params[:mls_id]).first
     end
 
     #=============================================================================
@@ -40,7 +45,7 @@ module CabooseRets
       })
       render :json => {
         :pager => pager,
-        :models => pager.items
+        :models => pager.items.as_json(:include => [:meta])# , :collection, :color, :design_look, :gem_stone, 
       } 
     end
 
@@ -67,9 +72,11 @@ module CabooseRets
       if !user_is_allowed_to 'edit', 'agents'
         Caboose.log("invalid permissions")
       else
-        pa = Agent.find(params[:pa_id])
-        pa.sort_order = params[:sort_order]
-        pa.save
+        params[:agent].each_with_index do |ag, ind|
+          agent = Agent.find(ag)
+          agent.sort_order = ind
+          agent.save
+        end
         resp.success = true
       end
       render :json => resp

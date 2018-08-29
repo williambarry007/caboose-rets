@@ -41,6 +41,7 @@ $(document).ready(function() {
     fields: [
       { show: true  , editable: false, bulk_edit: false, name: 'first_name'        , nice_name: 'First Name'        , sort: 'first_name'        , type: 'text'   , value: function(r) { return r.first_name    }, width: 200 },
       { show: true  , editable: false, bulk_edit: false, name: 'last_name'        , nice_name: 'Last Name'        , sort: 'last_name'        , type: 'text'   , value: function(r) { return r.last_name    }, width: 200 },
+      { show: true  , editable: true, bulk_edit: true, name: 'hide'        , nice_name: 'Hide'        , sort: 'hide'        , type: 'checkbox'   , text: function(r) { return r.meta && r.meta.hide ? 'Yes' : 'No'   }, value: function(r) { return r.meta && r.meta.hide ? true : false   }, width: 200 },
       { show: true  , editable: false, bulk_edit: false, name: 'mls_id'        , nice_name: 'MLS ID'        , sort: 'mls_id'        , type: 'text'   , value: function(r) { return r.mls_id    }, width: 200 }
     ],
     new_model_text: 'New Agent',

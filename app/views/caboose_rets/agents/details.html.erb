@@ -1,9 +1,1 @@
-<div class="agent-details">
-	<div class="constrain">
-		<h2><%= @agent.first_name %> <%= @agent.last_name %></h2>
-		<% if @agent.meta %>
-			<img src="<%= @agent.meta.image.url(:medium) %>" alt="<%= @agent.full_name %>" />
-			<div class="bio richtext"><%== @agent.meta.bio %></div>
-		<% end %>
-	</div>
-</div>
+<p>Override in sitefolder/_rets_agent_details.html.erb</p>

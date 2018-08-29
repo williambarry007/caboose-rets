@@ -2,21 +2,16 @@
 
 <a href="/admin/agents" class="caboose-btn">Back to Agents</a>
 
-		
-		<ul class="sortable" id="sortable_agents">
-	
-			<% @agents.each do |agent| %>
-				
-				<li class="clearfix ui-state-default" data-paid="<%= agent.id %>">
-          <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
-          <span class="resource-title"><%= agent.full_name %></span>
-        </li>
-
-			<% end %>
-		</ul>
+<ul class="sortable" id="sortable_agents">
+	<% @agents.each do |agent| %>
+		<li id="agent_<%= agent.id %>" class="clearfix ui-state-default" data-paid="<%= agent.id %>">
+      <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
+      <span class="resource-title"><%= agent.full_name %></span>
+    </li>
+	<% end %>
+</ul>
 
 <% content_for :caboose_css do %>
-<%= stylesheet_link_tag "jquery-ui/sortable" %>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 <style>
 	.sortable {
@@ -43,40 +38,21 @@
 
 <% content_for :caboose_js do %>
 <script>
-	function change_sort_order(pa_id, sort_order) {
+	function change_sort_order(data) {
   $.ajax({
-    url: '/admin/agents/update-sort',
-    type: 'put',
-    data: {
-    	pa_id: pa_id,
-      sort_order: sort_order
-    },
-    success: function(resp) {
-      if (resp.success) {
-
+      url: '/admin/agents/update-sort',
+      type: 'put',
+      data: data,
+      success: function(resp) { }
+    });
+  }
+  $(document).ready(function() {
+  	var sort = $(".sortable");
+  	sort.sortable({
+      update: function(event, ui) {
+        change_sort_order( sort.sortable('serialize') );
       }
-    }
+    });
   });
-}
-$(document).ready(function() {
-
-	$.each( $(".sortable"), function(k,v) {
-		var sort = $(v);
-		sort.sortable({
-	    update: function(event, ui) {
-	      var index = ui.item.index();
-	      var start = ui.item.data('start');
-	      var pa = ui.item.data('paid');
-	      for(var i=0;i <= sort.find("li").length; i++){
-	        var res = sort.find('li:nth-child(' + i + ')').data('paid');
-	        if (res)
-	          change_sort_order(res, i);
-	      }
-	    }
-	  });
-
-	});
-
-});
 </script>
 <% end %>

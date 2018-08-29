@@ -1,14 +1,1 @@
-<div class="agents-wrapper">
-	<div class="constrain">
-		<h2>Our Agents</h2>
-		<div class="agent-grid">
-			<% @agents.each do |agent| %>
-				<% pic = agent.meta ? agent.meta.image.url(:large) : 'https://cabooseit.s3.amazonaws.com/assets/shared/default_profile.png' %>
-				<a href="/agents/<%= agent.mls_id %>" class="agent">
-					<div class="photo" style="background-image:url(<%= pic %>);"></div>
-					<h5><%= agent.first_name %> <%= agent.last_name %></h5>
-				</a>
-			<% end %>
-		</div>
-	</div>
-</div>
+<p>Override in sitefolder/_rets_agent_index.html.erb</p>
