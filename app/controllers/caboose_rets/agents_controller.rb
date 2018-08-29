@@ -2,20 +2,25 @@
 module CabooseRets
   class AgentsController < ApplicationController
 
+    # @route GET /real-estate/agents
     # @route GET /agents
     def index
       @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).reject{ |a| (a.meta && a.meta.hide == true) }
     end
 
+    # @route GET /real-estate/agents/:slug
     # @route GET /agents/:mls_id
     def details
-      @agent = Agent.where(:mls_id => params[:mls_id]).first
+      @agent = Agent.where(:mls_id => params[:mls_id], :office_mls_id => @site.rets_office_id).first if !params[:mls_id].blank?
+      @agent = Agent.where(:slug => params[:slug], :office_mls_id => @site.rets_office_id).first if !params[:slug].blank?
       @listings = Property.where(:list_agent_mls_id => @agent.mls_id).order('list_price desc').all
     end
 
+    # @route GET /real-estate/agents/:slug/contact
     # @route GET /agents/:mls_id/contact
     def contact
-      @agent = Agent.where(:mls_id => params[:mls_id]).first
+      @agent = Agent.where(:mls_id => params[:mls_id], :office_mls_id => @site.rets_office_id).first if !params[:mls_id].blank?
+      @agent = Agent.where(:slug => params[:slug], :office_mls_id => @site.rets_office_id).first if !params[:slug].blank?
     end
 
     #=============================================================================
@@ -99,6 +104,7 @@ module CabooseRets
       params.each do |k,v|
         case k
           when "bio" then meta.bio = v
+          when "slug" then agent.slug = v
           when "hide" then meta.hide = v
         end
       end
