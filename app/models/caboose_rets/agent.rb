@@ -61,7 +61,8 @@ class CabooseRets::Agent < ActiveRecord::Base
     self.phone_toll_free              = data['PhoneTollFree']
     self.phone_voice_mail             = data['PhoneVoiceMail']        
     self.photo_count                  = data['PhotoCount']
-    self.photo_modification_timestamp = data['PhotoModificationTimestamp'] 
+    self.photo_modification_timestamp = data['PhotoModificationTimestamp']
+    self.slug                         = "#{data['FirstName']}-#{data['LastName']}".parameterize
   end
   
   def verify_meta_exists
