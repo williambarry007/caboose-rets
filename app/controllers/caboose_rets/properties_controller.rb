@@ -19,7 +19,7 @@ module CabooseRets
     			params[:street_name_like][0] = '' if params[:street_name_like][0].to_i == 0
     		end
     	end
-
+      where = @site && @site.id == 558 ? "(style = 'Condo')" : "()"
       @pager = Caboose::PageBarGenerator.new(params, {
         'area'                     => '',
         'area_like'                => '',      
@@ -68,7 +68,8 @@ module CabooseRets
         },
         'skip'            => ['status'],
         'base_url'        => '/properties',
-        'items_per_page'  => 10
+        'items_per_page'  => 10,
+        'additional_where' => [ (where) ]
       })
 
       @properties = @pager.items
