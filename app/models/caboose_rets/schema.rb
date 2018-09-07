@@ -239,6 +239,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :refrigerator_included_yn             , :text],
         [ :rental_rate_type                     , :text],
         [ :rent_incl                            , :text],
+        [ :representative_agent_mui             , :text],
         [ :res_style                            , :text],
         [ :restrictions                         , :text],
         [ :road_frontage                        , :text],
