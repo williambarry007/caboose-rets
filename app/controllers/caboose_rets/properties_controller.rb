@@ -19,7 +19,8 @@ module CabooseRets
     			params[:street_name_like][0] = '' if params[:street_name_like][0].to_i == 0
     		end
     	end
-      where = @site && @site.id == 558 ? "(style = 'Condo')" : "()"
+      where = @site && @site.id == 558 ? "(style = 'Condo' OR res_style = 'Condo')" : "(id is not null)"
+      sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
       @pager = Caboose::PageBarGenerator.new(params, {
         'area'                     => '',
         'area_like'                => '',      
@@ -61,8 +62,8 @@ module CabooseRets
         'status'                   => 'Active'
       },{
         'model'           => 'CabooseRets::Property',
-        'sort'            => CabooseRets::default_property_sort,
-        'desc'            => false,
+        'sort'            => sortby,
+        'desc'            => true,
         'abbreviations'   => {
         'address_like'    => 'street_number_concat_street_name_like'
         },

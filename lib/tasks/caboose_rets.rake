@@ -24,7 +24,7 @@ namespace :caboose_rets do
           :search_type => 'Property',
           :class       => 'Listing',
           :query       => "(Matrix_Unique_ID=0+)",
-          :limit       => 1,
+          :limit       => 100,
           :timeout     => -1
         }
       elsif t == 'a'      
@@ -52,7 +52,6 @@ namespace :caboose_rets do
           :timeout     => -1
         }
       end
-
       client.search(params) do |data|
         ap data
       end

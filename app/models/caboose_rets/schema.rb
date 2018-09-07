@@ -217,6 +217,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :open_house_public_count              , :text],
         [ :open_house_public_upcoming           , :text],
         [ :open_house_upcoming                  , :text],
+        [ :original_entry_timestamp             , :text],
         [ :parcel_number                        , :text],
         [ :pending_date                         , :text],
         [ :pets_allowed_yn                      , :text],

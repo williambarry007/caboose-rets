@@ -131,6 +131,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.open_house_public_count          = data['OpenHousePublicCount']
         self.open_house_public_upcoming       = data['OpenHousePublicUpcoming']
         self.open_house_upcoming              = data['OpenHouseUpcoming']
+        self.original_entry_timestamp         = data['OriginalEntryTimestamp'].blank? ? data['ListingContractDate'] : data['OriginalEntryTimestamp']
         self.parcel_number                    = data['ParcelNumber']
         self.pending_date                     = data['PendingDate']
         self.pets_allowed_yn                  = data['PetsAllowedYN']
