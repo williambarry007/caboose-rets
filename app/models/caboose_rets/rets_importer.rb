@@ -23,22 +23,19 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.get_config
+    rets_config = CabooseRets::RetsConfig.where("rets_url ILIKE ?","%mlsmatrix%").order('RANDOM()').first
     @@config = {
-      'url'                 => nil, # URL to the RETS login
-      'username'            => nil,
-      'password'            => nil,
-      'temp_path'           => nil,
-      'log_file'            => nil,
-      'media_base_url'      => nil
+      'url'                 => rets_config.rets_url,
+      'username'            => rets_config.rets_username,
+      'password'            => rets_config.rets_password
     }
-    config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
-    config = config[Rails.env]
-    config.each { |key,val| @@config[key] = val }
+    # config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
+    # config = config[Rails.env]
+    # config.each { |key,val| @@config[key] = val }
   end
 
   def self.client
     self.get_config if @@config.nil? || @@config['url'].nil?
-
     if @@rets_client.nil?
       @@rets_client = RETS::Client.login(
         :url      => @@config['url'],

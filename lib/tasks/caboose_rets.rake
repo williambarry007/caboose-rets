@@ -13,10 +13,11 @@ namespace :caboose_rets do
   desc "Do a simple search"
   task :simple_search => :environment do
     type = ['p','a','o','oh']
+    rets_config = CabooseRets::RetsConfig.where("rets_url ILIKE ?","%mlsmatrix%").order('RANDOM()').first
     client = RETS::Client.login(
-      :url      => 'http://rets.wamls.mlsmatrix.com/rets/Login.ashx',
-      :username => 'RETS_6',
-      :password => 'ellis'
+      :url      => rets_config.rets_url,
+      :username => rets_config.rets_username,
+      :password => rets_config.rets_password
     )
     type.each do |t|
       if t == 'p'
@@ -84,7 +85,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('9233280'  , "(Matrix_Unique_ID=9233280)")
+    CabooseRets::RetsImporter.import_properties('9468475'  , "(Matrix_Unique_ID=9468475)")
   end
 
   desc "Purge rets data"

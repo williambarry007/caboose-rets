@@ -322,6 +322,17 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
       ],
       Caboose::Site => [
         [ :use_rets , :boolean, { :default => false }]
+      ],
+      CabooseRets::RetsConfig => [
+        [ :site_id, :integer ],
+        [ :office_mls, :string ],
+        [ :office_mui, :string ],
+        [ :agent_mls, :string ],
+        [ :agent_mui, :string ],
+        [ :rets_url, :string ],
+        [ :rets_username, :string ],
+        [ :rets_password, :string ],
+        [ :default_sort, :string ]
       ]
   }
 end
