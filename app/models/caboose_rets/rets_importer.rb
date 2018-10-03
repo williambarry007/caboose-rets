@@ -77,7 +77,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     begin
       self.client.search(params) do |data|
-     #   self.log data
         obj = self.get_instance_with_id(class_type, data)
         if obj.nil?
           self.log("Error: object is nil")
