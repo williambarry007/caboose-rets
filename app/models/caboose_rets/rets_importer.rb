@@ -23,15 +23,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.get_config
-    rets_config = CabooseRets::RetsConfig.where("rets_url ILIKE ?","%mlsmatrix%").order('RANDOM()').first
     @@config = {
-      'url'                 => rets_config.rets_url,
-      'username'            => rets_config.rets_username,
-      'password'            => rets_config.rets_password
+      'url'                 => nil, # URL to the RETS login
+      'username'            => nil,
+      'password'            => nil,
+      'temp_path'           => nil,
+      'log_file'            => nil,
+      'media_base_url'      => nil
     }
-    # config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
-    # config = config[Rails.env]
-    # config.each { |key,val| @@config[key] = val }
+    config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
+    config = config[Rails.env]
+    config.each { |key,val| @@config[key] = val }
   end
 
   def self.client
@@ -48,11 +50,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.meta(class_type)
     case class_type
-      when 'Office'    then Caboose::StdClass.new({ :search_type => 'Office'    , :remote_key_field => 'Matrix_Unique_ID' , :local_key_field => 'matrix_unique_id'    , :local_table => 'rets_offices'      , :date_modified_field => 'MatrixModifiedDT'})
-      when 'Agent'     then Caboose::StdClass.new({ :search_type => 'Agent'     , :remote_key_field => 'Matrix_Unique_ID' , :local_key_field => 'matrix_unique_id'    , :local_table => 'rets_agents'       , :date_modified_field => 'MatrixModifiedDT'})
-      when 'OpenHouse' then Caboose::StdClass.new({ :search_type => 'OpenHouse' , :remote_key_field => 'matrix_unique_id' , :local_key_field => 'matrix_unique_id'    , :local_table => 'rets_open_houses'  , :date_modified_field => 'MatrixModifiedDT'})
-      when 'Listing'   then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'Matrix_Unique_ID' , :local_key_field => 'matrix_unique_id'    , :local_table => 'rets_properties'   , :date_modified_field => 'MatrixModifiedDT'})
-      when 'GFX'       then Caboose::StdClass.new({ :search_type => 'Media'     , :remote_key_field => 'MEDIA_ID'         , :local_key_field => 'media_id'            , :local_table => 'rets_media'        , :date_modified_field => 'DATE_MODIFIED'   })
+      when 'Office'    then Caboose::StdClass.new({ :search_type => 'Office'    , :remote_key_field => 'OfficeMlsId' , :local_key_field => 'lo_mls_id'    , :local_table => 'rets_offices'      , :date_modified_field => 'ModificationTimestamp'})
+      when 'Member'    then Caboose::StdClass.new({ :search_type => 'Member'    , :remote_key_field => 'MemberMlsId' , :local_key_field => 'mls_id'    , :local_table => 'rets_agents'       , :date_modified_field => 'ModificationTimestamp'})
+      when 'OpenHouse' then Caboose::StdClass.new({ :search_type => 'OpenHouse' , :remote_key_field => 'OpenHouseKey' , :local_key_field => 'matrix_unique_id'    , :local_table => 'rets_open_houses'  , :date_modified_field => 'ModificationTimestamp'})
+      when 'Property'  then Caboose::StdClass.new({ :search_type => 'Property'  , :remote_key_field => 'ListingId' , :local_key_field => 'mls_number'    , :local_table => 'rets_properties'   , :date_modified_field => 'ModificationTimestamp'})
+      when 'Media'     then Caboose::StdClass.new({ :search_type => 'Media'     , :remote_key_field => 'MediaObjectID'         , :local_key_field => 'media_id'            , :local_table => 'rets_media'        , :date_modified_field => 'ModificationTimestamp'   })
       end
   end
 
@@ -68,12 +70,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :search_type => m.search_type,
       :class => class_type,
       :query => query,
+    #  :limit => 3,
       :timeout => -1
     }
     obj = nil
 
     begin
       self.client.search(params) do |data|
+     #   self.log data
         obj = self.get_instance_with_id(class_type, data)
         if obj.nil?
           self.log("Error: object is nil")
@@ -91,20 +95,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.get_instance_with_id(class_type, data)
     obj = nil
+    self.log "Getting instance of #{class_type}..."
     m = case class_type
-      when 'Listing'   then CabooseRets::Property
+      when 'Property'  then CabooseRets::Property
       when 'OpenHouse' then CabooseRets::OpenHouse
-      when 'Agent'     then CabooseRets::Agent
+      when 'Member'    then CabooseRets::Agent
       when 'Office'    then CabooseRets::Office
-      when 'GFX'       then CabooseRets::Media
+      when 'Media'     then CabooseRets::Media
     end  
     obj  = case class_type
-      when 'Listing'   then m.where(:matrix_unique_id => data['Matrix_Unique_ID']).exists? ? m.where(:matrix_unique_id => data['Matrix_Unique_ID']).first : m.new(:matrix_unique_id => data['Matrix_Unique_ID'])
-      when 'OpenHouse' then m.where(:matrix_unique_id => data['matrix_unique_id']).exists? ? m.where(:matrix_unique_id => data['matrix_unique_id']).first : m.new(:matrix_unique_id => data['matrix_unique_id'])
-      when 'Agent'     then m.where(:matrix_unique_id => data['Matrix_Unique_ID']).exists? ? m.where(:matrix_unique_id => data['Matrix_Unique_ID']).first : m.new(:matrix_unique_id => data['Matrix_Unique_ID'])
-      when 'Office'    then m.where(:matrix_unique_id => data['Matrix_Unique_ID']).exists? ? m.where(:matrix_unique_id => data['Matrix_Unique_ID']).first : m.new(:matrix_unique_id => data['Matrix_Unique_ID'])
-      when 'GFX'       then m.where(:media_id => data['MEDIA_ID']      ).exists? ? m.where(:media_id => data['MEDIA_ID']      ).first : m.new(:media_id => data['MEDIA_ID']      )
+      when 'Property'  then m.where(:mls_number => data['ListingId']).exists? ? m.where(:mls_number => data['ListingId']).first : m.create(:mls_number => data['ListingId'])
+      when 'OpenHouse' then m.where(:matrix_unique_id => data['OpenHouseKey']).exists? ? m.where(:matrix_unique_id => data['OpenHouseKey']).first : m.create(:matrix_unique_id => data['OpenHouseKey'])
+      when 'Member'    then m.where(:mls_id => data['MemberMlsId']).exists? ? m.where(:mls_id => data['MemberMlsId']).first : m.create(:mls_id => data['MemberMlsId'])
+      when 'Office'    then m.where(:lo_mls_id => data['OfficeMlsId']).exists? ? m.where(:lo_mls_id => data['OfficeMlsId']).first : m.create(:lo_mls_id => data['OfficeMlsId'])
+      when 'Media'     then m.where(:media_id => data['MediaObjectID']      ).exists? ? m.where(:media_id => data['MediaObjectID']      ).first : m.create(:media_id => data['MediaObjectID']      )
     end
+    self.log "Found matching object ID #{obj.id}"
     return obj
   end
 
@@ -113,31 +119,42 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_after(date_modified, save_images = true)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Listing'  , date_modified, save_images)
+    self.log "Updating after #{date_modified}"
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Property'  , date_modified, save_images)
     self.delay(:priority => 10, :queue => 'rets').update_helper('Office'   , date_modified, save_images)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Agent'    , date_modified, save_images)
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Member'    , date_modified, save_images)
     self.delay(:priority => 10, :queue => 'rets').update_helper('OpenHouse', date_modified, save_images)
   end
 
-  def self.update_helper(class_type, date_modified, save_images = true)    
+  def self.update_helper(class_type, date_modified, save_images = true)
+    self.log "In update helper for #{class_type}"
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
+
+    statusquery = ""
+    case class_type
+      when 'Property'  then statusquery = "MlsStatus=Active"
+      when 'Office'    then statusquery = "OfficeStatus=Active"
+      when 'Member'    then statusquery = "MemberStatus=Active"
+      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
+    end
+
     params = {
       :search_type => m.search_type,
       :class => class_type,
       :select => [m.remote_key_field],
       :querytype => 'DMQL2',
-      :query => "(#{m.date_modified_field}=#{d}+)",
+      :query => "(#{m.date_modified_field}=#{d}+)AND(#{statusquery})",
       :standard_names_only => true,
       :timeout => -1
     }    
     self.log(params)
     self.client.search(params) do |data|    
       case class_type
-        when 'Listing'   then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
+        when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
         when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], save_images)
-        when 'Agent'     then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], save_images)
+        when 'Member'    then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], save_images)
         when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], save_images)
       end
     end
@@ -158,36 +175,33 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #   end
   # end
 
-  def self.import_properties(mui, save_images = true)
-    self.import('Listing', "(Matrix_Unique_ID=#{mui})")
-    p = CabooseRets::Property.where(:matrix_unique_id => mui.to_s).first
-    # p = CabooseRets::Property.create(:matrix_unique_id => mui.to_s) if p.nil?
+  def self.import_properties(mls_id, save_images = true)
+    self.import('Property', "(ListingId=#{mls_id})")
+    p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil
-      self.download_property_images(p)
+      self.download_property_images(p) if save_images
       self.update_coords(p)
     else
-      self.log("No Property associated with #{mui}")
+      self.log("No Property associated with #{mls_id}")
     end
   end
 
-  def self.import_office(mui, save_images = true)
-    self.import('Office', "(matrix_unique_id=#{mui})")
-    office = CabooseRets::Office.where(:matrix_unique_id => mui.to_s).first
-    # self.download_office_image(office) if save_images == true
+  def self.import_office(mls_id, save_images = true)
+    self.import('Office', "(OfficeMlsId=#{mls_id})")
+    office = CabooseRets::Office.where(:matrix_unique_id => mls_id.to_s).first
   end
 
-  def self.import_agent(mui, save_images = true)
-    self.import('Agent', "(Matrix_Unique_ID=#{mui})")
-    a = CabooseRets::Agent.where(:matrix_unique_id => mui.to_s).first
-    # self.download_agent_image(a) #if save_images == true
+  def self.import_agent(mls_id, save_images = true)
+    self.import('Member', "(MemberMlsId=#{mls_id})")
+    a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
   end
 
-  def self.import_open_house(mui, save_images = true)
-    self.import('OpenHouse', "(Matrix_Unique_ID=#{mui})")
+  def self.import_open_house(oh_id, save_images = true)
+    self.import('OpenHouse', "(OpenHouseKey=#{oh_id})")
   end
 
   def self.import_media(id, save_images = true)
-    self.import('GFX', "((MEDIA_ID=#{id}+),(MEDIA_ID=#{id}-))")
+    self.import('Media', "((MediaObjectID=#{id}+),(MediaObjectID=#{id}-))")
   end
 
   #=============================================================================
@@ -233,11 +247,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # end
 
   def self.download_property_images(p)
-    self.log "Saving images for #{p.matrix_unique_id}..."
+    self.log "Saving images for #{p.mls_number}..."
     begin
-      # url = "http://rets.wamls.mlsmatrix.com/rets/GetObject.ashx?Type=Photo&Resource=Property&ID=1026514:1"
-      self.client.get_object(:resource => 'Property', :type => 'LargePhoto', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['object-id']).first
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+
+        self.log "headers: #{headers.to_s}"
+
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
         m = CabooseRets::Media.new if m.nil?
 
         tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
@@ -249,8 +265,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
         # Parse downloaded content
         m.media_mui     = headers['content-id']
-        m.media_order   = headers['object-id']
-        m.media_remarks = headers['content-description']
+        m.media_order   = headers['orderhint']
+     #   m.media_remarks = headers['ShortDescription']
         m.media_type    = 'Photo'
 
         cm               = Caboose::Media.new
@@ -266,26 +282,26 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         # Remove temporary file
         `rm #{tmp_path}`
 
-        self.log("Image #{headers['content-id']}:#{headers['object-id']} saved")
+        self.log("Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
       end
     rescue RETS::APIError => err
-      self.log "No image for #{p.matrix_unique_id}."
+      self.log "No image for #{p.mls_number}."
       self.log err
     end
   end
 
   def self.download_agent_image(agent)
-    self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
-    begin
-      self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => property.list_agent_mls_id) do |headers, content|
-        agent.verify_meta_exists
-        agent.meta.image_location = headers['location']
-        agent.meta.save
-      end
-    rescue RETS::APIError => err
-      self.log "No image for #{agent.first_name} #{agent.last_name}."
-      self.log err
-    end
+    # self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
+    # begin
+    #   self.client.get_object(:resource => :Member, :type => :Photo, :location => true, :id => property.list_agent_mls_id) do |headers, content|
+    #     agent.verify_meta_exists
+    #     agent.meta.image_location = headers['location']
+    #     agent.meta.save
+    #   end
+    # rescue RETS::APIError => err
+    #   self.log "No image for #{agent.first_name} #{agent.last_name}."
+    #   self.log err
+    # end
   end
 
   def self.download_office_image(office)
@@ -311,16 +327,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       model = CabooseRets::Property      
       i = 0      
         self.log "Updating coords properties..."
-        model.where(:latitude => nil).reorder(:matrix_unique_id).each do |p1|
+        model.where(:latitude => nil).reorder(:mls_number).each do |p1|
           self.delay(:priority => 10, :queue => 'rets').update_coords(p1)
         end
       return
     end
 
-    self.log "Getting coords for Matrix_Unique_ID #{p.matrix_unique_id}..."
+    self.log "Getting coords for MLS # #{p.mls_number}..."
     coords = self.coords_from_address(CGI::escape "#{p.street_number} #{p.street_name}, #{p.city}, #{p.state_or_province} #{p.postal_code}")
     if coords.nil? || coords == false
-      self.log "Can't set coords for Matrix_Unique_ID #{p.matrix_unique_id}..."
+      self.log "Can't set coords for MLS # #{p.mls_number}..."
       return
     end
 
@@ -330,9 +346,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.coords_from_address(address)
-    #return false
     begin
-      uri = "https://maps.googleapis.com/maps/api/geocode/json?address=#{address}&sensor=false"
+      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyBD34Da5DhRH5wkq3sROsE7-jv90-f1v6o&address=#{address}"
       uri.gsub!(" ", "+")
       resp = HTTParty.get(uri)
       json = JSON.parse(resp.body)
@@ -352,13 +367,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.log('purging')
     self.purge_properties
     self.purge_offices
-    #self.purge_agents
+    self.purge_agents
     self.purge_open_houses
   end  
   
-  def self.purge_properties()   self.delay(:priority => 10, :queue => 'rets').purge_helper('Listing', '2012-01-01') end
+  def self.purge_properties()   self.delay(:priority => 10, :queue => 'rets').purge_helper('Property', '2012-01-01') end
   def self.purge_offices()      self.delay(:priority => 10, :queue => 'rets').purge_helper('Office', '2012-01-01') end
-  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Agent', '2012-01-01') end
+  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Member', '2012-01-01') end
   def self.purge_open_houses()  self.delay(:priority => 10, :queue => 'rets').purge_helper('OpenHouse', '2012-01-01') end
   
 
@@ -370,10 +385,20 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     # Get the total number of records
     self.log("- Getting total number of records for #{class_type}...")
+
+    statusquery = ""
+
+    case class_type
+      when 'Property'  then statusquery = "MlsStatus=Active"
+      when 'Office'    then statusquery = "OfficeStatus=Active"
+      when 'Member'    then statusquery = "MemberStatus=Active"
+      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
+    end
+
     params = {
       :search_type => m.search_type,
       :class => class_type,
-      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)",
+      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)AND(#{statusquery})",
       :standard_names_only => true,
       :timeout => -1
     }
@@ -394,6 +419,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     # Only do stuff if we got a real response from the server
     if ids.count > 0
 
+      puts "Remote IDs found: #{ids.to_s}"
+
       # Delete any records in the local database that shouldn't be there
       self.log("- Finding #{class_type} records in the local database that are not in the remote database...")
       t = m.local_table
@@ -401,6 +428,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
+      puts "Local IDs found: #{local_ids.to_s}"
       ids_to_remove = local_ids - ids
       self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
       self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
@@ -412,15 +440,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
+      puts "Local IDs found: #{local_ids.to_s}"
       ids_to_add = ids - local_ids
       ids_to_add = ids_to_add.sort.reverse
       self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
       ids_to_add.each do |id|
         self.log("- Importing #{id}...")
         case class_type
-          when "Listing"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
+          when "Property"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
           when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
-          when "Agent"     then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
+          when "Member"     then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
           when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
         end
       end
@@ -465,9 +494,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_add.each do |id|
         self.log("Importing #{id}...")
         case class_type
-          when "Listing"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
+          when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
           when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
-          when "Agent"     then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
+          when "Member"    then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
           when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
         end
       end

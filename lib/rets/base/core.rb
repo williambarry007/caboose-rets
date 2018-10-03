@@ -243,6 +243,7 @@ module RETS
       # @see #request_size
       # @see #request_hash
       def search(args, &block)
+     #   puts "starting search..."
         if !block_given? and args[:count_mode] != :only
           raise ArgumentError, "No block found"
         end
@@ -264,8 +265,11 @@ module RETS
 
         @request_size, @request_hash, @request_time, @rets_data = nil, nil, nil, {}
 
+     #   puts "req: #{req.to_s}"
+
         start = Time.now.utc.to_f
         @http.request(req) do |response|
+    #      puts "URL: #{req[:url]}"
           if args[:disable_stream]
             stream = StringIO.new(response.body)
             @request_time = Time.now.utc.to_f - start

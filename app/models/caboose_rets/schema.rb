@@ -337,50 +337,52 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
   }
 end
 
-def self.load_data
+  def self.load_data
 
-  bt = Caboose::BlockType.where(:name => 'layout_rets').first
-  if bt.nil?
-      cat = Caboose::BlockTypeCategory.where(:name => 'Layouts').first
-      bt = Caboose::BlockType.create(:name => 'layout_rets', :description => 'RETS Layout', :block_type_category_id => cat.id, :allow_child_blocks => false, :field_type => 'block')
+    # bt = Caboose::BlockType.where(:name => 'layout_rets').first
+    # if bt.nil?
+    #     cat = Caboose::BlockTypeCategory.where(:name => 'Layouts').first
+    #     bt = Caboose::BlockType.create(:name => 'layout_rets', :description => 'RETS Layout', :block_type_category_id => cat.id, :allow_child_blocks => false, :field_type => 'block')
+    # end
+
+    # Caboose::Site.where(:use_rets => true).reorder(:id).all.each do |site|
+    #   home_page = Caboose::Page.index_page(site.id)
+
+    #   # Check that the rets layout is applied to the site
+    #   bt.add_to_site(site.id)
+
+    #   # Verify that the site has all the rets pages created and each page has the rets layout
+    #   rets_page = Caboose::Page.where(:site_id => site.id, :alias => 'rets').first
+    #   rets_page = Caboose::Page.create(:site_id => site.id, :alias => 'rets', :slug => 'rets', :uri => 'rets', :title => 'RETS', :parent_id => home_page.id) if rets_page.nil?
+
+    #   pages = []
+    #   if !Caboose::Page.where(:site_id => site.id, :alias => 'property').exists?
+    #     then pages << Caboose::Page.create(:site_id => site.id, :slug => 'properties'       , :alias => 'property'         , :uri => 'property'         , :title => 'Properties'              , :parent_id => rets_page.id)
+    #   end    
+    #   if !Caboose::Page.where(:site_id => site.id, :alias => 'open-houses'      ).exists?
+    #     then pages << Caboose::Page.create(:site_id => site.id, :slug => 'open-houses'      , :alias => 'open-houses'      , :uri => 'open-houses'      , :title => 'Open Houses'             , :parent_id => rets_page.id)
+    #   end
+    #   if !Caboose::Page.where(:site_id => site.id, :alias => 'agents'           ).exists?
+    #     then pages << Caboose::Page.create(:site_id => site.id, :slug => 'agents'           , :alias => 'agents'           , :uri => 'agents'           , :title => 'Agents'                  , :parent_id => rets_page.id)
+    #   end
+    #   if !Caboose::Page.where(:site_id => site.id, :alias => 'saved-searches'   ).exists?
+    #     then pages << Caboose::Page.create(:site_id => site.id, :slug => 'saved-searches'   , :alias => 'saved-searches'   , :uri => 'saved-searches'   , :title => 'Saved Searches'          , :parent_id => rets_page.id)
+    #   end
+    #   if !Caboose::Page.where(:site_id => site.id, :alias => 'saved-properties' ).exists?
+    #     then pages << Caboose::Page.create(:site_id => site.id, :slug => 'saved-properties' , :alias => 'saved-properties' , :uri => 'saved-properties' , :title => 'Saved Properties'        , :parent_id => rets_page.id)
+    #   end
+
+    #     pages.each do |p|
+    #       Caboose::Block.where(:page_id =>  p.id).destroy_all
+    #       Caboose::Block.create(:page_id => p.id, :block_type_id => bt.id, :name => bt.name)
+
+    #       viewers = Caboose::PagePermission.where(:page_id => home_page.id, :action => 'view').pluck(:role_id)
+    #       editors = Caboose::PagePermission.where(:page_id => home_page.id, :action => 'edit').pluck(:role_id)
+    #       Caboose::Page.update_authorized_for_action(p.id, 'view', viewers)
+    #       Caboose::Page.update_authorized_for_action(p.id, 'edit', editors)
+    #     end
+    #   end
   end
 
-  Caboose::Site.where(:use_rets => true).reorder(:id).all.each do |site|
-    home_page = Caboose::Page.index_page(site.id)
 
-    # Check that the rets layout is applied to the site
-    bt.add_to_site(site.id)
-
-    # Verify that the site has all the rets pages created and each page has the rets layout
-    rets_page = Caboose::Page.where(:site_id => site.id, :alias => 'rets').first
-    rets_page = Caboose::Page.create(:site_id => site.id, :alias => 'rets', :slug => 'rets', :uri => 'rets', :title => 'RETS', :parent_id => home_page.id) if rets_page.nil?
-
-    pages = []
-    if !Caboose::Page.where(:site_id => site.id, :alias => 'property').exists?
-      then pages << Caboose::Page.create(:site_id => site.id, :slug => 'properties'       , :alias => 'property'         , :uri => 'property'         , :title => 'Properties'              , :parent_id => rets_page.id)
-    end    
-    if !Caboose::Page.where(:site_id => site.id, :alias => 'open-houses'      ).exists?
-      then pages << Caboose::Page.create(:site_id => site.id, :slug => 'open-houses'      , :alias => 'open-houses'      , :uri => 'open-houses'      , :title => 'Open Houses'             , :parent_id => rets_page.id)
-    end
-    if !Caboose::Page.where(:site_id => site.id, :alias => 'agents'           ).exists?
-      then pages << Caboose::Page.create(:site_id => site.id, :slug => 'agents'           , :alias => 'agents'           , :uri => 'agents'           , :title => 'Agents'                  , :parent_id => rets_page.id)
-    end
-    if !Caboose::Page.where(:site_id => site.id, :alias => 'saved-searches'   ).exists?
-      then pages << Caboose::Page.create(:site_id => site.id, :slug => 'saved-searches'   , :alias => 'saved-searches'   , :uri => 'saved-searches'   , :title => 'Saved Searches'          , :parent_id => rets_page.id)
-    end
-    if !Caboose::Page.where(:site_id => site.id, :alias => 'saved-properties' ).exists?
-      then pages << Caboose::Page.create(:site_id => site.id, :slug => 'saved-properties' , :alias => 'saved-properties' , :uri => 'saved-properties' , :title => 'Saved Properties'        , :parent_id => rets_page.id)
-    end
-
-      pages.each do |p|
-        Caboose::Block.where(:page_id =>  p.id).destroy_all
-        Caboose::Block.create(:page_id => p.id, :block_type_id => bt.id, :name => bt.name)
-
-        viewers = Caboose::PagePermission.where(:page_id => home_page.id, :action => 'view').pluck(:role_id)
-        editors = Caboose::PagePermission.where(:page_id => home_page.id, :action => 'edit').pluck(:role_id)
-        Caboose::Page.update_authorized_for_action(p.id, 'view', viewers)
-        Caboose::Page.update_authorized_for_action(p.id, 'edit', editors)
-      end
-    end
-  end
 end

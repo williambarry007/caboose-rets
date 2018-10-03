@@ -2,7 +2,7 @@
 class CabooseRets::OpenHouse < ActiveRecord::Base
   self.table_name = "rets_open_houses"
   
-  has_one :property, :primary_key => 'listing_mui', :foreign_key => 'matrix_unique_id'  
+  has_one :property, :primary_key => 'listing_mui', :foreign_key => 'mls_number'  
   attr_accessible :id, :matrix_unique_id
   
   # def property
@@ -20,17 +20,17 @@ class CabooseRets::OpenHouse < ActiveRecord::Base
   end
   
   def parse(data)
-        self.active_yn          = data['ActiveYN']
-        self.description        = data['Description']
-        self.end_time           = data['EndTime']
-        self.entry_order        = data['EntryOrder']
-        self.listing_mui        = data['Listing_MUI']
-        self.matrix_unique_id   = data['matrix_unique_id']
-        self.matrix_modified_dt = data['MatrixModifiedDT']
+    #    self.active_yn          = data['ActiveYN']
+        self.description        = data['OpenHouseRemarks']
+        self.end_time           = data['OpenHouseEndTime']
+     #   self.entry_order        = data['EntryOrder']
+        self.listing_mui        = data['ListingId']
+        self.matrix_unique_id   = data['OpenHouseKey']
+        self.matrix_modified_dt = data['ModificationTimestamp']
         self.open_house_date    = data['OpenHouseDate']
         self.open_house_type    = data['OpenHouseType']
-        self.provider_key       = data['ProviderKey']
+        self.provider_key       = data['ShowingAgentKey']
         self.refreshments       = data['Refrehments']
-        self.start_time         = data['StartTime'] 
+        self.start_time         = data['OpenHouseStartTime'] 
   end
 end

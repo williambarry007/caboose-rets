@@ -8,7 +8,7 @@ module RETS
     ##
     # Creates a new HTTP instance which will automatically handle authenting to the RETS server.
     def initialize(args)
-      @headers = {"User-Agent" => "Ruby RETS/v#{RETS::VERSION}", "Accept-Encoding" => "none"}
+      @headers = {"User-Agent" => "Ruby RETS/v#{RETS::VERSION}", "Accept-Encoding" => "none", "RETS-Version" => "1.8.0"}
       @request_count = 0
       @config = {:http => {}}.merge(args)
       @rets_data, @cookie_list = {}, {}
@@ -135,7 +135,7 @@ module RETS
           text = attr.last.value
         end
       end
-
+  #    puts "replycode: #{code}"
       return code, text
     end
 
@@ -179,6 +179,8 @@ module RETS
         request_uri = args[:url].request_uri
       end
 
+      request_uri = request_uri[0..-2] if request_uri[-1] == '&'
+
       headers = args[:headers]
 
       # Digest will change every time due to how its setup
@@ -203,6 +205,9 @@ module RETS
         http.ca_file = @config[:http][:ca_file] if @config[:http][:ca_file]
         http.ca_path = @config[:http][:ca_path] if @config[:http][:ca_path]
       end
+
+      puts "request_uri: #{request_uri}"
+  #    puts "headers: #{headers.to_s}"
 
       http.start do
         http.request_get(request_uri, headers) do |response|
@@ -234,6 +239,10 @@ module RETS
             end
           end
 
+          # puts "response.code: #{response.code}"
+          # puts "response.body: #{response.body}"
+          # puts "response.message: #{response.message}"
+
           # Rather than returning HTTP 401 when User-Agent authentication is needed, Retsiq returns HTTP 200
           # with RETS error 20037. If we get a 20037, will let it pass through and handle it as if it was a HTTP 401.
           # Retsiq apparently returns a 20041 now instead of a 20037 for the same use case.
@@ -241,12 +250,13 @@ module RETS
           rets_code = nil
           if response.code != "401" and ( response.code != "200" or args[:check_response] )
             if response.body =~ /<RETS/i
+        #      puts "found RETS in response body"
               rets_code, text = self.get_rets_response(Nokogiri::XML(response.body).xpath("//RETS").first)
               unless rets_code == "20037" or rets_code == "20041" or rets_code == "20052" or rets_code == "0"
                 raise RETS::APIError.new("#{rets_code}: #{text}", rets_code, text)
               end
-
             elsif !args[:check_response]
+       #       puts "didn't find RETS in response body and check_response is false"
               raise RETS::HTTPError.new("#{response.code}: #{response.message}", response.code, response.message)
             end
           end

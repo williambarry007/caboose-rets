@@ -1,9 +1,9 @@
 class CabooseRets::Agent < ActiveRecord::Base
   self.table_name = "rets_agents"  
   
-  has_one :meta, :class_name => 'AgentMeta', :primary_key => 'matrix_unique_id', :foreign_key => 'la_code'
+  has_one :meta, :class_name => 'AgentMeta', :primary_key => 'mls_id', :foreign_key => 'la_code'
   has_many :properties
-  attr_accessible :id, :agent_number, :matrix_unique_id, :sort_order
+  attr_accessible :id, :agent_number, :matrix_unique_id, :sort_order, :mls_id
   after_initialize :fix_name
   
   def image
@@ -30,43 +30,43 @@ class CabooseRets::Agent < ActiveRecord::Base
   end
   
   def refresh_from_mls
-    CabooseRets::RetsImporter.import('Agent',"(Matrix_Unique_ID=#{self.matrix_unique_id})")
+    CabooseRets::RetsImporter.import('Member',"(MemberMlsId=#{self.mls_id})")
     CabooseRets::RetsImporter.download_property_images(self)
   end
   
   def self.refresh_from_mls(agent_number)
-    CabooseRets::RetsImporter.import('Agent', "(Agent_Number=#{self.agent_number})")
-    CabooseRets::RetsImporter.import_agent(self.matrix_unique_id)          
+    CabooseRets::RetsImporter.import('Member', "(MemberMlsId=#{self.mls_id})")
+    CabooseRets::RetsImporter.import_agent(self.mls_id)          
   end
     
   def parse(data)
-    self.agent_number                 = data['AgentNumber']
-    self.cell_phone                   = data['CellPhone']
-    self.direct_work_phone            = data['DirectWorkPhone']
-    self.email                        = data['Email']
-    self.fax_phone                    = data['FaxPhone']
-    self.first_name                   = data['FirstName']
-    self.full_name                    = data['FullName']
-    self.generational_name            = data['GenerationalName']
-    self.last_name                    = data['LastName']
-    self.matrix_unique_id             = data['Matrix_Unique_ID']
-    self.matrix_modified_dt           = data['MatrixModifiedDT']
-    self.middle_name                  = data['MiddleName']
-    self.mls                          = data['MLS']
-    self.mls_id                       = data['MLSID']
-    self.office_mui                   = data['Office_MUI']
-    self.office_mls_id                = data['OfficeMLSID']
-    self.office_phone                 = data['OfficePhone']
-    self.other_phone                  = data['OtherPhone']
-    self.phone_toll_free              = data['PhoneTollFree']
-    self.phone_voice_mail             = data['PhoneVoiceMail']        
-    self.photo_count                  = data['PhotoCount']
-    self.photo_modification_timestamp = data['PhotoModificationTimestamp']
-    self.slug                         = "#{data['FirstName']}-#{data['LastName']}".parameterize
+#    self.agent_number                 = data['AgentNumber']
+    self.cell_phone                   = data['MemberMobilePhone']
+    self.direct_work_phone            = data['MemberDirectPhone']
+    self.email                        = data['MemberEmail']
+    self.fax_phone                    = data['MemberFax']
+    self.first_name                   = data['MemberFirstName']
+    self.full_name                    = data['MemberFullName']
+   # self.generational_name            = data['MemberMiddleName']
+    self.last_name                    = data['MemberLastName']
+    self.matrix_unique_id             = data['MemberMlsId']
+    self.matrix_modified_dt           = data['ModificationTimestamp']
+    self.middle_name                  = data['MemberMiddleName']
+    self.mls                          = 'West Alabama Multiple Listing Service'
+    self.mls_id                       = data['MemberMlsId']
+    self.office_mui                   = data['OfficeMlsId']
+    self.office_mls_id                = data['OfficeMlsId']
+    self.office_phone                 = data['MemberOfficePhone']
+    self.other_phone                  = data['MemberPreferredPhone']
+    self.phone_toll_free              = data['MemberTollFreePhone']
+    self.phone_voice_mail             = data['MemberVoiceMail']        
+  #  self.photo_count                  = data['PhotoCount']
+  #  self.photo_modification_timestamp = data['PhotoModificationTimestamp']
+    self.slug                         = "#{data['MemberFirstName']}-#{data['MemberLastName']}".parameterize
   end
   
   def verify_meta_exists
-     self.meta = CabooseRets::AgentMeta.create(:la_code => self.la_code) if self.meta.nil?
+     self.meta = CabooseRets::AgentMeta.create(:la_code => self.mls_id) if self.meta.nil?
   end
   
   def image_url(style)                

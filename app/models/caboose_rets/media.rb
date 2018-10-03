@@ -22,7 +22,7 @@ class CabooseRets::Media < ActiveRecord::Base
     # self.media_order 	  = data['MEDIA_ORDER'].to_i
     # self.media_remarks  = data['MEDIA_REMARKS']    
     # self.mls 		        = data['MLS']
-    self.media_type      = data['content-type']
+    self.media_type      = data['MediaCategory']
     self.media_mui       = data['content-id']
     self.media           = Caboose::Media.create(
                   :image => content,

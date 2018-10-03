@@ -13,26 +13,29 @@ namespace :caboose_rets do
   desc "Do a simple search"
   task :simple_search => :environment do
     type = ['p','a','o','oh']
-    rets_config = CabooseRets::RetsConfig.where("rets_url ILIKE ?","%mlsmatrix%").order('RANDOM()').first
+    @@config = nil
+    config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
+    config = config[Rails.env]
+    config.each { |key,val| @@config[key] = val }
     client = RETS::Client.login(
-      :url      => rets_config.rets_url,
-      :username => rets_config.rets_username,
-      :password => rets_config.rets_password
+      :url      => config['url'],
+      :username => config['username'],
+      :password => config['password']
     )
     type.each do |t|
       if t == 'p'
         params = {
           :search_type => 'Property',
-          :class       => 'Listing',
-          :query       => "(Matrix_Unique_ID=0+)",
-          :limit       => 100,
+          :class       => 'Property',
+          :query       => "(MlsStatus=Active)",
+          :limit       => 1,
           :timeout     => -1
         }
       elsif t == 'a'      
         params = {
-          :search_type => 'Agent',
-          :class       => 'Agent',
-          :query       => "(Matrix_Unique_ID=0+)",
+          :search_type => 'Member',
+          :class       => 'Member',
+          :query       => "(MemberStatus=Active)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -40,7 +43,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'Office',
           :class       => 'Office',
-          :query       => "(Matrix_Unique_ID=0+)",
+          :query       => "(OfficeStatus=Active)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -48,7 +51,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'OpenHouse',
           :class       => 'OpenHouse',
-          :query       => "(Matrix_Unique_ID=0+)",
+          :query       => "(OpenHouseKeyNumeric=0+)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -69,36 +72,37 @@ namespace :caboose_rets do
   task :reimport_property_images => :environment do
     props = CabooseRets::Property.all
     props.each do |p|
-      CabooseRets::RetsImporter.log("- Reimporting images for #{p.matrix_unique_id}...")
-      CabooseRets::Media.where(:media_mui => p.matrix_unique_id, :media_type => 'Photo').destroy_all
+      CabooseRets::RetsImporter.log("- Reimporting images for #{p.mls_number}...")
+      CabooseRets::Media.where(:media_mui => p.mls_number, :media_type => 'Photo').destroy_all
       CabooseRets::RetsImporter.download_property_images(p)
     end
   end
 
   desc "Import rets data"
   task :import => :environment do
-    CabooseRets::RetsImporter.import('Agent'    , "(Matrix_Unique_ID=0+)")
-    CabooseRets::RetsImporter.import('Listing'  , "(Matrix_Unique_ID=0+)")
-    CabooseRets::RetsImporter.import('Office'   , "(Matrix_Unique_ID=0+)")    
-    CabooseRets::RetsImporter.import('OpenHouse', "(Matrix_Unique_ID=0+)")
+    CabooseRets::RetsImporter.import('Member'    , "(MemberStatus=Active)")
+    CabooseRets::RetsImporter.import('Property'  , "(MlsStatus=Active)")
+    CabooseRets::RetsImporter.import('Office'    , "(OfficeStatus=Active)")    
+    CabooseRets::RetsImporter.import('OpenHouse' , "(OpenHouseKeyNumeric=0+)")
   end
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('9468475'  , "(Matrix_Unique_ID=9468475)")
+    #CabooseRets::RetsImporter.import_properties('130185',false)
+    CabooseRets::RetsImporter.import_agent('118596368',false)
   end
 
   desc "Purge rets data"
   task :purge => :environment do
-    CabooseRets::RetsImporter.purge_helper('Listing', '2013-08-06')
+    CabooseRets::RetsImporter.purge_helper('Property', '2013-08-06')
     CabooseRets::RetsImporter.purge_helper('Office', '2012-01-01')
-    CabooseRets::RetsImporter.purge_helper('Agent', '2012-01-01')
+    CabooseRets::RetsImporter.purge_helper('Member', '2012-01-01')
     CabooseRets::RetsImporter.purge_helper('OpenHouse', '2012-01-01')
   end
 
   desc "update helper"
   task :uh => :environment do
-    CabooseRets::RetsImporter.update_helper('Listing', last_updated)
+    CabooseRets::RetsImporter.update_helper('Property', last_updated)
   end
 
   #desc "Delete old rets properties"

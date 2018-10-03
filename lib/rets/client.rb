@@ -63,7 +63,7 @@ module RETS
       end
 
       http.login_uri = urls[:login]
-
+   #   puts "URLS: #{urls.to_s}"
       RETS::Base::Core.new(http, urls)
     end
   end
