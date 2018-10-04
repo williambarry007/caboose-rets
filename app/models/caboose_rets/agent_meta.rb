@@ -1,4 +1,3 @@
-
 class CabooseRets::AgentMeta < ActiveRecord::Base
   self.table_name = "rets_agents_meta"
   belongs_to :agent, :foreign_key => 'mls_id', :primary_key => 'la_code'

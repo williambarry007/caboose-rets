@@ -248,39 +248,48 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.download_property_images(p)
     self.log "Saving images for #{p.mls_number}..."
     begin
-      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-
-        self.log "headers: #{headers.to_s}"
-
-        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
+      # Get first image
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
         m = CabooseRets::Media.new if m.nil?
-
-        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
-
-        # Temporarily cache content
+        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:0.jpeg"
         File.open(tmp_path, "wb") do |f|
           f.write(content)
         end
-
-        # Parse downloaded content
+        m.media_mui     = headers['content-id']
+        m.media_order   = 0
+        m.media_type    = 'Photo'
+        cm               = Caboose::Media.new
+        cm.image         = File.open(tmp_path)
+        cm.name          = "rets_media_#{headers['content-id']}_0"
+        cm.original_name = "rets_media_#{headers['content-id']}_0.jpeg"
+        cm.processed     = true
+        cm.save
+        m.media_id = cm.id
+        m.save
+        `rm #{tmp_path}`
+        self.log("Image rets_media_#{headers['content-id']}_0 saved")
+      end
+      # Get rest of images
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
+        m = CabooseRets::Media.new if m.nil?
+        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
+        File.open(tmp_path, "wb") do |f|
+          f.write(content)
+        end
         m.media_mui     = headers['content-id']
         m.media_order   = headers['orderhint']
-     #   m.media_remarks = headers['ShortDescription']
         m.media_type    = 'Photo'
-
         cm               = Caboose::Media.new
         cm.image         = File.open(tmp_path)
         cm.name          = "rets_media_#{headers['content-id']}_#{headers['object-id']}"
         cm.original_name = "rets_media_#{headers['content-id']}_#{headers['object-id']}.jpeg"
         cm.processed     = true
         cm.save
-
         m.media_id = cm.id
         m.save
-
-        # Remove temporary file
         `rm #{tmp_path}`
-
         self.log("Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
       end
     rescue RETS::APIError => err
@@ -446,7 +455,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_add.each do |id|
         self.log("- Importing #{id}...")
         case class_type
-          when "Property"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
+          when "Property"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
           when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
           when "Member"     then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
           when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
@@ -493,7 +502,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_add.each do |id|
         self.log("Importing #{id}...")
         case class_type
-          when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, false)
+          when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
           when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
           when "Member"    then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
           when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)

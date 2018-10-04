@@ -88,8 +88,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    #CabooseRets::RetsImporter.import_properties('130185',false)
-    CabooseRets::RetsImporter.import_agent('118596368',false)
+    CabooseRets::RetsImporter.import_properties('130185',false)
   end
 
   desc "Purge rets data"
