@@ -127,29 +127,33 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.update_helper(class_type, date_modified, save_images = true)
     self.log "In update helper for #{class_type}"
+    self.log "Updating everything modified after #{date_modified}"
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
 
-    statusquery = ""
-    case class_type
-      when 'Property'  then statusquery = "MlsStatus=Active"
-      when 'Office'    then statusquery = "OfficeStatus=Active"
-      when 'Member'    then statusquery = "MemberStatus=Active"
-      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
-    end
+    self.log "d: #{d}"
+
+    # statusquery = ""
+    # case class_type
+    #   when 'Property'  then statusquery = "MlsStatus=Active"
+    #   when 'Office'    then statusquery = "OfficeStatus=Active"
+    #   when 'Member'    then statusquery = "MemberStatus=Active"
+    #   when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
+    # end
 
     params = {
       :search_type => m.search_type,
       :class => class_type,
       :select => [m.remote_key_field],
       :querytype => 'DMQL2',
-      :query => "(#{m.date_modified_field}=#{d}+)AND(#{statusquery})",
+      :query => "(#{m.date_modified_field}=#{d}+)", #AND(#{statusquery})",
       :standard_names_only => true,
       :timeout => -1
     }    
     self.log(params)
-    self.client.search(params) do |data|    
+    self.client.search(params) do |data|
+      self.log data
       case class_type
         when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
         when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], save_images)

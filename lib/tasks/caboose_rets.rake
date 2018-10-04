@@ -101,7 +101,7 @@ namespace :caboose_rets do
 
   desc "update helper"
   task :uh => :environment do
-    CabooseRets::RetsImporter.update_helper('Property', last_updated)
+    CabooseRets::RetsImporter.update_helper('Property', last_updated, false)
   end
 
   #desc "Delete old rets properties"
