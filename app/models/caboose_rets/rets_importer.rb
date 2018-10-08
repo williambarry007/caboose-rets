@@ -309,7 +309,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.download_agent_image(agent)
-    # self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
+    # self.log "Saving image  for #{agent.first_name} #{agent.last_name}..."
     # begin
     #   self.client.get_object(:resource => :Member, :type => :Photo, :location => true, :id => property.list_agent_mls_id) do |headers, content|
     #     agent.verify_meta_exists
