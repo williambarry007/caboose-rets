@@ -64,8 +64,7 @@ namespace :caboose_rets do
 
   desc "Import Image"
   task :img => :environment do 
-    p = CabooseRets::Property.where(:matrix_unique_id => "9233280").first
-    CabooseRets::RetsImporter.download_property_images(p)
+    CabooseRets::RetsImporter.download_missing_images
   end
 
   desc "Reimports Property Images"
@@ -142,7 +141,7 @@ namespace :caboose_rets do
 
     begin
       # RetsImporter.update_all_after(last_updated - Rational(1,86400))
-      CabooseRets::RetsImporter.update_after(last_updated)
+      CabooseRets::RetsImporter.update_after(last_updated, true)
 		  save_last_updated(task_started)
 		  unlock_task
 		rescue

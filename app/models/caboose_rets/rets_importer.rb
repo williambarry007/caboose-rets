@@ -120,9 +120,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.update_after(date_modified, save_images = true)
     self.log "Updating after #{date_modified}"
     self.delay(:priority => 10, :queue => 'rets').update_helper('Property'  , date_modified, save_images)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Office'   , date_modified, save_images)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Member'    , date_modified, save_images)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('OpenHouse', date_modified, save_images)
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Office'   , date_modified, false)
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Member'    , date_modified, false)
+    self.delay(:priority => 10, :queue => 'rets').update_helper('OpenHouse', date_modified, false)
   end
 
   def self.update_helper(class_type, date_modified, save_images = true)
@@ -156,9 +156,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       self.log data
       case class_type
         when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
-        when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], save_images)
-        when 'Member'    then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], save_images)
-        when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], save_images)
+        when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], false)
+        when 'Member'    then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], false)
+        when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], false)
       end
     end
   end
@@ -299,6 +299,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     rescue RETS::APIError => err
       self.log "No image for #{p.mls_number}."
       self.log err
+    end
+  end
+
+  def self.download_missing_images
+    CabooseRets::Property.where("photo_count = ? OR photo_count is null", '').all.each do |p|
+      self.delay(:priority => 10, :queue => 'rets').import_properties(p.mls_number, true)
     end
   end
 
@@ -468,53 +474,53 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
   end
 
-  def self.get_media_urls
-    m = self.meta(class_type)
+  # def self.get_media_urls
+  #   m = self.meta(class_type)
 
-    # Get the total number of records
-    params = {
-      :search_type => m.search_type,
-      :class => class_type,
-      :query => "(#{m.matrix_modified_dt}=#{date_modified}T00:00:01+)",
-      :standard_names_only => true,
-      :timeout => -1
-    }
-    self.client.search(params.merge({ :count => 1 }))
-    count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]
-    batch_count = (count.to_f/5000.0).ceil
+  #   # Get the total number of records
+  #   params = {
+  #     :search_type => m.search_type,
+  #     :class => class_type,
+  #     :query => "(#{m.matrix_modified_dt}=#{date_modified}T00:00:01+)",
+  #     :standard_names_only => true,
+  #     :timeout => -1
+  #   }
+  #   self.client.search(params.merge({ :count => 1 }))
+  #   count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]
+  #   batch_count = (count.to_f/5000.0).ceil
 
-    ids = []
-    k = m.remote_key_field
-    (0...batch_count).each do |i|
-      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
-        ids << data[k]
-      end
-    end
+  #   ids = []
+  #   k = m.remote_key_field
+  #   (0...batch_count).each do |i|
+  #     self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
+  #       ids << data[k]
+  #     end
+  #   end
 
-    if ids.count > 0
-      # Delete any records in the local database that shouldn't be there
-      t = m.local_table
-      k = m.local_key_field
-      query = ["delete from #{t} where #{k} not in (?)", ids]
-      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+  #   if ids.count > 0
+  #     # Delete any records in the local database that shouldn't be there
+  #     t = m.local_table
+  #     k = m.local_key_field
+  #     query = ["delete from #{t} where #{k} not in (?)", ids]
+  #     ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
 
-      # Find any ids in the remote database that should be in the local database
-      query = "select distinct #{k} from #{t}"      
-      rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-      local_ids = rows.collect{ |row| row[k] }
-      ids_to_add = ids - local_ids
-      ids_to_add.each do |id|
-        self.log("Importing #{id}...")
-        case class_type
-          when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
-          when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
-          when "Member"    then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
-          when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
-        end
-      end
-    end
+  #     # Find any ids in the remote database that should be in the local database
+  #     query = "select distinct #{k} from #{t}"      
+  #     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
+  #     local_ids = rows.collect{ |row| row[k] }
+  #     ids_to_add = ids - local_ids
+  #     ids_to_add.each do |id|
+  #       self.log("Importing #{id}...")
+  #       case class_type
+  #         when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
+  #         when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
+  #         when "Member"    then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
+  #         when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
+  #       end
+  #     end
+  #   end
 
-  end
+  # end
 
   #=============================================================================
   # Logging
@@ -547,7 +553,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     begin
       overlap = 30.seconds
-      if (DateTime.now - self.last_purged).to_i >= 1
+      if (DateTime.now - self.last_purged).to_f >= 0.5
         self.purge
         self.save_last_purged(task_started)
         # Keep this in here to make sure all updates are caught
@@ -556,7 +562,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
       self.log2("Updating after #{self.last_updated.strftime("%FT%T%:z")}...")
       self.update_after(self.last_updated - overlap)
-
+      self.download_missing_images
       self.log2("Saving the timestamp for when we updated...")
 		  self.save_last_updated(task_started)
 
