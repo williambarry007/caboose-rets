@@ -29,13 +29,13 @@ module CabooseRets
 
     # @route GET /admin/agents
     def admin_index
-      return unless (user_is_allowed_to 'view', 'agents')     
+      return unless (user_is_allowed_to 'view', 'rets_agents')     
       render :layout => 'caboose/admin'       
     end
 
     # @route GET /admin/agents/json
     def admin_json 
-      render :json => false and return if !user_is_allowed_to 'view', 'agents'
+      render :json => false and return if !user_is_allowed_to 'view', 'rets_agents'
       where = "(office_mls_id = '#{@site.rets_office_id}')"
       pager = Caboose::Pager.new(params, {
         'first_name_like' => '',
@@ -50,20 +50,20 @@ module CabooseRets
       })
       render :json => {
         :pager => pager,
-        :models => pager.items.as_json(:include => [:meta])# , :collection, :color, :design_look, :gem_stone, 
+        :models => pager.items.as_json(:include => [:meta])
       } 
     end
 
     # @route GET /admin/agents/:id/json
     def admin_json_single
-      render :json => false and return if !user_is_allowed_to 'edit', 'agents'
+      render :json => false and return if !user_is_allowed_to 'edit', 'rets_agents'
       prop = Agent.find(params[:id])
       render :json => prop
     end
 
     # @route GET /admin/agents/edit-sort
     def admin_edit_sort
-      if !user_is_allowed_to 'edit', 'agents'
+      if !user_is_allowed_to 'edit', 'rets_agents'
         Caboose.log("invalid permissions")
       else
         @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).all
@@ -74,7 +74,7 @@ module CabooseRets
     # @route PUT /admin/agents/update-sort
     def admin_update_sort
       resp = Caboose::StdClass.new
-      if !user_is_allowed_to 'edit', 'agents'
+      if !user_is_allowed_to 'edit', 'rets_agents'
         Caboose.log("invalid permissions")
       else
         params[:agent].each_with_index do |ag, ind|
@@ -89,7 +89,7 @@ module CabooseRets
 
     # @route GET /admin/agents/:id
     def admin_edit
-      return unless (user_is_allowed_to 'edit', 'agents')
+      return unless (user_is_allowed_to 'edit', 'rets_agents')
       @agent = Agent.find(params[:id])
       @agent_meta = @agent.meta ? @agent.meta : AgentMeta.create(:la_code => @agent.matrix_unique_id) if @agent
       render :layout => 'caboose/admin'       
@@ -97,7 +97,7 @@ module CabooseRets
 
     # @route PUT /admin/agents/:id
     def admin_update
-      return unless (user_is_allowed_to 'edit', 'agents')
+      return unless (user_is_allowed_to 'edit', 'rets_agents')
       resp = Caboose::StdClass.new
       agent = Agent.find(params[:id])
       meta = agent.meta ? agent.meta : AgentMeta.create(:la_code => agent.matrix_unique_id)
@@ -106,6 +106,7 @@ module CabooseRets
           when "bio" then meta.bio = v
           when "slug" then agent.slug = v
           when "hide" then meta.hide = v
+          when "accepts_listings" then meta.accepts_listings = v
         end
       end
       agent.save
@@ -117,7 +118,7 @@ module CabooseRets
 
     # @route POST /admin/agents/:id/image
     def admin_update_image
-      render :json => false and return unless user_is_allowed_to 'edit', 'agents'    
+      render :json => false and return unless user_is_allowed_to 'edit', 'rets_agents'    
       resp = Caboose::StdClass.new({ 'attributes' => {} })
       agent = Agent.find(params[:id])
       meta = agent.meta ? agent.meta : AgentMeta.create(:la_code => agent.matrix_unique_id) if agent

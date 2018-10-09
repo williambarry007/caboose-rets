@@ -1,46 +1,53 @@
+<%= raw @crumbtrail.print({
+  '/admin' => 'Admin',
+  '/admin/properties' => 'Properties'  
+}) %>
+
 <h1>Properties</h1>
 
-<style type='text/css'>
-#search_form_wrapper { margin-bottom: 10px; position: absolute; top:0; right: 0; }
+<p><a class="caboose-btn" href='/admin/rets/import'>Import new property from MLS</a></p>
+
+<div id='properties'></div>
+
+<br /><br />
+
+<% content_for :caboose_css do %>
+<style>
+ #properties_new  { display: none; }
 </style>
-
-<div id='search_form_wrapper'>
-  <form action='/admin/property' method='get' id='search_form'>
-    <input type='text' name='mls' placeholder='MLS #' value="<%= @gen.params['mls'] %>" style='width: 100px;' />
-    <input type='submit' value='Search' />
-  </form>
-</div>
-
-<p><a href='/admin/rets/import'>Import new property from MLS</a></p>
-
-<table class='data' id='properties_table'>
-  <tr>
-    <%= raw @gen.sortable_table_headings({
-				'mls'                     => 'MLS #',
-				'street_number, street_name'	=> 'Address',
-				'la_code'                 => 'Agent',
-				'lo_code'                 => 'Office'
-			})
-		%>
-  </tr>
-<% @properties.each do |p| %>
-  <% agent = p.agent %>
-  <% office = p.office %>
-  <tr onclick="window.location='/admin/property/<%= p.mls %>/edit';">
-    <td><%= raw p.mls %></td>
-    <td><%= raw "#{p.street_number} #{p.street_name}, #{p.city}" %></td>
-    <td><%= p.agent ? "#{agent.first_name} #{agent.last_name}" : p.la_code %></td>
-    <td><%= p.office ? office.lo_name : p.lo_code %></td>
-  </tr>
 <% end %>
-</table>
-
-<p><%= raw @gen.generate %></p>
 
 <% content_for :caboose_js do %>
+<%= javascript_include_tag 'caboose/model/all' %>
 <script type='text/javascript'>
+
+function get_address(prop) {
+  return prop.street_number + " " + prop.street_name + " " + prop.street_suffix;
+}
+
 $(document).ready(function() {
-  var modal = new CabooseModal(800);
+  var that = this;
+  var table = new IndexTable({    
+    form_authenticity_token: '<%= form_authenticity_token %>',
+    container: 'properties',
+    base_url: '/admin/properties',
+    allow_bulk_edit: false,
+    allow_bulk_delete: false,
+    allow_duplicate: false,
+    allow_advanced_edit: true,
+    allow_bulk_import: false,
+    no_models_text: "No matching properties were found.",
+    fields: [
+      { show: true  , editable: false, bulk_edit: false, name: 'mls_number'        , nice_name: 'MLS #'        , sort: 'mls_number'        , type: 'text'   , value: function(r) { return r.mls_number    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'street_name'        , nice_name: 'Address'        , sort: 'street_name'        , type: 'text'   , value: function(r) { return get_address(r) }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'city'        , nice_name: 'City'        , sort: 'city'        , type: 'text'   , value: function(r) { return r.city    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'state_or_province'        , nice_name: 'State'        , sort: 'state_or_province'        , type: 'text'   , value: function(r) { return r.state_or_province    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'postal_code'        , nice_name: 'ZIP'        , sort: 'postal_code'        , type: 'text'   , value: function(r) { return r.postal_code    }, width: 200 }
+    ],
+    search_fields: [                                                           
+      { name: 'mls_number'      , nice_name: 'MLS Number'  , type: 'text'  }
+    ]
+  });
 });
 </script>
 <% end %>

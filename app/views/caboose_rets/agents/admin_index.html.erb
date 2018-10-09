@@ -37,7 +37,7 @@ $(document).ready(function() {
     allow_duplicate: false,
     allow_advanced_edit: true,
     allow_bulk_import: false,
-    no_models_text: "You do not have access to edit any agent profiles.",
+    no_models_text: "No matching agents were found.",
     fields: [
       { show: true  , editable: false, bulk_edit: false, name: 'first_name'        , nice_name: 'First Name'        , sort: 'first_name'        , type: 'text'   , value: function(r) { return r.first_name    }, width: 200 },
       { show: true  , editable: false, bulk_edit: false, name: 'last_name'        , nice_name: 'Last Name'        , sort: 'last_name'        , type: 'text'   , value: function(r) { return r.last_name    }, width: 200 },

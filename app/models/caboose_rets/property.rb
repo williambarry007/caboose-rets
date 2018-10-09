@@ -13,7 +13,15 @@ class CabooseRets::Property <ActiveRecord::Base
     def self.geolocatable() all(conditions: "latitude IS NOT NULL AND longitude IS NOT NULL") end
 
     def refresh_from_mls
-        CabooseRets::RetsImporter.import_properties(self.mls_number, false)
+        CabooseRets::RetsImporter.import_properties(self.mls_number, true)
+    end
+
+    def agent
+        CabooseRets::Agent.where(:mls_id => self.list_agent_mls_id).first
+    end
+
+    def office
+        CabooseRets::Office.where(:lo_mls_id => self.list_office_mls_id).first
     end
 
     def parse(data)

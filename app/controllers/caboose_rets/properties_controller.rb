@@ -122,37 +122,51 @@ module CabooseRets
     # Admin actions
     #=============================================================================
 
+
     # @route GET /admin/properties
     def admin_index
-      return if !user_is_allowed('properties', 'view')
+      return unless (user_is_allowed_to 'view', 'rets_properties')     
+      render :layout => 'caboose/admin'       
+    end
 
-      @gen = Caboose::PageBarGenerator.new(params, {
-          'mls_number'      => ''
-      },{
-          'model'    => 'CabooseRets::Property',
-          'sort'     => 'mls_number',
-          'desc'     => false,
-          'base_url' => '/admin/properties',
-          'use_url_params'  => false
+    # @route GET /admin/properties/json
+    def admin_json 
+      render :json => false and return if !user_is_allowed_to 'view', 'rets_properties'
+      desc = params[:desc].blank? && !params[:sort].blank? ? 'false' : 'true'
+      pager = Caboose::Pager.new(params, {
+        'mls_number' => ''
+      }, {
+        'model' => 'CabooseRets::Property',
+        'sort'  => 'mls_number',
+        'desc'  => desc,
+        'base_url' => '/admin/properties',
+        'items_per_page' => 50
       })
-      @properties = @gen.items
-      render :layout => 'caboose/admin'
+      render :json => {
+        :pager => pager,
+        :models => pager.items
+      } 
     end
 
-    # @route GET /admin/properties/:mls_number/edit
+    # @route GET /admin/properties/:id/json
+    def admin_json_single
+      render :json => false and return if !user_is_allowed_to 'edit', 'rets_properties'
+      prop = Property.find(params[:id])
+      render :json => prop
+    end
+
+    # @route GET /admin/properties/:id
     def admin_edit
-      return if !user_is_allowed('properties', 'edit')
-      @property = Property.where(:mls => params[:mls_number]).first
+      return unless (user_is_allowed_to 'edit', 'rets_properties')
+      @property = Property.find(params[:id])
       render :layout => 'caboose/admin'
     end
 
-    # @route GET /admin/properties/:mls_number/refresh
+    # @route GET /admin/properties/:id/refresh
     def admin_refresh
-      return if !user_is_allowed('properties', 'edit')
-
-      p = Property.find(params[:mls_number])
-      p.delay(:priority => 10, :queue => 'rets').refresh_from_mls
-
+      return unless (user_is_allowed_to 'edit', 'rets_properties')
+      p = Property.find(params[:id])
+      CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_properties(p.mls_number, true)
       resp = Caboose::StdClass.new
       resp.success = "The property's info is being updated from MLS. This may take a few minutes depending on how many images it has."
       render :json => resp

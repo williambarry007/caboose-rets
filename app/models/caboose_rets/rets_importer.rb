@@ -134,20 +134,15 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     self.log "d: #{d}"
 
-    # statusquery = ""
-    # case class_type
-    #   when 'Property'  then statusquery = "MlsStatus=Active"
-    #   when 'Office'    then statusquery = "OfficeStatus=Active"
-    #   when 'Member'    then statusquery = "MemberStatus=Active"
-    #   when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
-    # end
+    quer = "(#{m.date_modified_field}=#{d}+)"
+    quer += "OR(PhotosChangeTimestamp=#{d}+)" if class_type == 'Property'
 
     params = {
       :search_type => m.search_type,
       :class => class_type,
       :select => [m.remote_key_field],
       :querytype => 'DMQL2',
-      :query => "(#{m.date_modified_field}=#{d}+)", #AND(#{statusquery})",
+      :query => quer,
       :standard_names_only => true,
       :timeout => -1
     }    

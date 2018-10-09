@@ -17,6 +17,7 @@ class CabooseRets::AgentMeta < ActiveRecord::Base
     :contact_info    ,
     :assistant_to    ,
     :designation     ,
-    :image_location
+    :image_location  ,
+    :accepts_listings
 
 end
