@@ -5,15 +5,13 @@
 
 <h1>Agent</h1>
 
-<% if @logged_in_user && @logged_in_user.is_allowed('add', 'agent') %>
+<% if @logged_in_user && @logged_in_user.is_allowed('add', 'rets_agents') %>
   <a href="/admin/agents/edit-sort" class="caboose-btn">Edit Sort Order</a>
 <% end %>
-
 
 <div id='agents'></div>
 
 <br /><br />
-
 
 <% content_for :caboose_css do %>
 <style>
