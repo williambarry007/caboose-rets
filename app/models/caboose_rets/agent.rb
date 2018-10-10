@@ -13,6 +13,7 @@ class CabooseRets::Agent < ActiveRecord::Base
 
   # def assistants
   #   CabooseRets::Agent.where(:assistant_to => self.mls_id).reorder(:last_name, :first_name).all
+  
   # end
 
   def office
