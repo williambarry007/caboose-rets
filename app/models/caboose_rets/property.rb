@@ -179,6 +179,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.sewer                            = data['Sewer']
         self.sold_terms                       = data['ListingTerms']
      #   self.sprinkler                        = data['Sprinkler']
+     
         self.sqft_source                      = data['LivingAreaSource']
         self.sqft_total                       = data['LivingArea'].blank? ? nil : data['LivingArea'].to_f
         self.state_or_province                = data['StateOrProvince']
