@@ -172,8 +172,23 @@ module CabooseRets
       render :json => resp
     end
 
-    # @route GET /rets/feed/:fieldtype
-    def facebook_feed
+    # @route GET /rets/products-feed/:fieldtype
+    def facebook_products_feed
+      rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
+      if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
+        @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).order("original_entry_timestamp DESC").take(100)
+      elsif params[:fieldtype] == 'office' && rc && !rc.office_mls.blank?
+        @properties = CabooseRets::Property.where("list_office_mls_id = ?", rc.office_mls).order("original_entry_timestamp DESC").take(100)
+      else
+        @properties = CabooseRets::Property.order("original_entry_timestamp DESC").take(100)
+      end
+      respond_to do |format|
+        format.rss { render :layout => false }
+      end
+    end
+
+    # @route GET /rets/listings-feed/:fieldtype
+    def facebook_listings_feed
       rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
       if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
         @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).order("original_entry_timestamp DESC").take(100)
