@@ -24,6 +24,10 @@ class CabooseRets::Property <ActiveRecord::Base
         CabooseRets::Office.where(:lo_mls_id => self.list_office_mls_id).first
     end
 
+    def full_address
+        "#{self.street_number} #{self.street_name.blank? ? '' : self.street_name.titleize} #{self.street_suffix.blank? ? '' : self.street_suffix.titleize}"
+    end
+
     def parse(data)
     #    puts(data.to_s)
      #   self.access                           = nil
