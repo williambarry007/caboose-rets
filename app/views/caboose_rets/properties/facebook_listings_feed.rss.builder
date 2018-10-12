@@ -4,7 +4,6 @@ xml.instruct! :xml, :version => "1.0"
 #xml.rss :version => "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
   xml.listings do
     xml.title @site.description
- #   xml.description hp ? hp.meta_description : @site.description
     xml.link(("https://" + domain), :rel => "self")
   #  xml.language "en"
     for property in @properties
