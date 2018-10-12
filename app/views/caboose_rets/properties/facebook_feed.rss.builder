@@ -26,8 +26,10 @@ xml.rss :version => "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
           else
             xml.g(:condition, 'used')
           end
+        else
+          xml.g(:condition, 'used')
         end
-        xml.g(:price, number_to_currency(property.list_price) + " USD")
+        xml.g(:price, number_to_currency(property.list_price).gsub("$","") + " USD")
         xml.g(:availability, 'in stock')
         xml.g(:brand, @site.description)
       end
