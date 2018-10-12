@@ -143,6 +143,7 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.municipality                     = data['Municipality']
         self.net_op_inc                       = data['NetOperatingIncome']
         # self.open_house_count                 = data['OpenHouseCount']
+        
         # self.open_house_public_count          = data['OpenHousePublicCount']
         # self.open_house_public_upcoming       = data['OpenHousePublicUpcoming']
         # self.open_house_upcoming              = data['OpenHouseUpcoming']
