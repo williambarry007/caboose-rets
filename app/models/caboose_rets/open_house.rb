@@ -24,6 +24,7 @@ class CabooseRets::OpenHouse < ActiveRecord::Base
         self.description        = data['OpenHouseRemarks']
         self.end_time           = data['OpenHouseEndTime']
      #   self.entry_order        = data['EntryOrder']
+     #
         self.listing_mui        = data['ListingId']
         self.matrix_unique_id   = data['OpenHouseKey']
         self.matrix_modified_dt = data['ModificationTimestamp']
