@@ -46,7 +46,7 @@ module CabooseRets
         'desc'  => 'false',
         'base_url' => '/admin/agents',
         'items_per_page' => 50,
-        'additional_where' => [ (where) ],
+        'additional_where' => [ (where) ]
       })
       render :json => {
         :pager => pager,

@@ -132,8 +132,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
 
-    self.log "d: #{d}"
-
     quer = "(#{m.date_modified_field}=#{d}+)"
     quer += "OR(PhotosChangeTimestamp=#{d}+)" if class_type == 'Property'
 

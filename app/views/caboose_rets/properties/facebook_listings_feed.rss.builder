@@ -1,11 +1,13 @@
 domain = Caboose::Domain.where(:site_id => @site.id, :primary => true).first.domain
 hp = Caboose::Page.where(:site_id => @site.id, :title => "Home").first
 xml.instruct! :xml, :version => "1.0"
-#xml.rss :version => "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
   xml.listings do
-    xml.title @site.description
-    xml.link(("https://" + domain), :rel => "self")
-  #  xml.language "en"
+    xml.title @site.id == 558 ? "The Gray Group" : @site.description
+    if @site.id == 558
+      xml.link("https://www.thegraygroupal.com", :rel => "self")
+    else
+      xml.link(("https://" + domain), :rel => "self")
+    end
     for property in @properties
       xml.listing do
         kind = "#{property.res_style} #{property.style} #{property.property_type} #{property.property_subtype}" 

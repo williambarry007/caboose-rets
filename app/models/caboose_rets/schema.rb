@@ -95,7 +95,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :open_house_type    , :text ],
         [ :provider_key       , :text ],
         [ :refreshments       , :text ],
-        [ :start_time         , :text ]
+        [ :start_time         , :text ],
+        [ :hide, :boolean     , { :default => false }]
       ],
       CabooseRets::Property => [
         [ :access                               , :text],

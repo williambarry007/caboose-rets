@@ -1,15 +1,46 @@
+<%= raw @crumbtrail.print({
+  '/admin' => 'Admin',
+  '/admin/open-houses' => 'Open Houses'  
+}) %>
 
 <h1>Open Houses</h1>
-<p><input type='button' value='Refresh Open Houses' onclick='refresh_open_house();' /></p>
-<div id='message'></div>
+
+<p><a class="caboose-btn" href='#' onclick='refresh_open_house();return false;'>Import new open houses from MLS</a></p>
+<div id="message"></div>
+
+<div id='open-houses'></div>
+
+<br /><br />
+
+<% content_for :caboose_css do %>
+<style>
+ #open-houses_new  { display: none; }
+</style>
+<% end %>
+
 
 <% content_for :caboose_js do %>
-<%= javascript_include_tag "caboose/model/all" %>
+<%= javascript_include_tag 'caboose/model/all' %>
 <script type='text/javascript'>
+
+	function date_format(date) {
+  var u = new Date(date);
+  var d = new Date(u.getTime() + u.getTimezoneOffset() * 60000)
+  var string = '';
+  if (d) {
+    d.setHours(0);
+    string += (d.getMonth() + 1);
+    string += "/";
+    string += d.getDate();
+    string += "/";
+    string += d.getFullYear();
+  }
+  return string;
+}
 
 function refresh_open_house()
 {
-  $('#message').html("<p class='loading'>Refreshing open houses...</p>");
+  $('#message').html("<p class='note loading'>Refreshing open houses...</p>");
   $.ajax({
     url: '/admin/open-houses/refresh',
     type: 'get',    
@@ -20,5 +51,27 @@ function refresh_open_house()
   });
 }
 
+$(document).ready(function() {
+  var that = this;
+  var table = new IndexTable({    
+    form_authenticity_token: '<%= form_authenticity_token %>',
+    container: 'open-houses',
+    base_url: '/admin/open-houses',
+    allow_bulk_edit: false,
+    allow_bulk_delete: false,
+    allow_duplicate: false,
+    allow_advanced_edit: false,
+    allow_bulk_import: false,
+    no_models_text: "No matching open-houses were found.",
+    fields: [
+      { show: true  , editable: false, bulk_edit: false, name: 'listing_mui'        , nice_name: 'MLS Number'        , sort: 'listing_mui'        , type: 'text'   , value: function(r) { return r.listing_mui    }, width: 200 },
+      { show: true  , editable: false, bulk_edit: false, name: 'start_time'        , nice_name: 'Date'        , sort: 'start_time'        , type: 'text'   , value: function(r) { return date_format(r.start_time)    }, width: 200 },
+      { show: true  , editable: true, bulk_edit: true, name: 'hide'        , nice_name: 'Hide'        , sort: 'hide'        , type: 'checkbox'   , text: function(r) { return r.hide ? 'Yes' : 'No'   }, value: function(r) { return r.hide ? true : false   }, width: 200 }
+    ],
+    search_fields: [                                                           
+      { name: 'listing_mui'      , nice_name: 'MLS Number'  , type: 'text'  }
+    ]
+  });
+});
 </script>
 <% end %>

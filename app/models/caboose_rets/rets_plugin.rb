@@ -13,7 +13,7 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
     }    
     item['children'] << { 'id' => 'agents', 'icon' => 'users',    'href' => '/admin/agents'           , 'text' => 'Agents'                , 'modal' => false }  if user.is_allowed('rets_agents','view')
     # item['children'] << { 'id' => 'offices'          , 'href' => '/admin/offices'          , 'text' => 'Offices'               , 'modal' => false }
-    # item['children'] << { 'id' => 'open-houses'      , 'href' => '/admin/open-houses'      , 'text' => 'Open Houses'           , 'modal' => false }
+    item['children'] << { 'id' => 'open-houses', 'icon' => 'calendars', 'href' => '/admin/open-houses'      , 'text' => 'Open Houses'           , 'modal' => false } if user.is_allowed('rets_open_houses','view')
     item['children'] << { 'id' => 'properties'      , 'icon' => 'rets', 'href' => '/admin/properties'      , 'text' => 'Properties'  , 'modal' => false }  if user.is_allowed('rets_properties','view')
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/commercial'       , 'text' => 'Commercial Property'   , 'modal' => false }
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/multi-family'     , 'text' => 'Multi-Family Property' , 'modal' => false }

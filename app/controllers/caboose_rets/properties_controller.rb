@@ -20,6 +20,8 @@ module CabooseRets
     		end
     	end
       where = @site && @site.id == 558 ? "(style = 'Condo' OR res_style = 'Condo')" : "(id is not null)"
+      # where2 = params[:keyword].blank? ? "(id is not null)" : "(mls_number ILIKE ? or public_remarks ILIKE ? or street_name ILIKE ? or subdivision ILIKE ?)"
+      # terms2 = params[:keyword].blank? ? nil : ["%#{params[:keyword]}%","%#{params[:keyword]}%","%#{params[:keyword]}%","%#{params[:keyword]}%"]
       sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
       @pager = Caboose::PageBarGenerator.new(params, {
         'area'                     => '',
@@ -70,7 +72,7 @@ module CabooseRets
         'skip'            => ['status'],
         'base_url'        => '/properties',
         'items_per_page'  => 10,
-        'additional_where' => [ (where) ]
+        'additional_where' => [ where ]
       })
 
       @properties = @pager.items
@@ -191,7 +193,11 @@ module CabooseRets
     def facebook_listings_feed
       rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
       if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
-        @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).order("original_entry_timestamp DESC").take(100)
+        if @site.id == 558
+          @properties = CabooseRets::Property.where("list_agent_mls_id in (?)", ['118593705','118511951','118598750','SCHMANDTT','118599999','118509093','118518704','118515504']).order("original_entry_timestamp DESC").take(100)
+        else
+          @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).order("original_entry_timestamp DESC").take(100)
+        end
       elsif params[:fieldtype] == 'office' && rc && !rc.office_mls.blank?
         @properties = CabooseRets::Property.where("list_office_mls_id = ?", rc.office_mls).order("original_entry_timestamp DESC").take(100)
       else
