@@ -78,7 +78,7 @@ module CabooseRets
 
       @properties = @pager.items
       if params[:waterfronts].present?   then @properties.reject!{|p| p.waterfronts.blank?} end
-      # if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end
+      # if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end 
       if params[:foreclosure_yn] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
 
       @saved_search = nil
