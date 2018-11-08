@@ -84,7 +84,7 @@ $(document).ready(function() {
       { name: 'hide', nice_name: 'Hide', type: 'checkbox', value: <%== Caboose.json(@agent_meta.hide) %>, width: 500, height: 300 },
       { name: 'slug', nice_name: 'Slug', type: 'text', value: <%== Caboose.json(@agent.slug) %>, width: 500 },
       { name: 'bio', nice_name: 'Bio', type: 'richtext', value: <%== Caboose.json(@agent_meta.bio) %>, width: 500, height: 300 },
-      { name: 'image'  , nice_name: 'Image'   , type: 'image'  , value: <%= raw Caboose.json(@agent_meta.image ? @agent_meta.image.url(:thumb) : 'http://placehold.it?300x300') %>, width: 800, update_url: '/admin/agents/<%= @agent.id %>/image' }
+      { name: 'image'  , nice_name: 'Image'   , type: 'image'  , value: <%= raw Caboose.json(@agent_meta.image ? @agent_meta.image.url(:thumb) : 'http://placehold.it?300x300') %>, width: 150, update_url: '/admin/agents/<%= @agent.id %>/image' }
     ]
   });  
 });

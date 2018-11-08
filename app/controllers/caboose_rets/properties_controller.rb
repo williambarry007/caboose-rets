@@ -10,8 +10,11 @@ module CabooseRets
       render :json => arr
     end
 
+    # @route GET /tuscaloosa-condos-for-sale
     # @route GET /properties
     def index
+      base_url = '/properties'
+      base_url = request.original_fullpath =~ /^\/tuscaloosa-condos-for-sale(.*?)$/ ? '/tuscaloosa-condos-for-sale' : base_url
     	params[:street_number_like] = params[:street_name_like].tr('A-z', '').tr(' ', '') unless params[:street_name_like].nil?
     	unless params[:street_name_like].nil?
     		params[:street_name_like] = params[:street_name_like].tr('0-9', "")
@@ -68,7 +71,7 @@ module CabooseRets
         'address_like'    => 'street_number_concat_street_name_like'
         },
         'skip'            => ['status'],
-        'base_url'        => '/properties',
+        'base_url'        => base_url,
         'items_per_page'  => 10,
         'additional_where' => [ where ]
       })
