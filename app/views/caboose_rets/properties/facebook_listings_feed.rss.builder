@@ -34,7 +34,7 @@ xml.instruct! :xml, :version => "1.0"
         xml.listing_type('for_sale_by_agent')
         xml.num_baths(property.baths_total)
         xml.num_beds(property.beds_total)
-        if !property.alternate_link.blank?
+        if !property.alternate_link.blank? && @use_alternate_link == true
           xml.url(property.alternate_link)
         else
           xml.url("https://" + domain + "/properties/#{property.mls_number}/details")

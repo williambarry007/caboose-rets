@@ -207,9 +207,12 @@ module CabooseRets
 
     # @route GET /rets/listings-feed/:fieldtype
     def facebook_listings_feed
+      @use_alternate_link = false
       rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
       if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
         if @site.id == 558
+          # Gray Group listings
+          @use_alternate_link = true
           @properties = CabooseRets::Property.where(:status => 'Active').where("list_agent_mls_id in (?)", ['118593705','118511951','118598750','SCHMANDTT','118599999','118509093','118518704','118515504']).order("original_entry_timestamp DESC").take(100)
         else
           @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).where(:status => 'Active').order("original_entry_timestamp DESC").take(100)
