@@ -185,7 +185,7 @@ module CabooseRets
       return unless (user_is_allowed_to 'edit', 'rets_properties')
       p = Property.find(params[:id])
       CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_properties(p.mls_number, true)
-      resp = Caboose::StdClass.new
+      resp = Caboose::StdClass.new 
       resp.success = "The property's info is being updated from MLS. This may take a few minutes depending on how many images it has."
       render :json => resp
     end
