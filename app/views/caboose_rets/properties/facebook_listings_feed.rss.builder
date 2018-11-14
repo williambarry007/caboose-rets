@@ -28,7 +28,7 @@ xml.instruct! :xml, :version => "1.0"
             xml.url("https:" + m.image.url(:large)) if m
           end
         end
-        xml.latitude(property.latitude.blank? ? '33.2098' : property.latitude)
+        xml.latitude(property.latitude.blank? ? '33.2098' : property.latitude) 
         xml.longitude(property.longitude.blank? ? '-87.5692' : property.longitude)
         xml.neighborhood(property.subdivision)
         xml.listing_type('for_sale_by_agent')
