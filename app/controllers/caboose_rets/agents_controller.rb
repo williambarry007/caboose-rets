@@ -63,27 +63,21 @@ module CabooseRets
 
     # @route GET /admin/agents/edit-sort
     def admin_edit_sort
-      if !user_is_allowed_to 'edit', 'rets_agents'
-        Caboose.log("invalid permissions")
-      else
-        @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).all
-        render :layout => 'caboose/admin'  
-      end
+      return unless user_is_allowed_to 'edit', 'rets_agents'
+      @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).all
+      render :layout => 'caboose/admin'  
     end
 
     # @route PUT /admin/agents/update-sort
     def admin_update_sort
       resp = Caboose::StdClass.new
-      if !user_is_allowed_to 'edit', 'rets_agents'
-        Caboose.log("invalid permissions")
-      else
-        params[:agent].each_with_index do |ag, ind|
-          agent = Agent.find(ag)
-          agent.sort_order = ind
-          agent.save
-        end
-        resp.success = true
+      return unless user_is_allowed_to 'edit', 'rets_agents'
+      params[:agent].each_with_index do |ag, ind|
+        agent = Agent.find(ag)
+        agent.sort_order = ind
+        agent.save
       end
+      resp.success = true
       render :json => resp
     end
 
@@ -115,7 +109,6 @@ module CabooseRets
       render :json => resp
     end
 
-
     # @route POST /admin/agents/:id/image
     def admin_update_image
       render :json => false and return unless user_is_allowed_to 'edit', 'rets_agents'    
@@ -127,7 +120,6 @@ module CabooseRets
       resp.attributes['image'] = { 'value' => meta.image.url(:thumb) }    
       render :text => resp.to_json
     end
-
 
   end
 end
