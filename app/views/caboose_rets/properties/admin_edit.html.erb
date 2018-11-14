@@ -184,7 +184,7 @@ function refresh_property_from_mls(mls)
   });
 }
 
-$(document).ready(function() {
+$(window).load(function() {
   m = new ModelBinder({
     name: 'Property',
     id: <%= @property.id %>,
