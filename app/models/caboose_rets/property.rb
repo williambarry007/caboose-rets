@@ -1,6 +1,6 @@
 class CabooseRets::Property <ActiveRecord::Base
     self.table_name = "rets_properties"
-    attr_accessible :id, :matrix_unique_id, :mls_number
+    attr_accessible :id, :matrix_unique_id, :mls_number, :alternate_link
 
     def url()     return "/properties/#{self.mls_number}/details" end
     def images()  return CabooseRets::Media.where(:media_mui => self.matrix_unique_id, :media_type => 'Photo').reorder(:media_order).all end

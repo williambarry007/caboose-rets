@@ -7,6 +7,12 @@ p = @property
 <input type='button' class="caboose-btn" value='Back' onclick="window.location='/admin/properties';" />
 <input type='button' class="caboose-btn" value='Manually Refresh from MLS' onclick="refresh_property_from_mls('<%= p.id %>');" />
 </p>
+
+<div style="margin:0 0 20px 0;min-height:36px;">
+	<div id="property_<%= @property.id %>_alternate_link"></div>
+</div>
+
+
 <div id='message'><%= raw flash[:message] ? flash[:message] : "" %></div>
 
 <table class='data'>
@@ -177,5 +183,17 @@ function refresh_property_from_mls(mls)
     }
   });
 }
+
+$(document).ready(function() {
+  m = new ModelBinder({
+    name: 'Property',
+    id: <%= @property.id %>,
+    update_url: '/admin/properties/<%= @property.id %>',
+    authenticity_token: '<%= form_authenticity_token %>',
+    attributes: [
+      { name: 'alternate_link', nice_name: 'Alternate Link', type: 'text', value: <%== Caboose.json(@property.alternate_link) %>, width: 500 }
+    ]
+  });  
+});
 </script>
 <% end %>

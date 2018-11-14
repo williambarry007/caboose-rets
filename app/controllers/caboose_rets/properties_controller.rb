@@ -165,6 +165,21 @@ module CabooseRets
       render :layout => 'caboose/admin'
     end
 
+    # @route PUT /admin/properties/:id
+    def admin_update
+      return unless (user_is_allowed_to 'edit', 'rets_properties')
+      resp = Caboose::StdClass.new
+      prop = Property.find(params[:id])
+      params.each do |k,v|
+        case k
+          when "alternate_link" then prop.alternate_link = v
+        end
+      end
+      prop.save
+      resp.success = true
+      render :json => resp
+    end
+
     # @route GET /admin/properties/:id/refresh
     def admin_refresh
       return unless (user_is_allowed_to 'edit', 'rets_properties')
@@ -195,12 +210,14 @@ module CabooseRets
       rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
       if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
         if @site.id == 558
-          @properties = CabooseRets::Property.where("list_agent_mls_id in (?)", ['118593705','118511951','118598750','SCHMANDTT','118599999','118509093','118518704','118515504']).order("original_entry_timestamp DESC").take(100)
+          @properties = CabooseRets::Property.where(:status => 'Active').where("list_agent_mls_id in (?)", ['118593705','118511951','118598750','SCHMANDTT','118599999','118509093','118518704','118515504']).order("original_entry_timestamp DESC").take(100)
         else
-          @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).order("original_entry_timestamp DESC").take(100)
+          @properties = CabooseRets::Property.where("list_agent_mls_id = ?", rc.agent_mls).where(:status => 'Active').order("original_entry_timestamp DESC").take(100)
         end
       elsif params[:fieldtype] == 'office' && rc && !rc.office_mls.blank?
-        @properties = CabooseRets::Property.where("list_office_mls_id = ?", rc.office_mls).order("original_entry_timestamp DESC").take(100)
+        @properties = CabooseRets::Property.where("list_office_mls_id = ?", rc.office_mls).where(:status => 'Active').order("original_entry_timestamp DESC").take(100)
+      elsif params[:fieldtype] == 'condo'
+        @properties = CabooseRets::Property.where("(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%')").where(:status => 'Active').order("original_entry_timestamp DESC").take(100)
       else
         @properties = CabooseRets::Property.order("original_entry_timestamp DESC").take(100)
       end

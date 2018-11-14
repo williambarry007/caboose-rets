@@ -34,7 +34,11 @@ xml.instruct! :xml, :version => "1.0"
         xml.listing_type('for_sale_by_agent')
         xml.num_baths(property.baths_total)
         xml.num_beds(property.beds_total)
-        xml.url("https://" + domain + "/properties/#{property.mls_number}/details")
+        if !property.alternate_link.blank?
+          xml.url(property.alternate_link)
+        else
+          xml.url("https://" + domain + "/properties/#{property.mls_number}/details")
+        end
         xml.year_built(property.year_built)
         if !property.property_type.blank?
           if kind.include?('Land')

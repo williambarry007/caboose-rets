@@ -99,6 +99,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :hide, :boolean     , { :default => false }]
       ],
       CabooseRets::Property => [
+        [ :alternate_link                       , :string],
         [ :access                               , :text],
         [ :acreage                              , :decimal],
         [ :acreage_source                       , :text],
