@@ -208,6 +208,7 @@ module CabooseRets
     # @route GET /rets/listings-feed/:fieldtype
     def facebook_listings_feed
       @use_alternate_link = false
+      @fieldtype = params[:fieldtype]
       rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
       if params[:fieldtype] == 'agent' && rc && !rc.agent_mls.blank?
         if @site.id == 558

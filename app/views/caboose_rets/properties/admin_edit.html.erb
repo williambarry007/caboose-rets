@@ -191,7 +191,7 @@ $(window).load(function() {
     update_url: '/admin/properties/<%= @property.id %>',
     authenticity_token: '<%= form_authenticity_token %>',
     attributes: [
-      { name: 'alternate_link', nice_name: 'Alternate Link', type: 'text', value: <%== Caboose.json(@property.alternate_link) %>, width: 500 }
+      { name: 'alternate_link', nice_name: 'Alternate Link', type: 'text', value: <%== Caboose.json(@property.alternate_link) %>, width: 800 }
     ]
   });  
 });

@@ -14,6 +14,17 @@
 <% content_for :caboose_css do %>
 <style>
  #properties_new  { display: none; }
+ #properties_message {
+  display: block;
+  min-height: 87px;
+  margin-bottom: 0 !important;
+ }
+ #properties_message p {
+  margin: 10px 0 0 0;
+ }
+ #properties_table_container {
+  margin-top: 10px;
+ }
 </style>
 <% end %>
 
@@ -48,6 +59,9 @@ $(document).ready(function() {
       { name: 'mls_number'      , nice_name: 'MLS Number'  , type: 'text'  }
     ]
   });
+});
+$(window).load(function() {
+  setTimeout(function(){ $("#properties_toggle_search").trigger("click"); }, 500);
 });
 </script>
 <% end %>
