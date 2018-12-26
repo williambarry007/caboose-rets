@@ -561,7 +561,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     task_started = self.lock_task
 
     begin
-      overlap = 24.hours
+      overlap = 2.hours
       if (DateTime.now - self.last_purged).to_f >= 0.5
         self.purge
         self.save_last_purged(task_started)
