@@ -119,7 +119,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.update_after(date_modified, save_images = true)
     si = save_images ? 'saving images' : 'not saving images'
-    self.log3(nil,nil,"Updating after #{date_modified} and #{si}")
+    self.log3(nil,nil,"Updating everything after #{date_modified} and #{si}")
     self.delay(:priority => 10, :queue => 'rets').update_helper('Property' , date_modified, save_images)
     self.delay(:priority => 10, :queue => 'rets').update_helper('Office'   , date_modified, false)
     self.delay(:priority => 10, :queue => 'rets').update_helper('Member'   , date_modified, false)
@@ -127,15 +127,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.update_helper(class_type, date_modified, save_images = true)
-    #self.log3(class_type,nil,"In update helper for #{class_type}")
-    self.log3(class_type,nil,"Updating everything modified after #{date_modified}")
+    si = save_images ? 'saving images' : 'not saving images'
+    self.log3(class_type,nil,"Updating #{class_type} modified after #{date_modified} and #{si}")
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
-
     quer = "(#{m.date_modified_field}=#{d}+)"
-    quer += "OR(PhotosChangeTimestamp=#{d}+)" if class_type == 'Property'
-
     params = {
       :search_type => m.search_type,
       :class => class_type,
@@ -155,7 +152,29 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], false)
       end
     end
+
+    # Check for changed images
+    if class_type == 'Property'
+      self.log3("Property",nil,"Checking for modified images on Properties...")
+      d1 = (self.last_updated - 1.hours).in_time_zone(CabooseRets::timezone).strftime("%FT%T")
+      params = {
+        :search_type => m.search_type,
+        :class => class_type,
+        :select => [m.remote_key_field],
+        :querytype => 'DMQL2',
+        :query => "(PhotosChangeTimestamp=#{d1}+)",
+        :standard_names_only => true,
+        :timeout => -1
+      }
+      self.log3(class_type,nil,"Searching with params: " + params.to_s)
+      self.client.search(params) do |data|
+        self.log3(class_type,nil,"Resulting data: " + data.to_s)
+        self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], true)
+      end
+    end
+
   end
+
 
   #=============================================================================
   # Single model import methods (called from a worker dyno)
@@ -431,7 +450,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     (0...batch_count).each do |i|
       self.log3(class_type,nil,"Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
       self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
-        ids << (class_type == 'OpenHouse' ? data[k].to_i : data[k])
+        ids << data[k]
       end
     end
 
@@ -455,7 +474,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
 
       # Find any ids in the remote database that should be in the local database
-      self.log3(class_type,nil,"- Finding #{class_type} records in the remote database that should be in the local database...")
+      self.log3(class_type,nil,"Finding #{class_type} records in the remote database that should be in the local database...")
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
@@ -567,7 +586,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         self.save_last_purged(task_started)
         overlap = 1.week
       end
-      self.update_after(self.last_updated - overlap)
+      self.update_after((self.last_updated - overlap), false)
       self.download_missing_images
       self.log3(nil,nil,"Saving the timestamp for when we updated to #{task_started.to_s}...")
 		  self.save_last_updated(task_started)

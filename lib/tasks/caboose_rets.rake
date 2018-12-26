@@ -130,6 +130,14 @@ namespace :caboose_rets do
     CabooseRets::RetsImporter.download_missing_images
   end
 
+  desc "Re-import property details"
+  task :reimport_properties => :environment do
+    props = CabooseRets::Property.all
+    props.each do |p|
+      CabooseRets::RetsImporter.delay(:queue => 'rets', :priority => 4).import_properties(p.mls_number, false)
+    end
+  end
+
   desc "Reimports Property Images"
   task :reimport_property_images => :environment do
     props = CabooseRets::Property.all
