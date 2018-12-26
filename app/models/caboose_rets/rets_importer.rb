@@ -64,7 +64,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.import(class_type, query)
     m = self.meta(class_type)
-    self.log("Importing #{m.search_type}:#{class_type} with query #{query}...")
+    self.log3(class_type,nil,"Importing #{m.search_type}:#{class_type} with query #{query}...") 
     self.get_config if @@config.nil? || @@config['url'].nil?
     params = {
       :search_type => m.search_type,
@@ -79,16 +79,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       self.client.search(params) do |data|
         obj = self.get_instance_with_id(class_type, data)
         if obj.nil?
-          self.log("Error: object is nil")
-          self.log(data.inspect)
+          self.log3(class_type,nil,"Error: object is nil")
+          self.log3(class_type,nil,data.inspect)
           next
         end
         obj.parse(data)
         obj.save
       end
     rescue RETS::HTTPError => err
-      self.log "Import error for #{class_type}: #{query}"
-      self.log err.message
+      self.log3(class_type,nil,"Import error for #{class_type}: #{query}")
+      self.log3(class_type,nil,err.message)
     end
   end
 
@@ -118,16 +118,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_after(date_modified, save_images = true)
-    self.log "Updating after #{date_modified}"
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Property'  , date_modified, save_images)
+    si = save_images ? 'saving images' : 'not saving images'
+    self.log3(nil,nil,"Updating after #{date_modified} and #{si}")
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Property' , date_modified, save_images)
     self.delay(:priority => 10, :queue => 'rets').update_helper('Office'   , date_modified, false)
-    self.delay(:priority => 10, :queue => 'rets').update_helper('Member'    , date_modified, false)
+    self.delay(:priority => 10, :queue => 'rets').update_helper('Member'   , date_modified, false)
     self.delay(:priority => 10, :queue => 'rets').update_helper('OpenHouse', date_modified, false)
   end
 
   def self.update_helper(class_type, date_modified, save_images = true)
-    self.log "In update helper for #{class_type}"
-    self.log "Updating everything modified after #{date_modified}"
+    #self.log3(class_type,nil,"In update helper for #{class_type}")
+    self.log3(class_type,nil,"Updating everything modified after #{date_modified}")
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
@@ -144,9 +145,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :standard_names_only => true,
       :timeout => -1
     }    
-    self.log(params)
+    self.log3(class_type,nil,"Searching with params: " + params.to_s)
     self.client.search(params) do |data|
-      self.log data
+      self.log3(class_type,nil,"Resulting data: " + data.to_s)
       case class_type
         when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
         when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], false)
@@ -172,31 +173,37 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # end
 
   def self.import_properties(mls_id, save_images = true)
+    si = save_images ? 'saving images' : 'not saving images'
+    self.log3('Property',mls_id,"Importing Property #{mls_id} and #{si}...")
     self.import('Property', "(ListingId=#{mls_id})")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil
       self.download_property_images(p) if save_images
       self.update_coords(p)
     else
-      self.log("No Property associated with #{mls_id}")
+      self.log3(nil,nil,"No Property associated with #{mls_id}")
     end
   end
 
   def self.import_office(mls_id, save_images = true)
+    self.log3('Office',mls_id,"Importing Office #{mls_id}...")
     self.import('Office', "(OfficeMlsId=#{mls_id})")
     office = CabooseRets::Office.where(:matrix_unique_id => mls_id.to_s).first
   end
 
   def self.import_agent(mls_id, save_images = true)
+    self.log3('Agent',mls_id,"Importing Agent #{mls_id}...")
     self.import('Member', "(MemberMlsId=#{mls_id})")
     a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
   end
 
   def self.import_open_house(oh_id, save_images = true)
+    self.log3('OpenHouse',oh_id,"Importing Open House #{oh_id}...")
     self.import('OpenHouse', "(OpenHouseKey=#{oh_id})")
   end
 
   def self.import_media(id, save_images = true)
+    self.log3('Media',id,"Importing Media #{id}...")
     self.import('Media', "((MediaObjectID=#{id}+),(MediaObjectID=#{id}-))")
   end
 
@@ -243,7 +250,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # end
 
   def self.download_property_images(p)
-    self.log "Saving images for #{p.mls_number}..."
+    self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
     begin
       # Get first image
       self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
@@ -296,6 +303,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.download_missing_images
+    self.log3("Property",nil,"Downloading all missing images...")
     CabooseRets::Property.where("photo_count = ? OR photo_count is null", '').all.each do |p|
       self.delay(:priority => 10, :queue => 'rets').import_properties(p.mls_number, true)
     end
@@ -337,17 +345,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     if p.nil?
       model = CabooseRets::Property      
       i = 0      
-        self.log "Updating coords properties..."
+        self.log3('Property',nil,"Updating coords properties...")
         model.where(:latitude => nil).reorder(:mls_number).each do |p1|
           self.delay(:priority => 10, :queue => 'rets').update_coords(p1)
         end
       return
     end
 
-    self.log "Getting coords for MLS # #{p.mls_number}..."
+    self.log3('Property',p.mls_number,"Getting coords for MLS # #{p.mls_number}...")
     coords = self.coords_from_address(CGI::escape "#{p.street_number} #{p.street_name}, #{p.city}, #{p.state_or_province} #{p.postal_code}")
     if coords.nil? || coords == false
-      self.log "Can't set coords for MLS # #{p.mls_number}..."
+      self.log3('Property',nil,"Can't set coords for MLS # #{p.mls_number}...")
       return
     end
 
@@ -375,7 +383,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.purge
-    self.log('purging')
+    self.log3(nil,nil,'purging')
     self.purge_properties
     self.purge_offices
     self.purge_agents
@@ -392,10 +400,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     m = self.meta(class_type)    
     self.log(m.search_type)
 
-    self.log("Purging #{class_type}...")
+    self.log3(class_type,nil,"Purging #{class_type}...")
 
     # Get the total number of records
-    self.log("- Getting total number of records for #{class_type}...")
+    self.log3(class_type,nil,"Getting total number of records for #{class_type}...")
 
     statusquery = ""
 
@@ -421,7 +429,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
-      self.log("- Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
+      self.log3(class_type,nil,"Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
       self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
         ids << (class_type == 'OpenHouse' ? data[k].to_i : data[k])
       end
@@ -430,33 +438,33 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     # Only do stuff if we got a real response from the server
     if ids.count > 0
 
-      puts "Remote IDs found: #{ids.to_s}"
+      self.log3(class_type,nil,"Remote IDs found: #{ids.to_s}")
 
       # Delete any records in the local database that shouldn't be there
-      self.log("- Finding #{class_type} records in the local database that are not in the remote database...")
+      self.log3(class_type,nil,"Finding #{class_type} records in the local database that are not in the remote database...")
       t = m.local_table
       k = m.local_key_field
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
-      puts "Local IDs found: #{local_ids.to_s}"
+      self.log3(class_type,nil,"Local IDs found: #{local_ids.to_s}")
       ids_to_remove = local_ids - ids
-      self.log("- Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
-      self.log("- Deleting #{class_type} records in the local database that shouldn't be there...")
+      self.log3(class_type,nil,"Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
+      self.log3(class_type,nil,"Deleting #{class_type} records in the local database that shouldn't be there...")
       query = ["delete from #{t} where #{k} in (?)", ids_to_remove]
       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
 
       # Find any ids in the remote database that should be in the local database
-      self.log("- Finding #{class_type} records in the remote database that should be in the local database...")
+      self.log3(class_type,nil,"- Finding #{class_type} records in the remote database that should be in the local database...")
       query = "select distinct #{k} from #{t}"
       rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
       local_ids = rows.collect{ |row| row[k] }
-      puts "Local IDs found: #{local_ids.to_s}"
+      self.log3(class_type,nil,"Local IDs found: #{local_ids.to_s}")
       ids_to_add = ids - local_ids
       ids_to_add = ids_to_add.sort.reverse
-      self.log("- Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
+      self.log3(class_type,nil,"Found #{ids_to_add.count} #{class_type} records in the remote database that we need to add to the local database.")
       ids_to_add.each do |id|
-        self.log("- Importing #{id}...")
+        self.log3(class_type,nil,"Importing #{id}...")
         case class_type
           when "Property"   then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
           when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
@@ -521,14 +529,22 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.log(msg)
     puts "[rets_importer] #{msg}"
-    #Rails.logger.info("[rets_importer] #{msg}")
   end
 
   def self.log2(msg)
     puts "======================================================================"
     puts "[rets_importer] #{msg}"
     puts "======================================================================"
-    #Rails.logger.info("[rets_importer] #{msg}")
+  end
+
+  def self.log3(class_name, object_id, text)
+    self.log2(text)
+    log = CabooseRets::Log.new
+    log.class_name = class_name
+    log.object_id = object_id
+    log.text = text
+    log.timestamp = DateTime.now
+    log.save
   end
 
   #=============================================================================
@@ -536,7 +552,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.update_rets
-    self.log2("Updating rets...")
+    self.log3(nil,nil,"Updating rets...")
     if self.task_is_locked
       self.log2("Task is locked, aborting.")
       return
@@ -545,20 +561,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     task_started = self.lock_task
 
     begin
-      overlap = 30.seconds
+      overlap = 24.hours
       if (DateTime.now - self.last_purged).to_f >= 0.5
         self.purge
         self.save_last_purged(task_started)
-        # Keep this in here to make sure all updates are caught
-        #overlap = 1.month
+        overlap = 1.week
       end
-
-      self.log2("Updating after #{self.last_updated.strftime("%FT%T%:z")}...")
       self.update_after(self.last_updated - overlap)
       self.download_missing_images
-      self.log2("Saving the timestamp for when we updated...")
+      self.log3(nil,nil,"Saving the timestamp for when we updated to #{task_started.to_s}...")
 		  self.save_last_updated(task_started)
-
 		  self.log2("Unlocking the task...")
 		  self.unlock_task
 		rescue Exception => err
@@ -570,12 +582,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
 
 		# Start the same update process in 20 minutes
-		self.log2("Adding the update rets task for 20 minutes from now...")
+		self.log3(nil,nil,"Adding the update rets task for 20 minutes from now...")
 		q = "handler like '%update_rets%'"
 		count = Delayed::Job.where(q).count
 		if count == 0 || (count == 1 && Delayed::Job.where(q).first.locked_at)
 		  self.delay(:run_at => 20.minutes.from_now, :priority => 10, :queue => 'rets').update_rets
 		end
+    # Delete old logs
+    CabooseRets::Log.where("timestamp < ?",(DateTime.now - 30.days)).destroy_all
   end
 
   def self.last_updated

@@ -290,7 +290,13 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :zoning                               , :text],
         [ :zoning_northport                     , :text],
         [ :zoning_tusc                          , :text]
-      ],      
+      ], 
+      CabooseRets::Log => [
+        [ :class_name, :string ],
+        [ :object_id, :string ],
+        [ :text, :text ],
+        [ :timestamp, :datetime ]
+      ],
       CabooseRets::Media => [
         [ :photo_modification_timestamp      , :string     ],
         [ :file_name                         , :string     ],
