@@ -145,7 +145,7 @@ namespace :caboose_rets do
       puts "Checking property #{p.mls_number}"
       if CabooseRets::Media.where(:media_mui => p.mls_number, :media_type => 'Photo').count == 0
         puts "Didn't find any images, re-importing"
-        CabooseRets::RetsImporter.download_property_images(p)
+        CabooseRets::RetsImporter.delay(:queue => 'rets', :priority => 4).download_property_images(p)
       end
     end
   end
