@@ -194,11 +194,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.import_properties(mls_id, save_images = true)
     si = save_images ? 'saving images' : 'not saving images'
     self.log3('Property',mls_id,"Importing Property #{mls_id} and #{si}...")
+    save_images = true if !CabooseRets::Property.where(:mls_number => mls_id.to_s).exists?
     self.import('Property', "(ListingId=#{mls_id})")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil
       self.download_property_images(p) if save_images
-      self.update_coords(p)
+      self.update_coords(p) if p.latitude.blank? || p.longitude.blank?
     else
       self.log3(nil,nil,"No Property associated with #{mls_id}")
     end
