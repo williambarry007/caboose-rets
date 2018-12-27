@@ -139,7 +139,7 @@ namespace :caboose_rets do
   end
 
   desc "fix images"
-  task :fix_images => :environment do
+  task :fix_images => :environment do 
     props = CabooseRets::Property.where("photo_count is not null and photo_count != ?", "0").order('id desc').all
     props.each do |p|
       puts "Checking property #{p.mls_number}"
