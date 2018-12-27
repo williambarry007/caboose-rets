@@ -153,7 +153,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
     end
 
-    # Check for changed images 
+    # Check for changed images
     if class_type == 'Property'
       self.log3("Property",nil,"Checking for modified images on Properties...")
       d1 = (self.last_updated - 1.hours).in_time_zone(CabooseRets::timezone).strftime("%FT%T")
