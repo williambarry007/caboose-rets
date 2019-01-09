@@ -88,6 +88,7 @@ class CabooseRets::Property <ActiveRecord::Base
         # self.expenses_utility                 = data['ExpensesUtility']
         self.exterior_features                = data['ExteriorFeatures']
         self.fireplace                        = data['FireplaceYN']
+        self.fireplace_features               = data['FireplaceFeatures']
      #   self.flood_plain                      = data['FloodPlain']
         self.flooring                         = data['Flooring']
        # self.foreclosure_sale_date            = data['ForeclosureSaleDate']
@@ -107,7 +108,7 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.income_rental                    = data['GrossIncome']
         self.interior_features                = data['InteriorFeatures']
         self.land_features_extras             = data['LotFeatures']
-        self.latitude                         = data['Latitude'].blank? ? nil : data['Latitude'].to_f
+        self.latitude                         = data['Latitude'].blank? ? self.latitude : data['Latitude'].to_f
     #    self.landscaping                      = data['Landscaping']
         self.laundry                          = data['LaundryFeatures']
         self.legal_description                = data['TaxLegalDescription']
@@ -124,8 +125,8 @@ class CabooseRets::Property <ActiveRecord::Base
         self.list_office_mls_id               = data['ListOfficeMlsId']
         self.list_office_name                 = data['ListOfficeName']
         self.list_office_phone                = data['ListOfficePhone']
-        self.list_price                       = data['ListPrice'].blank? ? nil : data['ListPrice'].to_i
-        self.longitude                        = data['Longitude'].blank? ? nil : data['Longitude'].to_f
+        self.list_price                       = data['ListPrice'].blank? ? self.list_price : data['ListPrice'].to_i
+        self.longitude                        = data['Longitude'].blank? ? self.longitude : data['Longitude'].to_f
         self.lot_description                  = data['LotFeatures']
         self.lot_dimensions                   = data['LotSizeDimensions']
         self.lot_dim_source                   = data['LotDimensionsSource']

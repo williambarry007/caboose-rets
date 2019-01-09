@@ -162,6 +162,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :expenses_utility                     , :text],
         [ :exterior_features                    , :text],
         [ :fireplace                            , :text],
+        [ :fireplace_features                   , :string ],
         [ :flood_plain                          , :text],
         [ :flooring                             , :text],
         [ :foreclosure_sale_date                , :text],

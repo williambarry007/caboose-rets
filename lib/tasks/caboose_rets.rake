@@ -154,7 +154,7 @@ namespace :caboose_rets do
   task :reimport_property_images => :environment do
     props = CabooseRets::Property.all
     props.each do |p|
-      CabooseRets::RetsImporter.log("- Reimporting images for #{p.mls_number}...")
+      CabooseRets::RetsImporter.log3("Property",p.mls_number,"Reimporting images for #{p.mls_number}...")
       CabooseRets::Media.where(:media_mui => p.mls_number, :media_type => 'Photo').destroy_all
       CabooseRets::RetsImporter.download_property_images(p)
     end
@@ -170,7 +170,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('130185',false)
+    CabooseRets::RetsImporter.import_properties('131136',false)
   end
 
   desc "Purge rets data"
