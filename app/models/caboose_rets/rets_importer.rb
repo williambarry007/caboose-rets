@@ -199,10 +199,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil
       self.download_property_images(p) if save_images == true
-      self.log3(nil,nil,"lat: #{p.latitude}")
-      self.log3(nil,nil,"lng: #{p.longitude}")
       if (p.latitude.blank? || p.longitude.blank?)
-        self.log3(nil,nil,"updating coords")
         self.update_coords(p) 
       end
     else
