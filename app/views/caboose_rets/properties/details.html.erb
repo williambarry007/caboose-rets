@@ -7,7 +7,9 @@
 					<div class="image-holder">
 						<% first_image = @property.images.first %>
 						<% m = Caboose::Media.where(:id => first_image.media_id).first if first_image && !first_image.media_id.blank? %>
-						<img src="<%= m.image.url(:large) %>" alt="<%= first_image.media_remarks %>" />
+						<% if m && first_image %>
+							<img src="<%= m.image.url(:large) %>" alt="<%= first_image.media_remarks %>" />
+						<% end %>
 					</div>
 					<%= render :partial => "caboose/blocks/grantdickey/image_gallery", :locals => {:property => @property} %>
 				</section>

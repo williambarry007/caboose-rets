@@ -170,7 +170,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('131136',false)
+    CabooseRets::RetsImporter.import_properties('131286',true)
   end
 
   desc "Purge rets data"

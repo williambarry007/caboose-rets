@@ -273,7 +273,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
-    begin
+  #  begin
       # Get first image
       self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
         m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
@@ -318,10 +318,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         `rm #{tmp_path}`
         self.log("Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
       end
-    rescue RETS::APIError => err
-      self.log "No image for #{p.mls_number}."
-      self.log err
-    end
+ #   rescue RETS::APIError => err
+ #     self.log "No image for #{p.mls_number}."
+ #     self.log err
+#    end
   end
 
   def self.download_missing_images
@@ -446,13 +446,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     count = 0
     self.client.search(params.merge({ :count => 1})) do |data| end        
     count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]    
-    batch_count = (count.to_f/5000.0).ceil
+    batch_count = (count.to_f/1000.0).ceil
 
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
       self.log3(class_type,nil,"Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
-      self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
+      self.client.search(params.merge({ :select => [k], :limit => 1000, :offset => 1000*i })) do |data|
         ids << data[k]
       end
     end
