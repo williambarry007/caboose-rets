@@ -188,7 +188,7 @@ namespace :caboose_rets do
 
   #desc "Delete old rets properties"
   #task :delete_old_properties => :environment do
-  #  CabooseRets::RetsImporter.delete_old_properties
+  #  CabooseRets::RetsImporter.delete_old_properties 
   #end
 
   desc "Update search options"
