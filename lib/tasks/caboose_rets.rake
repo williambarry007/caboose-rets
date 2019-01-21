@@ -34,7 +34,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'Property',
           :class       => 'Property',
-          :query       => "(MlsStatus=Active)",
+          :query       => "(MlsStatus=Active)AND(OriginatingSystemName=WESTAL)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -42,7 +42,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'Member',
           :class       => 'Member',
-          :query       => "(MemberStatus=Active)",
+          :query       => "(MemberStatus=Active)AND(OriginatingSystemName=WESTAL)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -50,7 +50,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'Office',
           :class       => 'Office',
-          :query       => "(OfficeStatus=Active)",
+          :query       => "(OfficeStatus=Active)AND(OriginatingSystemName=WESTAL)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -58,7 +58,7 @@ namespace :caboose_rets do
         params = {
           :search_type => 'OpenHouse',
           :class       => 'OpenHouse',
-          :query       => "(OpenHouseKeyNumeric=0+)",
+          :query       => "(OpenHouseKeyNumeric=0+)AND(OriginatingSystemName=WESTAL)",
           :limit       => 1,
           :timeout     => -1
         }
@@ -170,7 +170,7 @@ namespace :caboose_rets do
   
   desc "Single Import Test"
   task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('131286',true)
+    CabooseRets::RetsImporter.import_properties('131330',true)
   end
 
   desc "Purge rets data"

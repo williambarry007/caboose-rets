@@ -132,7 +132,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
-    quer = "(#{m.date_modified_field}=#{d}+)"
+    quer = "(#{m.date_modified_field}=#{d}+)AND(OriginatingSystemName=WESTAL)"
     params = {
       :search_type => m.search_type,
       :class => class_type,
@@ -162,7 +162,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         :class => class_type,
         :select => [m.remote_key_field],
         :querytype => 'DMQL2',
-        :query => "(PhotosChangeTimestamp=#{d1}+)",
+        :query => "(PhotosChangeTimestamp=#{d1}+)AND(OriginatingSystemName=WESTAL)",
         :standard_names_only => true,
         :timeout => -1
       }
@@ -439,7 +439,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     params = {
       :search_type => m.search_type,
       :class => class_type,
-      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)AND(#{statusquery})",
+      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)AND(#{statusquery})AND(OriginatingSystemName=WESTAL)",
       :standard_names_only => true,
       :timeout => -1
     }
