@@ -307,7 +307,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
 
 
-      # # Get first image
+      # # Get first image 
       # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
       #   self.log3('Media',p.mls_number,"Downloading first photo with content-id #{headers['content-id']}, orderhint #{headers['orderhint']}, object-id #{headers['object-id']}")
       #   m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
