@@ -273,51 +273,88 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
-  #  begin
-      # Get first image
-      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
-        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
-        m = CabooseRets::Media.new if m.nil?
-        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:0.jpeg"
-        File.open(tmp_path, "wb") do |f|
-          f.write(content)
-        end
-        m.media_mui     = headers['content-id']
-        m.media_order   = 0
-        m.media_type    = 'Photo'
-        cm               = Caboose::Media.new
-        cm.image         = File.open(tmp_path)
-        cm.name          = "rets_media_#{headers['content-id']}_0"
-        cm.original_name = "rets_media_#{headers['content-id']}_0.jpeg"
-        cm.processed     = true
-        cm.save
+ 
+    self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+      next if headers.blank?
+      ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
+      self.log3('Media',p.mls_number,headers.to_s)
+      self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
+      m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
+      m = CabooseRets::Media.new if m.nil?
+      tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
+      File.open(tmp_path, "wb") do |f|
+        f.write(content)
+      end
+      m.media_mui     = headers['content-id']
+      m.media_order   = ind
+      m.media_type    = 'Photo'
+      cm               = Caboose::Media.new
+      cm.image         = File.open(tmp_path)
+      cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
+      cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
+      cm.processed     = true
+      cm.save
+      #puts cm
+      if cm
         m.media_id = cm.id
         m.save
+        self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
         `rm #{tmp_path}`
-        self.log("Image rets_media_#{headers['content-id']}_0 saved")
+        self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
+      else
+        self.log3("Media",p.mls_number,"CabooseMedia was not created, not saving image")
       end
-      # Get rest of images
-      self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
-        m = CabooseRets::Media.new if m.nil?
-        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
-        File.open(tmp_path, "wb") do |f|
-          f.write(content)
-        end
-        m.media_mui     = headers['content-id']
-        m.media_order   = headers['orderhint']
-        m.media_type    = 'Photo'
-        cm               = Caboose::Media.new
-        cm.image         = File.open(tmp_path)
-        cm.name          = "rets_media_#{headers['content-id']}_#{headers['object-id']}"
-        cm.original_name = "rets_media_#{headers['content-id']}_#{headers['object-id']}.jpeg"
-        cm.processed     = true
-        cm.save
-        m.media_id = cm.id
-        m.save
-        `rm #{tmp_path}`
-        self.log("Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
-      end
+    end
+
+
+      # # Get first image
+      # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
+      #   self.log3('Media',p.mls_number,"Downloading first photo with content-id #{headers['content-id']}, orderhint #{headers['orderhint']}, object-id #{headers['object-id']}")
+      #   m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
+      #   m = CabooseRets::Media.new if m.nil?
+      #   tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:0.jpeg"
+      #   File.open(tmp_path, "wb") do |f|
+      #     f.write(content)
+      #   end
+      #   m.media_mui     = headers['content-id']
+      #   m.media_order   = 0
+      #   m.media_type    = 'Photo'
+      #   cm               = Caboose::Media.new
+      #   cm.image         = File.open(tmp_path)
+      #   cm.name          = "rets_media_#{headers['content-id']}_0"
+      #   cm.original_name = "rets_media_#{headers['content-id']}_0.jpeg"
+      #   cm.processed     = true
+      #   cm.save
+      #   m.media_id = cm.id
+      #   m.save
+      #   self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
+      #   `rm #{tmp_path}`
+      #   self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_0 saved")
+      # end
+      # # Get rest of images
+      # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+      #   self.log3('Media',p.mls_number,"Downloading subsequent photo with content-id #{headers['content-id']}, orderhint #{headers['orderhint']}, object-id #{headers['object-id']}")
+      #   m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
+      #   m = CabooseRets::Media.new if m.nil?
+      #   tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
+      #   File.open(tmp_path, "wb") do |f|
+      #     f.write(content)
+      #   end
+      #   m.media_mui     = headers['content-id']
+      #   m.media_order   = headers['orderhint']
+      #   m.media_type    = 'Photo'
+      #   cm               = Caboose::Media.new
+      #   cm.image         = File.open(tmp_path)
+      #   cm.name          = "rets_media_#{headers['content-id']}_#{headers['object-id']}"
+      #   cm.original_name = "rets_media_#{headers['content-id']}_#{headers['object-id']}.jpeg"
+      #   cm.processed     = true
+      #   cm.save
+      #   m.media_id = cm.id
+      #   m.save
+      #   self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
+      #   `rm #{tmp_path}`
+      #   self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
+      # end
  #   rescue RETS::APIError => err
  #     self.log "No image for #{p.mls_number}."
  #     self.log err

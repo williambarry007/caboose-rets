@@ -169,8 +169,10 @@ namespace :caboose_rets do
   end
   
   desc "Single Import Test"
-  task :import_one => :environment do
-    CabooseRets::RetsImporter.import_properties('131330',true)
+  task :import_one, [:mls_number, :download_photos] => :environment do |t, args|
+    puts "Save images: #{args.download_photos}"
+    save_images = args.download_photos == true || args.download_photos == 'true'
+    CabooseRets::RetsImporter.import_properties(args.mls_number, save_images)
   end
 
   desc "Purge rets data"
