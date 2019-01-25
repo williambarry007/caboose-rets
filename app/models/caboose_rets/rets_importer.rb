@@ -275,8 +275,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
- 
-    self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+    self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
       next if headers.blank?
       ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
       self.log3('Media',p.mls_number,headers.to_s)
@@ -290,22 +289,27 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       m.media_mui     = headers['content-id']
       m.media_order   = ind
       m.media_type    = 'Photo'
-      cm               = Caboose::Media.new
-      cm.image         = File.open(tmp_path)
-      cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
-      cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
-      cm.processed     = true
-      cm.save
-      #puts cm
-      if cm
-        m.media_id = cm.id
-        m.save
-        self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
-        `rm #{tmp_path}`
-        self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
-      else
-        self.log3("Media",p.mls_number,"CabooseMedia was not created, not saving image")
+      cm = nil
+      begin
+        cm               = Caboose::Media.new
+        cm.image         = File.open(tmp_path)
+        cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
+        cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
+        cm.processed     = true
+        cm.save
+        if cm && !cm.id.blank?
+          self.log3("Media",p.mls_number,"Created new CabooseMedia object #{cm.id}, setting media_id...")
+          m.media_id = cm.id
+        else
+          self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason")
+        end
+      rescue
+        self.log3("Media",p.mls_number,"CabooseMedia was not created for some other reason")
       end
+      m.save
+      self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+      `rm #{tmp_path}`
+      self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
     end
 
 
