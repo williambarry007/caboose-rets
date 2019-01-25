@@ -497,7 +497,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
     end
 
-    # Only do stuff if we got a real response from the server
+    # Only do stuff if we got a real response from the server 
     if ids.count > 0
 
       self.log3(class_type,nil,"Remote IDs found: #{ids.to_s}")
