@@ -128,6 +128,33 @@ namespace :caboose_rets do
   desc "Import Image"
   task :img => :environment do 
     CabooseRets::RetsImporter.download_missing_images
+    # @@config = {
+    #   'url'                 => nil,
+    #   'username'            => nil,
+    #   'password'            => nil,
+    #   'temp_path'           => nil,
+    #   'log_file'            => nil,
+    #   'media_base_url'      => nil
+    # }
+    # config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
+    # config = config[Rails.env]
+    # config.each { |key,val| @@config[key] = val }
+    # client = RETS::Client.login(
+    #   :url      => config['url'],
+    #   :username => config['username'],
+    #   :password => config['password']
+    # )
+    # params = {
+    #   :search_type=>"Property",
+    #   :class=>"Property",
+    #   :select=>["ListingId"],
+    #   :query=>"(ModificationTimestamp=2019-01-24T13:45:00+)AND(OriginatingSystemName=WESTAL)",
+    #   :timeout=>-1,
+    #   :limit => 1000
+    # }
+    # client.search(params) do |data|
+    #   puts data
+    # end
   end
 
   desc "Re-import property details"

@@ -108,7 +108,13 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.income_rental                    = data['GrossIncome']
         self.interior_features                = data['InteriorFeatures']
         self.land_features_extras             = data['LotFeatures']
-        self.latitude                         = data['Latitude'].blank? ? self.latitude : data['Latitude'].to_f
+    begin
+        self.latitude                         = data['X_Location'].split(',')[0].to_f
+        self.longitude                        = data['X_Location'].split(',')[1].to_f
+    rescue
+        self.latitude                         = self.latitude
+        self.longitude                        = self.longitude
+    end
     #    self.landscaping                      = data['Landscaping']
         self.laundry                          = data['LaundryFeatures']
         self.legal_description                = data['TaxLegalDescription']
@@ -126,7 +132,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.list_office_name                 = data['ListOfficeName']
         self.list_office_phone                = data['ListOfficePhone']
         self.list_price                       = data['ListPrice'].blank? ? self.list_price : data['ListPrice'].to_i
-        self.longitude                        = data['Longitude'].blank? ? self.longitude : data['Longitude'].to_f
+        
         self.lot_description                  = data['LotFeatures']
         self.lot_dimensions                   = data['LotSizeDimensions']
         self.lot_dim_source                   = data['LotDimensionsSource']

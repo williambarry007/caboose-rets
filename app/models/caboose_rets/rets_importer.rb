@@ -139,6 +139,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :select => [m.remote_key_field],
       :querytype => 'DMQL2',
       :query => quer,
+      :limit => 1000,
       :standard_names_only => true,
       :timeout => -1
     }    
@@ -162,6 +163,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         :class => class_type,
         :select => [m.remote_key_field],
         :querytype => 'DMQL2',
+        :limit => 1000,
         :query => "(PhotosChangeTimestamp=#{d1}+)AND(OriginatingSystemName=WESTAL)",
         :standard_names_only => true,
         :timeout => -1
@@ -478,6 +480,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :class => class_type,
       :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)AND(#{statusquery})AND(OriginatingSystemName=WESTAL)",
       :standard_names_only => true,
+      :limit => 1000,
       :timeout => -1
     }
     count = 0
