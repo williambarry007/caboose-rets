@@ -268,7 +268,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #     ids_to_remove = local_ids - ids
   #     if ids_to_remove && ids_to_remove.count > 0
   #       query = ["delete from rets_media where media_id in (?)", ids_to_remove]
-  #       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query)) 
+  #       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
   #     end
   #   end
   # end
