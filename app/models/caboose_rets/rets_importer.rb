@@ -298,18 +298,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         cm.processed     = true
         cm.save
         if cm && !cm.id.blank?
-          self.log3("Media",p.mls_number,"Created new CabooseMedia object #{cm.id}, setting media_id...")
           m.media_id = cm.id
+          m.save
+          self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+          self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
         else
-          self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason")
+          self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
         end
       rescue
-        self.log3("Media",p.mls_number,"CabooseMedia was not created for some other reason")
+        self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
       end
-      m.save
-      self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
       `rm #{tmp_path}`
-      self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
     end
 
 
