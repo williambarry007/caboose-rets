@@ -165,6 +165,15 @@ namespace :caboose_rets do
     end
   end
 
+  desc "fix empty coordinates"
+  task :fix_coords => :environment do
+    props = CabooseRets::Property.where("latitude is null or longitude is null").order('id desc').all
+    props.each do |p|
+      puts "Updating coords for property #{p.mls_number}"
+      CabooseRets::RetsImporter.delay(:queue => 'rets', :priority => 15).update_coords(p)
+    end
+  end
+
   desc "fix images"
   task :fix_images => :environment do 
     props = CabooseRets::Property.where("photo_count is not null and photo_count != ?", "0").order('id desc').all
