@@ -201,7 +201,9 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil
       self.download_property_images(p) if save_images == true
-      if (p.latitude.blank? || p.longitude.blank?)
+      # self.log2("Latitude: #{p.latitude}")
+      # self.log2("Longitude: #{p.longitude}")
+      if (p.latitude.blank? || p.latitude == '0.0') || (p.longitude.blank? || p.longitude == '0.0')
         self.update_coords(p) 
       end
     else
@@ -275,40 +277,44 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
-    self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-      next if headers.blank?
-      ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
-      self.log3('Media',p.mls_number,headers.to_s)
-      self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
-      m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
-      m = CabooseRets::Media.new if m.nil?
-      tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
-      File.open(tmp_path, "wb") do |f|
-        f.write(content)
-      end
-      m.media_mui     = headers['content-id']
-      m.media_order   = ind
-      m.media_type    = 'Photo'
-      cm = nil
-      begin
-        cm               = Caboose::Media.new
-        cm.image         = File.open(tmp_path)
-        cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
-        cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
-        cm.processed     = true
-        cm.save
-        if cm && !cm.id.blank?
-          m.media_id = cm.id
-          m.save
-          self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
-          self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
-        else
-          self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
+    begin
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+        next if headers.blank?
+        ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
+        self.log3('Media',p.mls_number,headers.to_s)
+        self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
+        m = CabooseRets::Media.new if m.nil?
+        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
+        File.open(tmp_path, "wb") do |f|
+          f.write(content)
         end
-      rescue
-        self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
+        m.media_mui     = headers['content-id']
+        m.media_order   = ind
+        m.media_type    = 'Photo'
+        cm = nil
+        begin
+          cm               = Caboose::Media.new
+          cm.image         = File.open(tmp_path)
+          cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
+          cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
+          cm.processed     = true
+          cm.save
+          if cm && !cm.id.blank?
+            m.media_id = cm.id
+            m.save
+            self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+            self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
+          else
+            self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
+          end
+        rescue
+          self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
+        end
+        `rm #{tmp_path}`
       end
-      `rm #{tmp_path}`
+    rescue
+      self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}")
     end
 
 

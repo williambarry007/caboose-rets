@@ -115,8 +115,8 @@ class CabooseRets::Property <ActiveRecord::Base
         self.latitude                         = self.latitude
         self.longitude                        = self.longitude
     end
-        self.latitude = nil if self.latitude == '0.0'
-        self.longitude = nil if self.longitude == '0.0'
+        self.latitude = nil if self.latitude == '0.0' || self.latitude == 0.0
+        self.longitude = nil if self.longitude == '0.0' || self.longitude == 0.0
     #    self.landscaping                      = data['Landscaping']
         self.laundry                          = data['LaundryFeatures']
         self.legal_description                = data['TaxLegalDescription']
