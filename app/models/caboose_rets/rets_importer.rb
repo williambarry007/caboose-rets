@@ -202,7 +202,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     if p != nil
       self.download_property_images(p) if save_images == true
       # self.log2("Latitude: #{p.latitude}")
-      # self.log2("Longitude: #{p.longitude}")
+      # self.log2("Longitude: #{p.longitude}") 
       if (p.latitude.blank? || p.latitude == '0.0') || (p.longitude.blank? || p.longitude == '0.0')
         self.update_coords(p) 
       end
