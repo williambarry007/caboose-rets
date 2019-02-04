@@ -96,7 +96,7 @@ module CabooseRets
     # @route GET /properties/:mls_number/details
     def details
       @property = Property.where(:mls_number => params[:mls_number]).first
-      @agent = Agent.where(:matrix_unique_id => @property.list_agent_mui, :office_mls_id => @site.rets_office_id).first if @property
+      @agent = Agent.where(:matrix_unique_id => @property.list_agent_mui).where("office_mls_id ILIKE ?", @site.rets_office_id).first if @property
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_number => params[:mls_number]).exists?
       if @property.nil?
         @mls_number = params[:mls_number]
