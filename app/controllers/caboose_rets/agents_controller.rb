@@ -5,22 +5,22 @@ module CabooseRets
     # @route GET /real-estate/agents
     # @route GET /agents
     def index
-      @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).reject{ |a| (a.meta && a.meta.hide == true) }
+      @agents = Agent.where("office_mls_id ILIKE ?",@site.rets_office_id).order(:sort_order).reject{ |a| (a.meta && a.meta.hide == true) }
     end
 
     # @route GET /real-estate/agents/:slug
     # @route GET /agents/:mls_id
     def details
-      @agent = Agent.where(:mls_id => params[:mls_id], :office_mls_id => @site.rets_office_id).first if !params[:mls_id].blank?
-      @agent = Agent.where(:slug => params[:slug], :office_mls_id => @site.rets_office_id).first if !params[:slug].blank?
+      @agent = Agent.where(:mls_id => params[:mls_id]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:mls_id].blank?
+      @agent = Agent.where(:slug => params[:slug]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:slug].blank?
       @listings = Property.where("list_agent_mls_id = ? OR co_list_agent_mls_id = ?",@agent.mls_id,@agent.mls_id).where(:status => 'Active').order('list_price desc').all
     end
 
     # @route GET /real-estate/agents/:slug/contact
     # @route GET /agents/:mls_id/contact
     def contact
-      @agent = Agent.where(:mls_id => params[:mls_id], :office_mls_id => @site.rets_office_id).first if !params[:mls_id].blank?
-      @agent = Agent.where(:slug => params[:slug], :office_mls_id => @site.rets_office_id).first if !params[:slug].blank?
+      @agent = Agent.where(:mls_id => params[:mls_id]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:mls_id].blank?
+      @agent = Agent.where(:slug => params[:slug]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:slug].blank?
     end
 
     #=============================================================================
@@ -36,7 +36,7 @@ module CabooseRets
     # @route GET /admin/agents/json
     def admin_json 
       render :json => false and return if !user_is_allowed_to 'view', 'rets_agents'
-      where = "(office_mls_id = '#{@site.rets_office_id}')"
+      where = "(office_mls_id ILIKE '#{@site.rets_office_id}')"
       pager = Caboose::Pager.new(params, {
         'first_name_like' => '',
         'last_name_like' => ''
@@ -64,7 +64,7 @@ module CabooseRets
     # @route GET /admin/agents/edit-sort
     def admin_edit_sort
       return unless user_is_allowed_to 'edit', 'rets_agents'
-      @agents = Agent.where(:office_mls_id => @site.rets_office_id).order(:sort_order).all
+      @agents = Agent.where("office_mls_id ILIKE ?", @site.rets_office_id).order(:sort_order).all
       render :layout => 'caboose/admin'  
     end
 
