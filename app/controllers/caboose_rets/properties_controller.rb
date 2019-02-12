@@ -106,14 +106,7 @@ module CabooseRets
       beds_min = @property.beds_total - 2 if @property
       beds_max = @property.beds_total + 2 if @property
 
-      # price_min2 = @property.list_price * 0.5 if @property
-      # price_max2 = @property.list_price * 1.5 if @property
-      # beds_min2 = @property.beds_total - 3 if @property
-      # beds_max2 = @property.beds_total + 3 if @property
-
       @related = Property.near("#{@property.latitude}, #{@property.longitude}", 50).where(:property_type => @property.property_type, :status => 'Active', :property_subtype => @property.property_subtype).where(price_where,price_min,price_max).where(beds_where,beds_min,beds_max).where("mls_number != ?",@property.mls_number).order('distance asc').limit(3) if @property
-      #@related = Property.near("#{@property.latitude}, #{@property.longitude}", 20).where(:property_type => @property.property_type, :status => 'Active', :property_subtype => @property.property_subtype).where(price_where,price_min2,price_max2).where(beds_where,beds_min2,beds_max2).where("mls_number != ?",@property.mls_number).order('distance asc').limit(3) if @property && @related.count == 0
-
 
       if @property.nil?
         @mls_number = params[:mls_number]

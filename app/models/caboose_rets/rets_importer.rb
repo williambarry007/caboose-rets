@@ -429,8 +429,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       return
     end
 
-    p.latitude = coords['lat']
-    p.longitude = coords['lng']
+    p.latitude = coords['lat'].to_f
+    p.longitude = coords['lng'].to_f
     p.save
   end
 
