@@ -251,6 +251,12 @@ namespace :caboose_rets do
   desc "Loads data into caboose tables"
   task :load_data => :environment do CabooseRets::Schema.load_data end
 
+  desc "update test"
+  task :update_test => :environment do
+    d = DateTime.now - 1.hours
+    CabooseRets::RetsImporter.update_helper("Property", d, true)
+  end
+
   desc "Updates all the listings from MLS"
   task :update_rets => :environment do
     if task_is_locked

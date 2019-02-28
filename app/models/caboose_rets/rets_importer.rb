@@ -132,7 +132,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     m = self.meta(class_type)
     k = m.remote_key_field
     d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
-    quer = "(#{m.date_modified_field}=#{d}+)AND(OriginatingSystemName=WESTAL)"
+
+    statusquery = ""
+    case class_type
+      when 'Property'  then statusquery = "MlsStatus=Active"
+      when 'Office'    then statusquery = "OfficeStatus=Active"
+      when 'Member'    then statusquery = "MemberStatus=Active"
+      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
+    end
+
+    quer = "(#{m.date_modified_field}=#{d}+)AND(OriginatingSystemName=WESTAL)AND(#{statusquery})"
     params = {
       :search_type => m.search_type,
       :class => class_type,
@@ -164,7 +173,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         :select => [m.remote_key_field],
         :querytype => 'DMQL2',
         :limit => 1000,
-        :query => "(PhotosChangeTimestamp=#{d1}+)AND(OriginatingSystemName=WESTAL)",
+        :query => "(PhotosChangeTimestamp=#{d1}+)AND(OriginatingSystemName=WESTAL)AND(MlsStatus=Active)",
         :standard_names_only => true,
         :timeout => -1
       }
@@ -199,10 +208,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     save_images = true if !CabooseRets::Property.where(:mls_number => mls_id.to_s).exists?
     self.import('Property', "(ListingId=#{mls_id})")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
-    if p != nil
+    if p != nil && p.status == 'Active'
       self.download_property_images(p) if save_images == true
-      # self.log2("Latitude: #{p.latitude}")
-      # self.log2("Longitude: #{p.longitude}") 
       if (p.latitude.blank? || p.latitude == '0.0') || (p.longitude.blank? || p.longitude == '0.0')
         self.update_coords(p) 
       end
