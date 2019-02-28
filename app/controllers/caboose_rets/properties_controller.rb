@@ -101,10 +101,10 @@ module CabooseRets
 
       price_where = "list_price is not null and (list_price >= ? AND list_price <= ?)"
       beds_where = "beds_total is not null and (beds_total >= ? AND beds_total <= ?)"
-      price_min = @property.list_price * 0.8 if @property
-      price_max = @property.list_price * 1.2 if @property
-      beds_min = @property.beds_total - 2 if @property
-      beds_max = @property.beds_total + 2 if @property
+      price_min = @property.list_price * 0.8 if @property && @property.list_price
+      price_max = @property.list_price * 1.2 if @property && @property.list_price
+      beds_min = @property.beds_total - 2 if @property && @property.beds_total
+      beds_max = @property.beds_total + 2 if @property && @property.beds_total
 
       @related = Property.near("#{@property.latitude}, #{@property.longitude}", 50).where(:property_type => @property.property_type, :status => 'Active', :property_subtype => @property.property_subtype).where(price_where,price_min,price_max).where(beds_where,beds_min,beds_max).where("mls_number != ?",@property.mls_number).order('distance asc').limit(3) if @property
 
