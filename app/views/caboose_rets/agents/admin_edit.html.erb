@@ -37,6 +37,8 @@
 
 <div id="agent_<%= @agent.id %>_accepts_listings"></div>
 <br />
+<div id="agent_<%= @agent.id %>_weight"></div>
+<br />
 <div id="agent_<%= @agent.id %>_hide"></div>
 <br />
 <div id="agent_<%= @agent.id %>_slug"></div>
@@ -82,6 +84,10 @@ $(document).ready(function() {
     attributes: [
       { name: 'accepts_listings', nice_name: 'Accepts Listings', type: 'checkbox', value: <%== Caboose.json(@agent_meta.accepts_listings) %>, width: 500, height: 300 },
       { name: 'hide', nice_name: 'Hide', type: 'checkbox', value: <%== Caboose.json(@agent_meta.hide) %>, width: 500, height: 300 },
+      { name: 'weight', nice_name: 'Listing Assignment Weight', type: 'select', value: <%== Caboose.json(@agent_meta.weight) %>, width: 500, options: [
+      <% (0..10).each do |ind| %>
+       {'text':'<%= ind %>','value':<%= ind %>},
+      <% end %>]},
       { name: 'slug', nice_name: 'Slug', type: 'text', value: <%== Caboose.json(@agent.slug) %>, width: 500 },
       { name: 'bio', nice_name: 'Bio', type: 'richtext', value: <%== Caboose.json(@agent_meta.bio) %>, width: 500, height: 300 },
       { name: 'image'  , nice_name: 'Image'   , type: 'image'  , value: <%= raw Caboose.json(@agent_meta.image ? @agent_meta.image.url(:thumb) : 'http://placehold.it?300x300') %>, width: 150, update_url: '/admin/agents/<%= @agent.id %>/image' }

@@ -18,6 +18,7 @@ class CabooseRets::AgentMeta < ActiveRecord::Base
     :assistant_to    ,
     :designation     ,
     :image_location  ,
-    :accepts_listings
+    :accepts_listings,
+    :weight
 
 end

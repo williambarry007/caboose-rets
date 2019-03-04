@@ -100,6 +100,7 @@ module CabooseRets
           when "bio" then meta.bio = v
           when "slug" then agent.slug = v
           when "hide" then meta.hide = v
+          when "weight" then meta.weight = v
           when "accepts_listings" then meta.accepts_listings = v
         end
       end
