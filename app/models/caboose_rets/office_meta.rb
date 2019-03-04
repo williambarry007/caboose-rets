@@ -6,7 +6,7 @@ class CabooseRets::OfficeMeta < ActiveRecord::Base
   has_attached_file :image, 
     :path => 'rets/offices/:lo_code_:style.:extension', 
     :styles => {
-      :thumb => '100x150>',
+      :thumb => '100x150>', 
       :large => '200x300>'
     }
   do_not_validate_attachment_file_type :image
