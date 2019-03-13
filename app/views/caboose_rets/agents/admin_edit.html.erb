@@ -84,8 +84,8 @@ $(document).ready(function() {
     attributes: [
       { name: 'accepts_listings', nice_name: 'Accepts Listings', type: 'checkbox', value: <%== Caboose.json(@agent_meta.accepts_listings) %>, width: 500, height: 300 },
       { name: 'hide', nice_name: 'Hide', type: 'checkbox', value: <%== Caboose.json(@agent_meta.hide) %>, width: 500, height: 300 },
-      { name: 'weight', nice_name: 'Listing Assignment Weight', type: 'select', value: <%== Caboose.json(@agent_meta.weight) %>, width: 500, options: [
-      <% (0..10).each do |ind| %>
+      { name: 'weight', nice_name: 'Listing Assignment Level', type: 'select', value: <%== Caboose.json(@agent_meta.weight) %>, width: 500, options: [
+      <% (1..2).each do |ind| %>
        {'text':'<%= ind %>','value':<%= ind %>},
       <% end %>]},
       { name: 'slug', nice_name: 'Slug', type: 'text', value: <%== Caboose.json(@agent.slug) %>, width: 500 },
