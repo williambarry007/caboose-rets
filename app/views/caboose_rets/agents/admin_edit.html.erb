@@ -2,72 +2,112 @@
 
 <div class="grid-row">
   <div class="unit1of2 left">
-    
+    <p class="fixed">
+      <span class="title">First Name</span>
+      <span class="value"><%= @agent.first_name %></span>
+    </p>
+
+    <p class="fixed">
+      <span class="title">Last Name</span>
+      <span class="value"><%= @agent.last_name %></span>
+    </p>
+    <p class="fixed">
+      <span class="title"><%= 'email'.titleize %></span>
+      <span class="value"><%= @agent.email %></span>
+    </p>
+    <p class="fixed">
+      <span class="title"><%= 'cell_phone'.titleize %></span>
+      <span class="value"><%= @agent.cell_phone %></span>
+    </p>
+    <p class="fixed">
+      <span class="title"><%= 'office_phone'.titleize %></span>
+      <span class="value"><%= @agent.office_phone %></span>
+    </p>
+    <p class="fixed">
+      <span class="title"><%= 'direct_work_phone'.titleize %></span>
+      <span class="value"><%= @agent.direct_work_phone %></span>
+    </p>
+    <p class="fixed">
+      <span class="title"><%= 'fax_phone'.titleize %></span>
+      <span class="value"><%= @agent.fax_phone %></span>
+    </p>
+    <p class="fixed">
+      <span class="title">MLS ID</span>
+      <span class="value"><%= @agent.mls_id %></span>
+    </p>
+
+
+    <div id="agent_<%= @agent.id %>_accepts_listings"></div>
+    <br />
+    <div id="agent_<%= @agent.id %>_weight"></div>
+    <br />
+    <div id="agent_<%= @agent.id %>_hide"></div>
+    <br />
+    <div id="agent_<%= @agent.id %>_slug"></div>
+
+    <div class="richtext-holder">
+      <h5>Bio</h5>
+      <div id="agent_<%= @agent.id %>_bio"></div>
+    </div>
+
+    <div id="agent_<%= @agent.id %>_image"></div>
+
+    <div id="message"></div>
+    <br /><br />
+    <a href="/admin/agents" class="caboose-btn">Back to Agents</a>
   </div>
   <div class="unit1of2 right">
-    <% properties = CabooseRets::Property.where(:representative_agent_mui => @agent.mls_id) %>
+    <% properties = CabooseRets::Property.where(:representative_agent_mui => @agent.mls_id).order('id desc').limit(100) %>
     <% if properties.count > 0 %>
-      <h5>Assigned Listings</h5>
+      <h5>Assigned Listings (<%= properties.count %>)</h5>
+      <ul>
+        <% properties.each do |prop| %>
+          <li><a target="_blank" href="/properties/<%= prop.mls_number %>/details">MLS # <%= prop.mls_number %> - <%= prop.full_address %></a></li>
+        <% end %>
+      </ul>
     <% end %>  
   </div>
 </div>
 
-<p class="fixed">
-  <span class="title">First Name</span>
-  <span class="value"><%= @agent.first_name %></span>
-</p>
 
-<p class="fixed">
-  <span class="title">Last Name</span>
-  <span class="value"><%= @agent.last_name %></span>
-</p>
-<p class="fixed">
-  <span class="title"><%= 'email'.titleize %></span>
-  <span class="value"><%= @agent.email %></span>
-</p>
-<p class="fixed">
-  <span class="title"><%= 'cell_phone'.titleize %></span>
-  <span class="value"><%= @agent.cell_phone %></span>
-</p>
-<p class="fixed">
-  <span class="title"><%= 'office_phone'.titleize %></span>
-  <span class="value"><%= @agent.office_phone %></span>
-</p>
-<p class="fixed">
-  <span class="title"><%= 'direct_work_phone'.titleize %></span>
-  <span class="value"><%= @agent.direct_work_phone %></span>
-</p>
-<p class="fixed">
-  <span class="title"><%= 'fax_phone'.titleize %></span>
-  <span class="value"><%= @agent.fax_phone %></span>
-</p>
-<p class="fixed">
-  <span class="title">MLS ID</span>
-  <span class="value"><%= @agent.mls_id %></span>
-</p>
-
-
-<div id="agent_<%= @agent.id %>_accepts_listings"></div>
-<br />
-<div id="agent_<%= @agent.id %>_weight"></div>
-<br />
-<div id="agent_<%= @agent.id %>_hide"></div>
-<br />
-<div id="agent_<%= @agent.id %>_slug"></div>
-
-<div class="richtext-holder">
-  <h5>Bio</h5>
-  <div id="agent_<%= @agent.id %>_bio"></div>
-</div>
-
-<div id="agent_<%= @agent.id %>_image"></div>
-
-<div id="message"></div>
-<br /><br />
-<a href="/admin/agents" class="caboose-btn">Back to Agents</a>
 
 <% content_for :caboose_css do %>
 <style>
+  .mce-tinymce.mce-container {
+    max-width: 99%;
+  }
+  .grid-row {
+    padding: 10px 1%;
+  }
+  .unit1of2 h5 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+  }
+  .unit1of2.right ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  .unit1of2.right ul li {
+    margin-bottom: 1px;
+  }
+  .unit1of2.right ul li a {
+    text-decoration: none;
+    font-size: 15px;
+    color: #5757b1;
+  }
+  .unit1of2.right ul li a:hover {
+    color: #b15757;
+  }
+  .grid-row .unit1of2 {
+    width: 50%;
+    float: left;
+  }
+  .unit1of2.left {
+    padding-right: 1%;
+  }
+  .unit1of2.right {
+    padding-left: 1%;
+  }
   p.fixed span.title {
     font-weight: bold;
   }
