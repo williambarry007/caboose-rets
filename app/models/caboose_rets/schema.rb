@@ -47,7 +47,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :image_location      , :string     ],
         [ :image               , :attachment ],
         [ :accepts_listings             , :boolean     , { :default => true }],
-        [ :weight              , :float ]
+        [ :weight              , :float       , { :default => 1 } ]
       ], 
       CabooseRets::Office => [
         [ :lo_addr1                     , :text ],
