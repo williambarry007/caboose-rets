@@ -1,5 +1,17 @@
 <h1>Edit Agent</h1>
 
+<div class="grid-row">
+  <div class="unit1of2 left">
+    
+  </div>
+  <div class="unit1of2 right">
+    <% properties = CabooseRets::Property.where(:representative_agent_mui => @agent.mls_id) %>
+    <% if properties.count > 0 %>
+      <h5>Assigned Listings</h5>
+    <% end %>  
+  </div>
+</div>
+
 <p class="fixed">
   <span class="title">First Name</span>
   <span class="value"><%= @agent.first_name %></span>
