@@ -443,7 +443,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.coords_from_address(address)
     begin
-      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyBD34Da5DhRH5wkq3sROsE7-jv90-f1v6o&address=#{address}"
+      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyB9Wwx7sdWaUnFyLcdQ61NOV7DE2NZkDUE&address=#{address}"
       uri.gsub!(" ", "+")
       resp = HTTParty.get(uri)
       json = JSON.parse(resp.body)

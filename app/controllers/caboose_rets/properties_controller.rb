@@ -22,7 +22,7 @@ module CabooseRets
     			params[:street_name_like][0] = '' if params[:street_name_like][0].to_i == 0
     		end
     	end
-      where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%')" : "(id is not null)"
+      where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')" : "(id is not null)"
       sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
       @pager = Caboose::PageBarGenerator.new(params, {
         'area'                     => '',
