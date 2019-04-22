@@ -81,7 +81,7 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.driveway                         = data['Driveway']
         self.elementary_school                = data['ElementarySchool']
         self.exists_struct                    = data['StructureType']
-        # self.expenses_association             = data['ExpensesAssociation']
+        # self.expenses_association             = data['ExpensesAssociation'] 
         self.expenses_insurance               = data['InsuranceExpense']
         self.expenses_maintenance             = data['MaintenanceExpense']
         self.expenses_management              = data['ProfessionalManagementExpense']
