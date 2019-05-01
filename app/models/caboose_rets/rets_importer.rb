@@ -210,7 +210,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil && p.status == 'Active'
       self.download_property_images(p) if save_images == true
-      if (p.latitude.blank? || p.latitude == '0.0') || (p.longitude.blank? || p.longitude == '0.0')
+      if p.latitude.blank? || p.latitude == '0.0' || p.longitude.blank? || p.longitude == '0.0'
         self.update_coords(p) 
       end
     else
@@ -284,13 +284,16 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.download_property_images(p)
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
+    ids_to_keep = []
     begin
       self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
         next if headers.blank?
         ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
         self.log3('Media',p.mls_number,headers.to_s)
         self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
+        is_new = false
         m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
+        is_new = true if m.nil?
         m = CabooseRets::Media.new if m.nil?
         tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
         File.open(tmp_path, "wb") do |f|
@@ -310,7 +313,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
           if cm && !cm.id.blank?
             m.media_id = cm.id
             m.save
-            self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+            ids_to_keep << m.id
+            if is_new
+              self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+            else
+              self.log3("Media",p.mls_number,"RetsMedia object already existed #{m.id}, updated media_id = #{m.media_id}")
+            end
             self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
           else
             self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
@@ -324,6 +332,17 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}")
     end
 
+    # If we downloaded new images, look for old images to delete
+    if ids_to_keep.count > 0
+      self.log3("Media",p.mls_number,"Keeping new RetsMedia ids: #{ids_to_keep}")
+      self.log3("Media",p.mls_number,"Looking for old RetsMedia to delete")
+      CabooseRets::Media.where(:media_mui => p.matrix_unique_id).where("id not in (?)",ids_to_keep).each do |med|
+        self.log3("Media",p.mls_number,"Deleting old RetsMedia #{med.id} and CabooseMedia #{med.media_id}...")
+        m = Caboose::Media.where(:id => med.media_id).where("name ILIKE ?","rets_media%").first
+        m.destroy if m
+        med.destroy
+      end
+    end
 
       # # Get first image  
       # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|

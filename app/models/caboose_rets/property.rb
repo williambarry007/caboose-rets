@@ -110,16 +110,12 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.income_rental                    = data['GrossIncome']
         self.interior_features                = data['InteriorFeatures']
         self.land_features_extras             = data['LotFeatures']
-    begin
-        self.latitude                         = data['X_Location'].split(',')[0].to_f
-        self.longitude                        = data['X_Location'].split(',')[1].to_f
-    rescue
-        self.latitude                         = self.latitude
-        self.longitude                        = self.longitude
-    end
-        self.latitude = nil if self.latitude == 0.0
-        self.longitude = nil if self.longitude == 0.0
-    #    self.landscaping                      = data['Landscaping']
+        self.latitude                         = self.latitude.blank? ? nil : self.latitude
+        self.longitude                        = self.longitude.blank? ? nil : self.longitude
+        if self.latitude == 0.0 || self.latitude == '0.0' || self.longitude == 0.0 || self.longitude == '0.0' || (self.street_number != data['StreetNumber']) || (self.street_name != data['StreetName']) || (self.city != data['City']) || (self.postal_code != data['PostalCode'])
+            self.latitude = nil
+            self.longitude = nil
+        end
         self.laundry                          = data['LaundryFeatures']
         self.legal_description                = data['TaxLegalDescription']
         self.legal_lot                        = data['TaxLot']
