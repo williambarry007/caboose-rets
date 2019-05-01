@@ -214,9 +214,9 @@ namespace :caboose_rets do
   desc "Purge rets data"
   task :purge => :environment do
     CabooseRets::RetsImporter.purge_helper('Property', '2013-08-06')
-    # CabooseRets::RetsImporter.purge_helper('Office', '2012-01-01')
-    # CabooseRets::RetsImporter.purge_helper('Member', '2012-01-01')
-    # CabooseRets::RetsImporter.purge_helper('OpenHouse', '2012-01-01')
+    CabooseRets::RetsImporter.purge_helper('Office', '2012-01-01')
+    CabooseRets::RetsImporter.purge_helper('Member', '2012-01-01')
+    CabooseRets::RetsImporter.purge_helper('OpenHouse', '2012-01-01')
   end
 
   desc "update helper"
