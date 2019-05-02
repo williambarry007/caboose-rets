@@ -18,6 +18,19 @@ class CabooseRets::Property <ActiveRecord::Base
         CabooseRets::RetsImporter.import_properties(self.mls_number, true)
     end
 
+    def featured_photo_url
+        img_url = nil
+        self.images.each do |img|
+            m = Caboose::Media.where(:id => img.media_id).first
+            if m && m.image && m.image.url(:large)
+                img_url = m.image.url(:large)
+                return img_url
+                break
+            end
+        end
+        return img_url
+    end
+
     def agent
         CabooseRets::Agent.where(:mls_id => self.list_agent_mls_id).first
     end

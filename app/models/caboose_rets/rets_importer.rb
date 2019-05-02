@@ -303,6 +303,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         m.media_order   = ind
         m.media_type    = 'Photo'
         cm = nil
+        old_cm_id = is_new ? nil : m.media_id
         begin
           cm               = Caboose::Media.new
           cm.image         = File.open(tmp_path)
@@ -317,6 +318,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
             if is_new
               self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
             else
+              old_media = Caboose::Media.where(:id => old_cm_id).first
+              if old_media
+                self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
+                old_media.destroy
+              end
               self.log3("Media",p.mls_number,"RetsMedia object already existed #{m.id}, updated media_id = #{m.media_id}")
             end
             self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
@@ -548,7 +554,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_remove = local_ids - ids
       self.log3(class_type,nil,"Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
       
-
       # Delete all RetsMedia and CabooseMedia for the deleted property listings 
       if class_type == 'Property' && ids_to_remove && ids_to_remove.count > 0
         self.log3(class_type,nil,"Deleting Media objects that shouldn't be there...")
