@@ -19,7 +19,7 @@ class CabooseRets::Property <ActiveRecord::Base
     end
 
     def featured_photo_url
-        img_url = nil
+        img_url = "https://cabooseit.s3.amazonaws.com/assets/pmre/house.png"
         self.images.each do |img|
             m = Caboose::Media.where(:id => img.media_id).first
             if m && m.image && m.image.url(:large)
