@@ -211,6 +211,11 @@ namespace :caboose_rets do
     CabooseRets::RetsImporter.import_properties(args.mls_number, save_images)
   end
 
+  desc "Import one agent"
+  task :import_one_agent, [:mls_number] => :environment do |t, args|
+    CabooseRets::RetsImporter.import_agent(args.mls_number, false)
+  end
+
   desc "Purge rets data"
   task :purge => :environment do
     CabooseRets::RetsImporter.purge_helper('Property', '2013-08-06')

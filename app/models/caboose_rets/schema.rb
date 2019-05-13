@@ -35,7 +35,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :photo_count                  , :text    ],
         [ :photo_modification_timestamp , :text    ],
         [ :sort_order                   , :integer ],
-        [ :slug                         , :text    ]
+        [ :slug                         , :text     ],
+        [ :last_updated                 , :datetime ]
       ],
       CabooseRets::AgentMeta => [
         [ :la_code             , :string     ],

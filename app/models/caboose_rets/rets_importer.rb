@@ -225,9 +225,29 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   def self.import_agent(mls_id, save_images = true)
-    self.log3('Agent',mls_id,"Importing Agent #{mls_id}...")
-    self.import('Member', "(MemberMlsId=#{mls_id})")
     a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
+    if a.nil?
+      self.log3('Agent',mls_id,"Importing new Agent #{mls_id}...")
+      self.import('Member', "(MemberMlsId=#{mls_id})")
+      a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
+      if a
+        a.last_updated = DateTime.now
+        a.save
+      end
+    else
+      lu = a.last_updated.blank? ? 0 : a.last_updated.to_time.to_i
+      now = DateTime.now.to_time.to_i
+      diff = now - lu
+      is_old = diff > 86400 # 24 hours
+      if is_old
+        self.log3('Agent',mls_id,"Updating existing Agent #{mls_id}...")
+        self.import('Member', "(MemberMlsId=#{mls_id})")
+        a.last_updated = DateTime.now
+        a.save
+      else
+        self.log3('Agent',mls_id,"Skipping importing Agent #{mls_id} because last_updated is today...")
+      end
+    end
   end
 
   def self.import_open_house(oh_id, save_images = true)
