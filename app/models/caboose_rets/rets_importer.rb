@@ -238,7 +238,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       lu = a.last_updated.blank? ? 0 : a.last_updated.to_time.to_i
       now = DateTime.now.to_time.to_i
       diff = now - lu
-      is_old = diff > 86400 # 24 hours
+      is_old = diff > 86400 # 24 hours 
       if is_old
         self.log3('Agent',mls_id,"Updating existing Agent #{mls_id}...")
         self.import('Member', "(MemberMlsId=#{mls_id})")
