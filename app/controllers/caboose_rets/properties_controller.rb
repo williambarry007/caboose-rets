@@ -111,7 +111,7 @@ module CabooseRets
       if @property.nil?
         @mls_number = params[:mls_number]
       #  CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
-        render 'properties/property_not_exists'
+        render 'caboose_rets/properties/property_not_exists'
         return
       end
 
@@ -126,7 +126,7 @@ module CabooseRets
       if @property.nil?
        @mls = params[:mls]
     #   CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
-       render 'properties/property_not_exists'
+       render 'caboose_rets/properties/property_not_exists'
        return
       end
     end
