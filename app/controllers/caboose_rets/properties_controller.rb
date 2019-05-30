@@ -68,7 +68,7 @@ module CabooseRets
         'sort'            => sortby,
         'desc'            => true,
         'abbreviations'   => {
-        'address_like'    => 'street_number_concat_street_name_like'
+        'address_like'    => 'street_number_concat_street_dir_prefix_concat_street_name_concat_street_suffix_concat_street_dir_suffix_like'
         },
         'skip'            => ['status'],
         'base_url'        => base_url,
