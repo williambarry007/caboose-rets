@@ -50,7 +50,7 @@ class CabooseRets::Property <ActiveRecord::Base
     end
 
     def parse(data)
-    #    puts(data.to_s)
+    #    puts(data.to_s) 
      #   self.access                           = nil
         self.acreage                          = data['LotSizeAcres'].blank? ? nil : data['LotSizeAcres'].to_f
         self.acreage_source                   = data['LotSizeSource']
