@@ -171,6 +171,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :foreclosure_yn                       , :text],
         [ :fsboyn                               , :text],
         [ :garage                               , :text],
+        [ :garage_spaces                        , :string ],
         [ :heating                              , :text],
         [ :high_school                          , :text],
         [ :hoa_amenities                        , :text],

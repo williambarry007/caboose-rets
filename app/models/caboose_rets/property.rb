@@ -116,6 +116,7 @@ class CabooseRets::Property <ActiveRecord::Base
       #  self.foreclosure_yn                   = data['ForeclosureYN']
       #  self.fsboyn                           = data['FSBOYN']
         self.garage                           = data['GarageYN']
+        self.garage_spaces                    = data['GarageSpaces']
         self.heating                          = data['Heating']
         self.high_school                      = data['HighSchool']
         self.hoa_amenities                    = data['AssociationAmenities']
