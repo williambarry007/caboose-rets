@@ -308,7 +308,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     begin
       self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
         next if headers.blank?
-        ind = headers['orderhint'] ? headers['orderhint'].to_i : 0
+        ind = headers['orderhint'] ? headers['orderhint'].to_i : 1
         self.log3('Media',p.mls_number,headers.to_s)
         self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
         is_new = false

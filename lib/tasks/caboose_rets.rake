@@ -191,8 +191,21 @@ namespace :caboose_rets do
     props = CabooseRets::Property.all
     props.each do |p|
       CabooseRets::RetsImporter.log3("Property",p.mls_number,"Reimporting images for #{p.mls_number}...")
-      CabooseRets::Media.where(:media_mui => p.mls_number, :media_type => 'Photo').destroy_all
+      CabooseRets::Media.where(:media_mui => p.matrix_unique_id, :media_type => 'Photo').destroy_all
       CabooseRets::RetsImporter.download_property_images(p)
+    end
+  end
+
+  desc "Fix Property Images"
+  task :fix_property_images => :environment do
+    media = CabooseRets::Media.where(:media_order => 0).limit(1)
+    media.each do |m|
+      p = CabooseRets::Property.where(:matrix_unique_id => m.media_mui).first
+      if p
+        CabooseRets::RetsImporter.log3("Property",p.mls_number,"Reimporting images for #{p.mls_number}...")
+        CabooseRets::Media.where(:media_mui => p.matrix_unique_id, :media_type => 'Photo').destroy_all
+        CabooseRets::RetsImporter.delay(:queue => 'rets', :priority => 15).download_property_images(p)
+      end
     end
   end
 
