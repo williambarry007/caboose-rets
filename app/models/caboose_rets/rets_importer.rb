@@ -358,7 +358,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}")
     end
 
-    # If we downloaded new images, look for old images to delete
+    # If we downloaded new images, look for old images to delete. 
     if ids_to_keep.count > 0
       self.log3("Media",p.mls_number,"Keeping new RetsMedia ids: #{ids_to_keep}")
       self.log3("Media",p.mls_number,"Looking for old RetsMedia to delete")
