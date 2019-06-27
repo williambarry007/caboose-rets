@@ -198,7 +198,7 @@ namespace :caboose_rets do
 
   desc "Fix Property Images"
   task :fix_property_images => :environment do
-    media = CabooseRets::Media.where(:media_order => 0).all 
+    media = CabooseRets::Media.where(:media_order => 0).all
     media.each do |m|
       p = CabooseRets::Property.where(:matrix_unique_id => m.media_mui).first
       if p
