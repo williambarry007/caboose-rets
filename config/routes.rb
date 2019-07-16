@@ -96,6 +96,7 @@ CabooseRets::Engine.routes.draw do
   get    "/saved-properties"                       => "saved_properties#index"
   post   "/saved-properties"                       => "saved_properties#add"
   delete "/saved-properties/:mls"             => "saved_properties#delete"
+  get    "/admin/users/:id/mls"                    => "saved_properties#rets_info"
 
   get    "/admin/properties/:mls/photos"       => "rets_media#admin_photos"
   get    "/admin/properties/:mls/files"        => "rets_media#admin_files"

@@ -35,11 +35,7 @@
       <span class="title">MLS ID</span>
       <span class="value"><%= @agent.mls_id %></span>
     </p>
-
-
     <div id="agent_<%= @agent.id %>_accepts_listings"></div>
-    <br />
-    <div id="agent_<%= @agent.id %>_weight"></div>
     <br />
     <div id="agent_<%= @agent.id %>_hide"></div>
     <br />
@@ -59,13 +55,24 @@
   <div class="unit1of2 right">
     <% properties = CabooseRets::Property.where(:representative_agent_mui => @agent.mls_id).order('id desc').limit(100) %>
     <% if properties.count > 0 %>
-      <h5>Assigned Listings (<%= properties.count %>)</h5>
+      <h5 style="margin:0;">Assigned Listings (<%= properties.count %>)</h5>
       <ul>
         <% properties.each do |prop| %>
           <li><a target="_blank" href="/properties/<%= prop.mls_number %>/details">MLS # <%= prop.mls_number %> - <%= prop.full_address %></a></li>
         <% end %>
       </ul>
-    <% end %>  
+    <% end %>
+
+    <% users = Caboose::User.where(:rets_agent_mls_id => @agent.mls_id).order('id desc').limit(100) %>
+    <% if users.count > 0 %>
+      <h5 style="margin:0;">Assigned Users (<%= users.count %>)</h5>
+      <ul>
+        <% users.each do |user| %>
+          <li><a href="/admin/users/<%= user.id %>"><%= user.first_name %> <%= user.last_name %></a></li>
+        <% end %>
+      </ul>
+    <% end %>
+
   </div>
 </div>
 
@@ -86,6 +93,7 @@
   .unit1of2.right ul {
     list-style-type: none;
     padding: 0;
+    margin-top: 6px;
   }
   .unit1of2.right ul li {
     margin-bottom: 1px;

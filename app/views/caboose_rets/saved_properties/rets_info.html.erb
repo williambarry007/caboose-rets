@@ -1,0 +1,32 @@
+
+
+<%= render :partial => 'caboose/users/admin_header' %>
+
+<h3 style="margin:0;">MLS Profile</h3>
+
+  <div class="mb-holder">
+    <p><div id='user_<%= @edituser.id %>_rets_agent_mls_id' ></div></p>
+  </div>
+
+
+
+<%= render :partial => 'caboose/users/admin_footer' %>
+
+<% content_for :caboose_js do %>
+<%= javascript_include_tag "caboose/model/all" %>
+<script type="text/javascript">
+
+$(document).ready(function() {
+  new ModelBinder({
+    name: 'User',
+    id: <%= @edituser.id %>,
+    update_url: '/admin/users/<%= @edituser.id %>',
+    authenticity_token: '<%= form_authenticity_token %>',
+    attributes: [
+      { name: 'rets_agent_mls_id' , nice_name: 'Assigned Agent', type: 'select' , value: <%= raw Caboose.json(@edituser.rets_agent_mls_id) %>, width: 400, options_url: '/admin/agents/options' }
+    ]    
+  });  
+});
+
+</script>
+<% end %>

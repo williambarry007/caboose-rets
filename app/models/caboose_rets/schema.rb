@@ -7,6 +7,12 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
     }
   end
 
+  def self.removed_columns
+    {
+      CabooseRets::SavedProperty => [:mls_acct]
+    }
+  end
+
   # The schema of the database
   # { Model => [[name, data_type, options]] }
   def self.schema
@@ -315,7 +321,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
       ],
       CabooseRets::SavedProperty => [
         [ :user_id         , :integer ],
-        [ :mls_number      , :integer ]
+        [ :mls_number      , :string ]
       ],
       CabooseRets::SavedSearch => [
         [ :user_id       , :integer   ],
@@ -335,6 +341,9 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
       ],
       Caboose::Site => [
         [ :use_rets , :boolean, { :default => false }]
+      ],
+      Caboose::User => [
+        [ :rets_agent_mls_id , :string ]
       ],
       CabooseRets::RetsConfig => [
         [ :site_id, :integer ],

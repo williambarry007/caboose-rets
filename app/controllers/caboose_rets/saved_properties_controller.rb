@@ -7,6 +7,12 @@ module CabooseRets
       @properties = SavedProperty.where(:user_id => logged_in_user.id).all
     end
 
+    # GET /admin/users/:id/mls
+    def rets_info
+      @edituser = Caboose::User.where(:id => params[:id], :site_id => @site.id).first
+      render :layout => 'caboose/admin'
+    end
+
     # POST /saved-properties
     def add
       return if !verify_logged_in

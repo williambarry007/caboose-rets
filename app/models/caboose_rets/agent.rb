@@ -39,6 +39,29 @@ class CabooseRets::Agent < ActiveRecord::Base
     CabooseRets::RetsImporter.import('Member', "(MemberMlsId=#{self.mls_id})")
     CabooseRets::RetsImporter.import_agent(self.mls_id)          
   end
+
+  def self.assign_to_new_user(user)
+    if user && user.site && user.site.use_rets
+      rc = CabooseRets::RetsConfig.where(:site_id => user.site_id).first
+      agents                 = rc ? CabooseRets::Agent.joins(:meta).where(:office_mls_id => rc.office_mls, rets_agents_meta: {hide: FALSE, accepts_listings: true}).order(:sort_order).all : []
+      last_agent_mls_id      = Caboose::Setting.where(:name => "latest_user_agent", :site_id => user.site_id).exists? ? Caboose::Setting.where(:name => "latest_user_agent", :site_id => user.site_id).first : Caboose::Setting.create(:name => "latest_user_agent", :site_id => user.site_id, :value => agents.first.mls_id)
+      last_agent             = CabooseRets::Agent.joins(:meta).where(:mls_id => last_agent_mls_id.value, rets_agents_meta: {hide: FALSE, accepts_listings: true}).first
+      agent_index            = last_agent.present? ? agents.find_index(last_agent) : 0
+      agent_index + 1 < agents.count ? agent_index += 1 : agent_index = 0
+      agent = agents[agent_index]
+      if agent.mls_id == '118593505' # Steven Deal shouldn't be assigned
+        agent_index + 1 < agents.count ? agent_index += 1 : agent_index = 0
+        agent = agents[agent_index]
+      end
+      Caboose.log("Assigning agent #{agent.mls_id} to user #{user.id}")
+      user.rets_agent_mls_id = agent.mls_id
+      last_agent_mls_id.value = agent.mls_id
+      user.save
+      last_agent_mls_id.save
+      role = Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).exists? ? Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).first : Caboose::Role.create(:name => 'RETS Visitor', :site_id => user.site_id)
+      Caboose::RoleMembership.create(:user_id => user.id, :role_id => role.id)
+    end
+  end
     
   def parse(data)
 #    self.agent_number                 = data['AgentNumber']

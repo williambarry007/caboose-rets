@@ -33,6 +33,17 @@ module CabooseRets
       render :layout => 'caboose/admin'       
     end
 
+    # @route GET /admin/agents/options
+    def admin_agent_options
+      options = []
+      rc = CabooseRets::RetsConfig.where(:site_id => @site.id).first
+      agents = rc ? CabooseRets::Agent.joins(:meta).where(:office_mls_id => rc.office_mls, rets_agents_meta: {hide: FALSE, accepts_listings: true}).order(:sort_order).all : []
+      agents.each do |c|
+        options << { 'value' => c.mls_id, 'text' => "#{c.first_name} #{c.last_name}" }
+      end     
+      render :json => options
+    end
+
     # @route GET /admin/agents/json
     def admin_json 
       render :json => false and return if !user_is_allowed_to 'view', 'rets_agents'
