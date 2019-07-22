@@ -28,9 +28,13 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
   end
 
   def self.admin_user_tabs(tabs, user, site)
-    arr = tabs.to_a.insert(-2, ['MLS Profile', "/admin/users/#{user.id}/mls"])
-    tabs = Hash[arr] 
-    return tabs    
+    if site && site.use_rets
+      arr = tabs.to_a.insert(-2, ['MLS Profile', "/admin/users/#{user.id}/mls"])
+      tabs = Hash[arr]
+      return tabs
+    else
+      return tabs
+    end
   end
   
 end
