@@ -321,7 +321,8 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
       ],
       CabooseRets::SavedProperty => [
         [ :user_id         , :integer ],
-        [ :mls_number      , :string ]
+        [ :mls_number      , :string ],
+        [ :date_saved,     :datetime ]
       ],
       CabooseRets::SavedSearch => [
         [ :user_id       , :integer   ],

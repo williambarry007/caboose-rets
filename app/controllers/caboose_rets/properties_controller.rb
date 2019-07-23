@@ -24,6 +24,7 @@ module CabooseRets
     	end
       where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')" : "(id is not null)"
       sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
+      @saved_properties = CabooseRets::SavedProperty.where(:user_id => logged_in_user.id).pluck(:mls_number)
       @pager = Caboose::PageBarGenerator.new(params, {
         'area'                     => '',
         'area_like'                => '',      
@@ -98,7 +99,6 @@ module CabooseRets
       @property = Property.where(:mls_number => params[:mls_number]).first
       @agent = Agent.where(:matrix_unique_id => @property.list_agent_mui).where("office_mls_id ILIKE ?", @site.rets_office_id).first if @property
       @saved = logged_in? && SavedProperty.where(:user_id => logged_in_user.id, :mls_number => params[:mls_number]).exists?
-
       price_where = "list_price is not null and (list_price >= ? AND list_price <= ?)"
       beds_where = "beds_total is not null and (beds_total >= ? AND beds_total <= ?)"
       price_min = @property.list_price * 0.8 if @property && @property.list_price

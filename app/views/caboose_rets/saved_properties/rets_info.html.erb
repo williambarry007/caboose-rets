@@ -8,9 +8,41 @@
     <p><div id='user_<%= @edituser.id %>_rets_agent_mls_id' ></div></p>
   </div>
 
-
+<% if @saved.count > 0 %>
+  <h3 class="sp">Saved Properties</h3>
+  <ul class="saved">
+    <% @saved.each do |sp| %>
+      <% prop = CabooseRets::Property.where(:mls_number => sp.mls_number).first %>
+      <% next if prop.nil? || prop.status != 'Active' %>
+      <li>
+        <a href="/properties/<%= sp.mls_number %>/details" target="_blank">MLS #<%= sp.mls_number %> - <%= prop.full_address %></a>
+        <% if !sp.date_saved.blank? %><span> - saved on <%= sp.date_saved.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y') %></span><% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
 
 <%= render :partial => 'caboose/users/admin_footer' %>
+
+<% content_for :caboose_css do %>
+  <style>
+    h3.sp {
+      margin: 30px 0 10px 0;
+    }
+    ul.saved {
+      padding-left: 0;
+      list-style-type: none;
+    }
+    ul.saved li {
+      display: block;
+      margin-bottom: 3px;
+    }
+    ul.saved li a {
+      text-decoration: none;
+    }
+  </style>
+<% end %>
+
 
 <% content_for :caboose_js do %>
 <%= javascript_include_tag "caboose/model/all" %>

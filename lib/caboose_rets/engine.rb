@@ -21,7 +21,13 @@ module CabooseRets
     initializer 'caboose_rets.assets.precompile' do |app|            
       app.config.assets.precompile += [
         'caboose_rets/admin_media.js',
-        'caboose_rets/caboose_rets.js'
+        'caboose_rets/caboose_rets.js',
+        'caboose_rets/rets_functions.js',
+        'caboose_rets/retsicons.css',
+        'caboose_rets/rets.eot',
+        'caboose_rets/rets.svg',
+        'caboose_rets/rets.ttf',
+        'caboose_rets/rets.woff'
       ]      
     end
   end

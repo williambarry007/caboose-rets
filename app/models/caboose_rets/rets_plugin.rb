@@ -19,9 +19,7 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/multi-family'     , 'text' => 'Multi-Family Property' , 'modal' => false }
     # item['children'] << { 'id' => 'land'             , 'href' => '/admin/land'             , 'text' => 'Land Property'         , 'modal' => false }
     # item['children'] << { 'id' => 'saved-properties' , 'href' => '/saved-properties'       , 'text' => 'Saved Properties'      , 'modal' => false }
-    # item['children'] << { 'id' => 'saved-searches'   , 'href' => '/saved-searches'         , 'text' => 'Saved Searches'        , 'modal' => false }    
-    
-    
+    # item['children'] << { 'id' => 'saved-searches'   , 'href' => '/saved-searches'         , 'text' => 'Saved Searches'        , 'modal' => false }
     nav << item
     
     return nav
