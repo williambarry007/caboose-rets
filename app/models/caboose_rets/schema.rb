@@ -260,6 +260,7 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
         [ :roof                                 , :text],
         [ :roofage                              , :text],
         [ :room_count                           , :text],
+        [ :security_features                    , :text],
         [ :service_type                         , :text],
         [ :sewer                                , :text],
         [ :sold_terms                           , :text],

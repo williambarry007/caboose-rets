@@ -203,6 +203,7 @@ class CabooseRets::Property <ActiveRecord::Base
    #     self.roofage                          = data['Roofage']
         self.room_count                       = data['RoomsTotal']
    #     self.service_type                     = data['ServiceType'] 
+        self.security_features                = data['SecurityFeatures']
         self.sewer                            = data['Sewer']
         self.sold_terms                       = data['ListingTerms']
      #   self.sprinkler                        = data['Sprinkler']
