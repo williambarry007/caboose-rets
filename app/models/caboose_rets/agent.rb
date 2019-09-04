@@ -40,6 +40,27 @@ class CabooseRets::Agent < ActiveRecord::Base
     CabooseRets::RetsImporter.import_agent(self.mls_id)          
   end
 
+  def send_new_user_email(user)
+    if !self.email.blank? && user && user.site
+      settings = Caboose::SmtpConfig.where(:site_id => user.site_id).first
+      if settings
+        delivery_options = {
+          user_name: settings.user_name, 
+          password: settings.password,
+          address: settings.address,
+          port: settings.port,
+          domain: settings.domain,
+          authentication: settings.authentication,
+          enable_starttls_auto: settings.enable_starttls_auto
+        }
+        from_address = "#{settings.site.description} <#{settings.from_address}>"
+        msg = CabooseRets::RetsMailer.send("new_user", self, user, from_address)
+        msg.delivery_method.settings.merge!(delivery_options)
+        msg.deliver
+      end
+    end
+  end
+
   def self.assign_to_new_user(user)
     if user && user.site && user.site.use_rets
       rc = CabooseRets::RetsConfig.where(:site_id => user.site_id).first
@@ -53,10 +74,11 @@ class CabooseRets::Agent < ActiveRecord::Base
         agent_index + 1 < agents.count ? agent_index += 1 : agent_index = 0
         agent = agents[agent_index]
       end
-      Caboose.log("Assigning agent #{agent.mls_id} to user #{user.id}")
+      Caboose.log("Assigning agent #{agent.mls_id} to user #{user.id}") if Rails.env.development?
       user.rets_agent_mls_id = agent.mls_id
       last_agent_mls_id.value = agent.mls_id
       user.save
+      agent.delay(:queue => 'rets').send_new_user_email(user)
       last_agent_mls_id.save
       role = Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).exists? ? Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).first : Caboose::Role.create(:name => 'RETS Visitor', :site_id => user.site_id)
       Caboose::RoleMembership.create(:user_id => user.id, :role_id => role.id)

@@ -1,0 +1,11 @@
+<h4>New User Registration</h4>
+
+<p>A new user has registered for an account on the <%= @site.description %> website. Their information is below:</p>
+
+<p><strong>Name:</strong> <%= @user.first_name %> <%= @user.last_name %></p>
+<p><strong>Email Address:</strong> <%= @user.email %></p>
+<p><strong>Phone Number:</strong> <%= @user.phone %></p>
+
+<% if @agent && !@agent.full_name.blank? %>
+	<p>This user has been automatically assigned to <%= @agent.full_name.titleize %>.</p>
+<% end %>
