@@ -69,7 +69,7 @@ class CabooseRets::Agent < ActiveRecord::Base
       last_agent             = CabooseRets::Agent.joins(:meta).where(:mls_id => last_agent_mls_id.value, rets_agents_meta: {hide: FALSE, accepts_listings: true}).first
       agent_index            = last_agent.present? ? agents.find_index(last_agent) : 0
       agent_index + 1 < agents.count ? agent_index += 1 : agent_index = 0
-      agent = agents[agent_index] 
+      agent = agents[agent_index]   
       if agent.mls_id == '118593505' # Steven Deal shouldn't be assigned
         agent_index + 1 < agents.count ? agent_index += 1 : agent_index = 0
         agent = agents[agent_index]
