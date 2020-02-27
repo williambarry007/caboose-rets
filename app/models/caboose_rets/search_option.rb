@@ -1,7 +1,7 @@
 class CabooseRets::SearchOption < ActiveRecord::Base
   self.table_name = "rets_search_options"
 
-  attr_accessible :id, :name, :field, :value, :flag_for_delete
+  # attr_accessible :id, :name, :field, :value, :flag_for_delete
                                  
   def self.update_search_options
     

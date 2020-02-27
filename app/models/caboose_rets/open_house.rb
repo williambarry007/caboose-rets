@@ -3,7 +3,7 @@ class CabooseRets::OpenHouse < ActiveRecord::Base
   self.table_name = "rets_open_houses"
   
   has_one :property, :primary_key => 'listing_mui', :foreign_key => 'mls_number'  
-  attr_accessible :id, :matrix_unique_id, :hide
+  # attr_accessible :id, :matrix_unique_id, :hide
   
   # def property
   #   models = [CabooseRets::Property]

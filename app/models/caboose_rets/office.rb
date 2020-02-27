@@ -3,7 +3,7 @@ class CabooseRets::Office < ActiveRecord::Base
   self.table_name = "rets_offices"
   
   has_one :meta, :primary_key => 'matrix_unique_id', :foreign_key => 'matrix_unique_id'  
-  attr_accessible :id, :name, :lo_mls_id, :matrix_unique_id
+  # attr_accessible :id, :name, :lo_mls_id, :matrix_unique_id
   
   def image
     return nil if self.meta.nil?

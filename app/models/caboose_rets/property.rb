@@ -1,6 +1,6 @@
 class CabooseRets::Property <ActiveRecord::Base
     self.table_name = "rets_properties"
-    attr_accessible :id, :matrix_unique_id, :mls_number, :alternate_link
+    # attr_accessible :id, :matrix_unique_id, :mls_number, :alternate_link
 
     geocoded_by :full_address
 

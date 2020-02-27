@@ -13,7 +13,7 @@ class CabooseRets::Media < ActiveRecord::Base
       :huge => '1200x1200>'
     }
   do_not_validate_attachment_file_type :image
-  attr_accessible :date_modified, :file_name, :media_id, :media_order, :media_remarks, :media_type, :mls, :url
+  # attr_accessible :date_modified, :file_name, :media_id, :media_order, :media_remarks, :media_type, :mls, :url
 
   def parse(data,content)
     # self.date_modified  = data['DATE_MODIFIED']
