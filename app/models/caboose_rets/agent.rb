@@ -3,7 +3,7 @@ class CabooseRets::Agent < ActiveRecord::Base
   
   has_one :meta, :class_name => 'AgentMeta', :primary_key => 'mls_id', :foreign_key => 'la_code'
   has_many :properties
-  attr_accessible :id, :agent_number, :matrix_unique_id, :sort_order, :mls_id, :last_updated
+  # attr_accessible :id, :agent_number, :matrix_unique_id, :sort_order, :mls_id, :last_updated
   after_initialize :fix_name
   
   def image

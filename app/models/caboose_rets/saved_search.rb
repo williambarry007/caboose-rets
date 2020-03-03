@@ -2,7 +2,7 @@ class CabooseRets::SavedSearch < ActiveRecord::Base
   self.table_name = 'rets_saved_searches'
 
   belongs_to :user
-  attr_accessible :id, :user_id, :property_type, :uri, :params, :date_last, :interval, :notify
+  # attr_accessible :id, :user_id, :property_type, :uri, :params, :date_last, :interval, :notify
   
   # We're storing the params as JSON, so parse it when we init
   after_initialize do
