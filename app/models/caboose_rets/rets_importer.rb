@@ -287,7 +287,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #     m.parse(data)
   #     m.save
   #   end
-
   #   if ids.count > 0
   #     # Delete any records in the local database that shouldn't be there
   #     self.log("- Deleting GFX records for MLS ##{p.matrix_unique_id} in the local database that are not in the remote database...")
