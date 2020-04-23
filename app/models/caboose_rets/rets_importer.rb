@@ -262,12 +262,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   end
 
   #=============================================================================
-  # Images
+  # Images go here
   #=============================================================================
 
   # def self.download_property_images(p, save_images = true)
   #   return if save_images == false
-
   #   self.log("- Downloading GFX records for #{p.matrix_unique_id}...")
   #   params = {
   #     :search_type => 'Media',
