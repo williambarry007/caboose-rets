@@ -46,7 +46,7 @@ module CabooseRets
     # GET /saved-properties/:mls/toggle
     # def toggle_save
     #   return if !verify_logged_in
-    #   resp = Caboose::StdClass.new
+    #   resp = Caboose::StdClass.new 
     #   if SavedProperty.where(:user_id => logged_in_user.id, :mls => params[:mls]).exists?
     #     SavedProperty.where(:user_id => logged_in_user.id, :mls => params[:mls]).destroy_all
     #     resp.saved = false
