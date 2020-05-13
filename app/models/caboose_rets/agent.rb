@@ -56,7 +56,7 @@ class CabooseRets::Agent < ActiveRecord::Base
         from_address = "#{settings.site.description} <#{settings.from_address}>"
         msg = CabooseRets::RetsMailer.send("new_user", self, user, from_address)
         msg.delivery_method.settings.merge!(delivery_options)
-        msg.deliver
+        msg.deliver_now
       end
     end
   end
@@ -78,7 +78,7 @@ class CabooseRets::Agent < ActiveRecord::Base
       user.rets_agent_mls_id = agent.mls_id
       last_agent_mls_id.value = agent.mls_id
       user.save
-      agent.delay(:queue => 'rets').send_new_user_email(user)
+      Rails.env.production? ? agent.delay(:queue => 'rets').send_new_user_email(user) : agent.send_new_user_email(user)
       last_agent_mls_id.save
       role = Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).exists? ? Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).first : Caboose::Role.create(:name => 'RETS Visitor', :site_id => user.site_id)
       Caboose::RoleMembership.create(:user_id => user.id, :role_id => role.id)

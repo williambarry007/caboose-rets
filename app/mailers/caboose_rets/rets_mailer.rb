@@ -1,4 +1,4 @@
-class RetsMailer < ActionMailer::Base
+class CabooseRets::RetsMailer < ActionMailer::Base
 
   default from: "noreply <noreply@caboosecms.com>"
 
