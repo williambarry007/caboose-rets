@@ -1,0 +1,25 @@
+<h1>User Report</h1>
+
+<p>Last 30 Days</p>
+
+<p>New users registered: <%= @users.count %></p>
+
+<ul class="users">
+	<% @users.each do |u| %>
+		<% agent = CabooseRets::Agent.where(:mls_id => u.rets_agent_mls_id).first %>
+		<li>
+			<a href="/admin/users/<%= u.id %>"><%= u.first_name %> <%= u.last_name %></a>
+			<% if u.date_created %><span>- <%= u.date_created.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y') %></span><% end %>
+			<br />
+			<% if agent %><span style="display:block;margin-top:2px;">Assigned Agent: <%= agent.first_name %> <%= agent.last_name %></span><% end %>
+		</li>
+	<% end %>
+</ul>
+
+<% content_for :caboose_css do %>
+<style>
+	ul.users li {
+		margin-bottom: 10px;
+	}
+</style>
+<% end %>

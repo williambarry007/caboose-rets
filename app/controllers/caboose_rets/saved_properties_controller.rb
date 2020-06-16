@@ -15,11 +15,17 @@ module CabooseRets
       render :layout => 'caboose/admin'
     end
 
+    # GET /admin/mls/user-report
+    def user_report
+      d = DateTime.now - 30.days
+      @users = Caboose::User.where(:site_id => @site.id).where("date_created > ?", d).order('id desc').all
+      render :layout => 'caboose/admin'
+    end
+
     # PUT /api/save-property
     def save
       return if !verify_logged_in
       resp = Caboose::StdClass.new
-      # test
       if SavedProperty.exists?(:user_id => logged_in_user.id, :mls_number => params[:mls])
         resp.success = true
       else

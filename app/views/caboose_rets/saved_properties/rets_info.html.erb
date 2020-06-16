@@ -4,6 +4,7 @@
 
 <div class="mb-holder">
   <p><div id='user_<%= @edituser.id %>_rets_agent_mls_id' ></div></p>
+  <% if @edituser.date_created %><p>Date Registered: <%= @edituser.date_created.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y') %></p><% end %>
 </div>
 
 <% if @saved.count > 0 %>

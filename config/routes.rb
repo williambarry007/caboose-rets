@@ -97,6 +97,7 @@ CabooseRets::Engine.routes.draw do
   put    "/api/save-property"                 => "saved_properties#save"
   put    "/api/unsave-property"               => "saved_properties#unsave"
   get    "/admin/users/:id/mls"               => "saved_properties#rets_info"
+  get    "/admin/mls/user-report"             => "saved_properties#user_report"
 
   get    "/admin/properties/:mls/photos"       => "rets_media#admin_photos"
   get    "/admin/properties/:mls/files"        => "rets_media#admin_files"
