@@ -17,8 +17,7 @@ module CabooseRets
 
     # GET /admin/mls/user-report
     def user_report
-      @d = Date.today.at_beginning_of_month
-      @users = Caboose::User.where(:site_id => @site.id).where("date_created > ?", @d).order('id desc').all
+      @users = Caboose::User.where(:site_id => @site.id).order('id desc').limit(500)
       render :layout => 'caboose/admin'
     end
 
