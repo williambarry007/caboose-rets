@@ -17,7 +17,7 @@ module CabooseRets
 
     # GET /admin/mls/user-report
     def user_report
-      @users = Caboose::User.where(:site_id => @site.id).order('id desc').limit(500)
+      @users = Caboose::User.where(:site_id => @site.id).where("rets_agent_mls_id is not null").order('id desc').limit(500)
       render :layout => 'caboose/admin'
     end
 
