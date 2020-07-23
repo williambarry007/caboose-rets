@@ -17,7 +17,7 @@ xml.rss :version => "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
         m = Caboose::Media.where(:id => first_image.media_id).first if first_image && !first_image.media_id.blank?
         if m && m.image
           xml.g(:image_link, "https:" + m.image.url(:large))
-        else 
+        else
           xml.g(:image_link, 'https://cabooseit.s3.amazonaws.com/rets/house.png')
         end
         if !property.construction_status.blank?
