@@ -39,7 +39,7 @@ xml.instruct! :xml, :version => "1.0"
         elsif !property.alternate_link.blank? && @use_alternate_link == true
           xml.url(property.alternate_link)
         else
-          xml.url("https://" + domain + "/properties/#{property.mls_number}/details")
+          xml.url("https://" + domain + "/properties/#{property.mls_number}/details?utm_source=Nine&utm_medium=Facebook&utm_campaign=Retargeting")
         end
         xml.year_built(property.year_built)
         if !property.property_type.blank?
