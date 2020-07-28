@@ -161,7 +161,7 @@ class CabooseRets::Property <ActiveRecord::Base
         self.matrix_unique_id                 = data['ListingKey']
         self.matrix_modified_dt               = data['ModificationTimestamp']
         self.max_sqft                         = data['LivingArea']
-        self.middle_school                    = data['MiddleSchool']
+        self.middle_school                    = data['MiddleOrJuniorSchool']
     #    self.mineral_rights                   = data['MineralRights']
         self.min_sqft                         = data['LivingArea']
         self.misc_indoor_featuresa            = data['BuildingFeatures']

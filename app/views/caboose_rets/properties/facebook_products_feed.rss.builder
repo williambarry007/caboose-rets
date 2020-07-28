@@ -12,7 +12,7 @@ xml.rss :version => "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
         xml.g(:id, property.mls_number)
         xml.g(:title, property.full_address)
         xml.g(:description, property.public_remarks)
-        xml.g(:link, "https://" + domain + "/properties/#{property.mls_number}/details?utm_source=Nine&utm_medium=Facebook&utm_campaign=Retargeting")
+        xml.g(:link, "https://" + domain + "/properties/#{property.mls_number}/details")
         first_image = property.images.first if property.images
         m = Caboose::Media.where(:id => first_image.media_id).first if first_image && !first_image.media_id.blank?
         if m && m.image

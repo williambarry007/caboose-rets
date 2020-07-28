@@ -1,4 +1,3 @@
-
 module CabooseRets
   class PropertiesController < ApplicationController
 
@@ -22,7 +21,11 @@ module CabooseRets
     			params[:street_name_like][0] = '' if params[:street_name_like][0].to_i == 0
     		end
     	end
-      where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')" : "(id is not null)"
+      where = "(id is not null)"
+      if (@site && @site.id == 558) || request.original_fullpath =~ /^\/tuscaloosa-condos-for-sale(.*?)$/
+        where = "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')"
+      end
+   #   where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')" : "(id is not null)"
       sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
       @saved_properties = CabooseRets::SavedProperty.where(:user_id => logged_in_user.id).pluck(:mls_number)
       @pager = Caboose::PageBarGenerator.new(params, {
@@ -82,10 +85,10 @@ module CabooseRets
       # if params[:ftr_lotdesc] == 'golf' then @properties.reject!{|p| p.ftr_lotdesc != 'golf'} end 
       if params[:foreclosure_yn] then @properties.reject!{|p| p.foreclosure_yn != "Y"} end
 
-      @saved_search = nil
-      if CabooseRets::SavedSearch.exists?(:uri => request.fullpath)
-        @saved_search = CabooseRets::SavedSearch.where(:uri => request.fullpath).first
-      end
+      # @saved_search = nil
+      # if CabooseRets::SavedSearch.exists?(:uri => request.fullpath)
+      #   @saved_search = CabooseRets::SavedSearch.where(:uri => request.fullpath).first
+      # end
 
       @block_options = {
         :properties   => @properties,

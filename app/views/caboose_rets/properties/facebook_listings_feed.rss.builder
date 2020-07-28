@@ -1,5 +1,4 @@
 domain = Caboose::Domain.where(:site_id => @site.id, :primary => true).first.domain
-hp = Caboose::Page.where(:site_id => @site.id, :title => "Home").first
 xml.instruct! :xml, :version => "1.0"
   xml.listings do
     xml.title @site.id == 558 ? "The Gray Group" : @site.description
@@ -39,7 +38,8 @@ xml.instruct! :xml, :version => "1.0"
         elsif !property.alternate_link.blank? && @use_alternate_link == true
           xml.url(property.alternate_link)
         else
-          xml.url("https://" + domain + "/properties/#{property.mls_number}/details?utm_source=Nine&utm_medium=Facebook&utm_campaign=Retargeting")
+          url = "https://" + domain + "/properties/#{property.mls_number}/details?utm_source=Nine&utm_medium=Facebook&utm_campaign=Retargeting"
+          xml.url( url )
         end
         xml.year_built(property.year_built)
         if !property.property_type.blank?
