@@ -696,7 +696,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
     self.log2("Locking task...")
     task_started = self.lock_task
-
     begin
       overlap = 2.hours
       if (DateTime.now - self.last_purged).to_f >= 0.5
@@ -717,7 +716,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		  self.log2("Unlocking task if last updated...")
 		  self.unlock_task_if_last_updated(task_started)
     end
-
 		# Start the same update process in 20 minutes
 		self.log3(nil,nil,"Adding the update rets task for 20 minutes from now...")
 		q = "handler like '%update_rets%'"
@@ -727,6 +725,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		end
     # Delete old logs
     CabooseRets::Log.where("timestamp < ?",(DateTime.now - 30.days)).destroy_all
+    # Update search options
+    CabooseRets::SearchOption.delay(:queue => "rets").update_search_options
   end
 
   def self.last_updated

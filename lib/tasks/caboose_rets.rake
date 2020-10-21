@@ -283,9 +283,7 @@ namespace :caboose_rets do
     end
     CabooseRets::RetsImporter.log("Updating rets data...")
     task_started = lock_task
-
     begin
-      # RetsImporter.update_all_after(last_updated - Rational(1,86400))
       CabooseRets::RetsImporter.update_after(last_updated, true)
 		  save_last_updated(task_started)
 		  unlock_task
@@ -294,6 +292,7 @@ namespace :caboose_rets do
 		ensure
 		  unlock_task_if_last_updated(task_started)
     end
+    CabooseRets::SearchOption.delay(:queue => "rets").update_search_options
   end
 
   def last_updated

@@ -22,10 +22,26 @@ module CabooseRets
     		end
     	end
       where = "(id is not null)"
+      search_options = []
+
       if (@site && @site.id == 558) || request.original_fullpath =~ /^\/tuscaloosa-condos-for-sale(.*?)$/
         where = "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')"
       end
-   #   where = @site && @site.id == 558 ? "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')" : "(id is not null)"
+
+      if params[:location_query] && !params[:location_query].blank?
+        lc = params[:location_query]
+        if lc && lc.count > 0
+          lc.each do |lcid|
+            so = CabooseRets::SearchOption.where(:id => lcid).first
+            if so
+              search_options << "(#{so.field} = '#{so.value}')"
+            end
+          end
+        end
+      end
+
+      where2 = search_options.blank? ? "(id is not null)" : ("(" + search_options.join(' OR ') + ")")
+
       sortby = @site && @site.id == 558 ? "original_entry_timestamp" : CabooseRets::default_property_sort
       @saved_properties = CabooseRets::SavedProperty.where(:user_id => logged_in_user.id).pluck(:mls_number)
       @pager = Caboose::PageBarGenerator.new(params, {
@@ -63,22 +79,25 @@ module CabooseRets
         'foreclosure_yn'           => '',
         'address_like'             => '',
         'street_name_like'         => '',
-        'street_number_like'          => '',
+        'street_number_like'       => '',
         'postal_code'              => '',
-        'postal_code_like'         => '',        
+        'postal_code_like'         => '',
         'status'                   => 'Active'
       },{
         'model'           => 'CabooseRets::Property',
         'sort'            => sortby,
         'desc'            => true,
         'abbreviations'   => {
-        'address_like'    => 'street_number_concat_street_dir_prefix_concat_street_name_concat_street_suffix_concat_street_dir_suffix_like'
+          'address_like'    => 'street_number_concat_street_dir_prefix_concat_street_name_concat_street_suffix_concat_street_dir_suffix_like'
         },
         'skip'            => ['status'],
+        'additional_params' => ['location_query'],
         'base_url'        => base_url,
         'items_per_page'  => 10,
-        'additional_where' => [ where ]
+        'additional_where' => [ where, where2 ]
       })
+
+      @pager.original_params[:test] == "hey"
 
       @properties = @pager.items
       if params[:waterfronts].present?   then @properties = @properties.reject{|p| p.waterfronts.blank?} end
