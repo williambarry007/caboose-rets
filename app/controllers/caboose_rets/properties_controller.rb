@@ -25,7 +25,7 @@ module CabooseRets
       search_options = []
 
       if (@site && @site.id == 558) || request.original_fullpath =~ /^\/tuscaloosa-condos-for-sale(.*?)$/
-        where = "(style ILIKE '%condo%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')"
+        where = "(style ILIKE '%condo%' OR public_remarks ILIKE '%condo%' OR legal_description ILIKE '%unit%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')"
       end
 
       if params[:location_query] && !params[:location_query].blank?
