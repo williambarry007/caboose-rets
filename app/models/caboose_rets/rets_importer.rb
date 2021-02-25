@@ -724,7 +724,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		  self.delay(:run_at => 20.minutes.from_now, :priority => 10, :queue => 'rets').update_rets
 		end
     # Delete old logs
-    CabooseRets::Log.where("timestamp < ?",(DateTime.now - 30.days)).destroy_all
+    CabooseRets::Log.where("timestamp < ?",(DateTime.now - 7.days)).destroy_all
     # Update search options
     CabooseRets::SearchOption.delay(:queue => "rets").update_search_options
   end

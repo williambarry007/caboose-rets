@@ -2,7 +2,6 @@ module CabooseRets
   class PropertiesController < ApplicationController
 
     # @route GET /properties/search-options
-    # q=rock quary
     def search_options
       count = params[:count_per_name] ? params[:count_per_name] : 10
       arr = SearchOption.results(params[:q], count)
@@ -23,6 +22,7 @@ module CabooseRets
     	end
       where = "(id is not null)"
       search_options = []
+      searched_address = false
 
       if (@site && @site.id == 558) || request.original_fullpath =~ /^\/tuscaloosa-condos-for-sale(.*?)$/
         where = "(style ILIKE '%condo%' OR public_remarks ILIKE '%condo%' OR legal_description ILIKE '%unit%' OR res_style ILIKE '%condo%' OR property_subtype ILIKE '%condo%' OR property_subtype ILIKE '%townhouse%')"
@@ -33,8 +33,14 @@ module CabooseRets
         if lc && lc.count > 0
           lc.each do |lcid|
             so = CabooseRets::SearchOption.where(:id => lcid).first
-            if so
+            if so && so.name == "Street Address"
+              search_options << "( CONCAT(CONCAT(CONCAT(CONCAT(street_number, ' '),street_name),' '),street_suffix) ILIKE '%#{so.value}%' )"
+              searched_address = true
+            elsif so && so.name == "Street Name"
+              search_options << "( CONCAT(CONCAT(street_name,' '),street_suffix) ILIKE '%#{so.value}%' )"
+            elsif so
               search_options << "(#{so.field} = '#{so.value}')"
+              searched_address = true if so.name == 'MLS Number'
             end
           end
         end
@@ -114,6 +120,13 @@ module CabooseRets
         :saved_search => @saved_search,
         :pager        => @pager
       }
+
+      if @properties && @properties.count == 1 && searched_address
+        only_property = @properties.first
+        redirect_to only_property.url and return
+      end
+
+
     end
 
     # @route GET /properties/:mls_number/details

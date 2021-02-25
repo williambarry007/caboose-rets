@@ -16,6 +16,7 @@ class CabooseRets::SearchOption < ActiveRecord::Base
       'MLS Area'      => ['area'],
       'Neighborhood'  => ['subdivision'],
       'Street Name'   => ['street_name'],
+      'Street Address'   => ['street_address'],
       'Property Type' => ['property_type'],      
       'MLS Number'    => ['mls_number']
     }
@@ -30,15 +31,45 @@ class CabooseRets::SearchOption < ActiveRecord::Base
   end
   
   def self.update_search_options_for_field(name, field)
-    q = ["select distinct(#{field}) from rets_properties where status = ?", 'Active']
-    rows = ActiveRecord::Base.connection.select_rows(ActiveRecord::Base.send(:sanitize_sql_array, q))
-    rows.each do |row|
-      so = self.where(:name => name, :field => field, :value => row[0]).first
-      if so.nil? && !field.blank?
-        self.create(:name => name, :field => field, :value => row[0])
-      else      
-        so.flag_for_delete = false
-        so.save
+    if field == 'street_name'
+      CabooseRets::Property.where(:status => "Active", :property_type => "Residential").where("street_name is not null").order(:id).all.each do |prop|
+        add = "#{prop.street_name} #{prop.street_suffix}"
+        val = add.blank? ? nil : add.strip
+        next if val.blank?
+        so = self.where(:name => name, :field => field, :value => val).first
+        if so.nil? && !field.blank?
+          self.create(:name => name, :field => field, :value => val)
+        elsif so
+          so.flag_for_delete = false
+          so.save
+        end
+      end
+    elsif field == 'street_address'
+      CabooseRets::Property.where(:status => "Active", :property_type => "Residential").where("street_name is not null and street_number is not null").order(:id).all.each do |prop|
+        add = "#{prop.street_number} #{prop.street_name} #{prop.street_suffix}"
+        val = add.blank? ? nil : add.strip
+        next if val.blank?
+        so = self.where(:name => name, :field => field, :value => val).first
+        if so.nil? && !field.blank?
+          self.create(:name => name, :field => field, :value => val)
+        elsif so
+          so.flag_for_delete = false
+          so.save
+        end
+      end
+    else
+      q = ["select distinct(#{field}) from rets_properties where status = ? and property_type = ?", 'Active', 'Residential']
+      rows = ActiveRecord::Base.connection.select_rows(ActiveRecord::Base.send(:sanitize_sql_array, q))
+      rows.each do |row|
+        val = row[0].blank? ? nil : row[0].titleize.strip
+        next if val.blank?
+        so = self.where(:name => name, :field => field, :value => val).first
+        if so.nil? && !field.blank?
+          self.create(:name => name, :field => field, :value => val)
+        elsif so
+          so.flag_for_delete = false
+          so.save
+        end
       end
     end
   end
