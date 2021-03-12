@@ -723,10 +723,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		if count == 0 || (count == 1 && Delayed::Job.where(q).first.locked_at)
 		  self.delay(:run_at => 20.minutes.from_now, :priority => 10, :queue => 'rets').update_rets
 		end
-    # Delete old logs
-    CabooseRets::Log.where("timestamp < ?",(DateTime.now - 7.days)).destroy_all
+
+    # Delete RETS logs over 7 days old
+    dt = DateTime.now - 7.days
+    sql = "delete from rets_logs where timestamp < '#{dt}';"
+    ActiveRecord::Base.connection.select_all(sql)
+
     # Update search options
-    CabooseRets::SearchOption.delay(:queue => "rets").update_search_options
+    CabooseRets::SearchOption.delay(:queue => "rets", :priority => 15).update_search_options
   end
 
   def self.last_updated

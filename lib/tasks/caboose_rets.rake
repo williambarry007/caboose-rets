@@ -292,7 +292,6 @@ namespace :caboose_rets do
 		ensure
 		  unlock_task_if_last_updated(task_started)
     end
-    CabooseRets::SearchOption.delay(:queue => "rets").update_search_options
   end
 
   def last_updated
