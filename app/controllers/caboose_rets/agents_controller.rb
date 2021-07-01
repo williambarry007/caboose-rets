@@ -17,9 +17,9 @@ module CabooseRets
     end
 
     # @route GET /real-estate/agents/:slug/contact
-    # @route GET /agents/:mls_id/contact
+    # @route GET /agents/:id/contact
     def contact
-      @agent = Agent.where(:mls_id => params[:mls_id]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:mls_id].blank?
+      @agent = Agent.where(:id => params[:id]).first if !params[:id].blank?
       @agent = Agent.where(:slug => params[:slug]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:slug].blank?
     end
 

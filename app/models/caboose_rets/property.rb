@@ -41,12 +41,17 @@ class CabooseRets::Property <ActiveRecord::Base
 
     def full_address
         address = "#{self.unit_number.blank? ? '' : 'Unit ' + self.unit_number + ', '}#{self.street_number} #{self.street_dir_prefix.blank? ? '' : self.street_dir_prefix + ' '}#{self.street_name.blank? ? '' : self.street_name.titleize}#{self.street_suffix.blank? ? '' : ' ' + self.street_suffix.titleize}#{self.street_dir_suffix.blank? ? '' : ' ' + self.street_dir_suffix}"
-        return address.blank? ? '' : address.gsub('Mc ','Mc')
+        return address.blank? ? '' : address.gsub('Mc ','Mc').gsub('Mlk',"MLK").gsub(" Us ", " US ").gsub(" Th ", "th ").gsub("Mcfarland","McFarland")
     end
 
     def full_address_city
         address = "#{self.unit_number.blank? ? '' : 'Unit ' + self.unit_number + ', '}#{self.street_number} #{self.street_dir_prefix.blank? ? '' : self.street_dir_prefix + ' '}#{self.street_name.blank? ? '' : self.street_name.titleize}#{self.street_suffix.blank? ? '' : ' ' + self.street_suffix.titleize}#{self.street_dir_suffix.blank? ? '' : ' ' + self.street_dir_suffix}#{self.city.blank? ? '' : '<br />' + self.city.titleize + ', ' + self.state_or_province + ' ' + self.postal_code}"
-        return address.blank? ? '' : address.gsub('Mc ','Mc')
+        return address.blank? ? '' : address.gsub('Mc ','Mc').gsub('Mlk',"MLK").gsub(" Us ", " US ").gsub(" Th ", "th ").gsub("Mcfarland","McFarland")
+    end
+
+    def meta_description(site)
+        fa = self.full_address_city.blank? ? nil : self.full_address_city.gsub("<br />",", ")
+        return "View the property listed for sale at #{fa}. #{site.description}"
     end
 
     def parse(data)

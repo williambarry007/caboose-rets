@@ -143,27 +143,19 @@ module CabooseRets
 
       @related = Property.near("#{@property.latitude}, #{@property.longitude}", 50).where(:property_type => @property.property_type, :status => 'Active', :property_subtype => @property.property_subtype).where(price_where,price_min,price_max).where(beds_where,beds_min,beds_max).where("mls_number != ?",@property.mls_number).order('distance asc').limit(3) if @property
 
-      if @property.nil?
-        @mls_number = params[:mls_number]
-      #  CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i) 
-        render 'caboose_rets/properties/property_not_exists'
-        return
-      end
+      render :file => "caboose/extras/error404", :layout => "caboose/application", :status => 404 and return if @property.nil?
 
       @block_options = {
         :mls_number => params[:mls_number],
         :property => @property,
         :saved    => @saved,
-  #      :agent    => @property ? @property.where(:list_agent_mls_id => @property.list_agent_mls_id).first : nil,
         :form_authenticity_token => form_authenticity_token
       }
 
-      if @property.nil?
-       @mls = params[:mls]
-    #   CabooseRets::RetsImporter.delay(:priority => 10, :queue => 'rets').import_property(@mls_number.to_i)
-       render 'caboose_rets/properties/property_not_exists'
-       return
-      end
+      @page.title = @property.full_address
+      @page.meta_description = @property.meta_description(@site)
+      @page.uri = "properties/#{@property.mls_number}/details"
+
     end
 
     #=============================================================================
