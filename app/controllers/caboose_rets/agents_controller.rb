@@ -14,7 +14,7 @@ module CabooseRets
       @agent = Agent.where(:mls_id => params[:mls_id]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:mls_id].blank?
       @agent = Agent.where(:slug => params[:slug]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:slug].blank?
       @listings = Property.where("list_agent_mls_id ILIKE ? OR co_list_agent_mls_id ILIKE ?", @agent.mls_id, @agent.mls_id).where(:status => 'Active').order('list_price desc').all
-    end
+    end 
 
     # @route GET /real-estate/agents/:slug/contact
     # @route GET /agents/:id/contact
