@@ -44,7 +44,7 @@ class CabooseRets::SearchOption < ActiveRecord::Base
           so.save
         end
       end
-    elsif field == 'street_address'
+    elsif field == 'street_address' 
       CabooseRets::Property.where(:status => "Active", :property_type => "Residential").where("street_name is not null and street_number is not null").order(:id).all.each do |prop|
         add = "#{prop.street_number} #{prop.street_name} #{prop.street_suffix}"
         val = add.blank? ? nil : add.strip
