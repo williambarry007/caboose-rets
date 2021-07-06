@@ -26,8 +26,8 @@ class CabooseRets::SearchOption < ActiveRecord::Base
       end
     end
   
-    # Delete all flagged 
-    self.where(:flag_for_delete => true).delete_all        
+    # Delete all flagged
+    self.where(:flag_for_delete => true).delete_all
   end
   
   def self.update_search_options_for_field(name, field)
