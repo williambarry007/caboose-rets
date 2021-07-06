@@ -74,12 +74,13 @@ class CabooseRets::SearchOption < ActiveRecord::Base
     end
   end
   
-  def self.results(str, count_per_name = 10)      
+  def self.results(str, count_per_name = 10)
+    s = str.blank? ? '' : str.downcase.strip
     q = ["select * from (        
         select id, name, field, value, row_number() over (partition by name order by field) as rownum 
         from rets_search_options        
         where lower(value) like ?        
-      ) tmp where rownum < #{count_per_name}", "%#{str}%"]      
+      ) tmp where rownum < #{count_per_name}", "%#{s}%"]      
     rows = ActiveRecord::Base.connection.select_rows(ActiveRecord::Base.send(:sanitize_sql_array, q))
     arr = rows.collect{ |row| { :id => row[0].to_i, :name => row[1], :field => row[2], :text => row[3] }}    
     return arr    
