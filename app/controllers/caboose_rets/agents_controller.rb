@@ -23,6 +23,29 @@ module CabooseRets
       @agent = Agent.where(:slug => params[:slug]).where("office_mls_id ILIKE ?", @site.rets_office_id).first if !params[:slug].blank?
     end
 
+    # @route GET /rets-unsubscribe
+    def user_unsubscribe
+      user_id = params[:token].blank? ? nil : params[:token].strip.gsub("7b8v9j","").gsub("9b6h0c2n","")
+      @user = user_id ? Caboose::User.where(:id => user_id, :site_id => @site.id).first : nil
+      @token = params[:token]
+      render :file => "caboose/extras/error404", :layout => "caboose/application", :status => 404 and return if @user.nil? || @token.blank?
+      @page.meta_robots = "noindex, nofollow"
+      @page.uri = "rets-unsubscribe"
+      @page.seo_title = "Confirm Unsubscription | #{@site.description}"
+    end
+
+    # @route GET /rets-unsubscribe/confirm
+    def user_unsubscribe_confirm
+      user_id = params[:token].blank? ? nil : params[:token].strip.gsub("7b8v9j","").gsub("9b6h0c2n","")
+      @user = user_id ? Caboose::User.where(:id => user_id, :site_id => @site.id).first : nil
+      render :file => "caboose/extras/error404", :layout => "caboose/application", :status => 404 and return if @user.nil?
+      @page.meta_robots = "noindex, nofollow"
+      @page.uri = "rets-unsubscribe/confirm"
+      @page.seo_title = "Unsubscribed | #{@site.description}"
+      @user.tax_exempt = true # this means unsubscribed
+      @user.save
+    end
+
     #=============================================================================
     # Admin functions 
     #=============================================================================

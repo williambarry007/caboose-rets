@@ -40,23 +40,26 @@ class CabooseRets::Agent < ActiveRecord::Base
     CabooseRets::RetsImporter.import_agent(self.mls_id)          
   end
 
-  def send_new_user_email(user)
-    if !self.email.blank? && user && user.site
-      settings = Caboose::SmtpConfig.where(:site_id => user.site_id).first
-      if settings
-        delivery_options = {
-          user_name: settings.user_name, 
-          password: settings.password,
-          address: settings.address,
-          port: settings.port,
-          domain: settings.domain,
-          authentication: settings.authentication,
-          enable_starttls_auto: settings.enable_starttls_auto
-        }
-        from_address = "#{settings.site.description} <#{settings.from_address}>"
-        msg = CabooseRets::RetsMailer.send("new_user", self, user, from_address)
-        msg.delivery_method.settings.merge!(delivery_options)
-        msg.deliver_now
+  # Sends a SMS to the agent (using Twilio) notifying them that a new user has registered and been assigned to them
+  def send_text(message, site_id)
+    s1 = Caboose::Setting.where(:site_id => site_id, :name => "twilio_account_sid").first
+    account_sid = s1 ? s1.value : nil
+    s2 = Caboose::Setting.where(:site_id => site_id, :name => "twilio_auth_token").first
+    auth_token = s2 ? s2.value : nil
+    s3 = Caboose::Setting.where(:site_id => site_id, :name => "twilio_from_number").first
+    twilio_number = s3 ? s3.value : nil
+    send_to = self.cell_phone.blank? ? (self.direct_work_phone.blank? ? self.other_phone : self.direct_work_phone) : self.cell_phone
+    send_to = '205-657-0937' if Rails.env.development? # Billy's cell
+    if account_sid && auth_token && twilio_number && !send_to.blank? && !message.blank?
+      @client = Twilio::REST::Client.new account_sid, auth_token
+      begin
+        message = @client.messages.create(
+          body: message,
+          to:   "+1#{send_to.gsub(/[(\- )]/, '')}",
+          from: "#{twilio_number}"
+        )
+      rescue
+        Caboose.log("invalid phone number")
       end
     end
   end
@@ -78,7 +81,21 @@ class CabooseRets::Agent < ActiveRecord::Base
       user.rets_agent_mls_id = agent.mls_id
       last_agent_mls_id.value = agent.mls_id
       user.save
-      Rails.env.production? ? agent.delay(:queue => 'rets').send_new_user_email(user) : agent.send_new_user_email(user)
+
+      s1 = Caboose::Setting.where(:site_id => user.site_id, :name => "agent_text_message").first
+      message = s1 ? s1.value : nil
+
+      if !message.blank?
+        message = message.gsub("|user_first_name|", user.first_name)
+        message = message.gsub("|user_last_name|", user.last_name)
+        message = message.gsub("|user_email|", user.email)
+        message = message.gsub("|user_phone|", user.phone)
+        agent.delay(:queue => 'rets', :priority => 0).send_text(message, user.site_id)
+      end
+
+      CabooseRets::RetsMailer.configure_for_site(user.site_id).new_user(agent, user).deliver_later
+      CabooseRets::RetsMailer.configure_for_site(user.site_id).user_welcome(agent, user).deliver_later
+
       last_agent_mls_id.save
       role = Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).exists? ? Caboose::Role.where(:name => 'RETS Visitor', :site_id => user.site_id).first : Caboose::Role.create(:name => 'RETS Visitor', :site_id => user.site_id)
       Caboose::RoleMembership.create(:user_id => user.id, :role_id => role.id)

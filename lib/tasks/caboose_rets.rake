@@ -115,7 +115,7 @@ namespace :caboose_rets do
       params = {
         :search_type => 'OpenHouse',
         :class       => 'OpenHouse',
-        :query       => "(OpenHouseKey=#{args.query})",
+        :query       => "(ListingId=#{args.query})",
         :limit       => 1,
         :timeout     => -1
       }
@@ -271,8 +271,8 @@ namespace :caboose_rets do
 
   desc "update test"
   task :update_test => :environment do
-    d = DateTime.now - 1.hours
-    CabooseRets::RetsImporter.update_helper("Property", d, true)
+    d = DateTime.now - 6.hours
+    CabooseRets::RetsImporter.update_helper("OpenHouse", d, false)
   end
 
   desc "Updates all the listings from MLS"
