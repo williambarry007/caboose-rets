@@ -27,6 +27,7 @@ class CabooseRets::RetsMailer < ActionMailer::Base
     @user = user
     @site = user.site
     to_address = user.email
+    bcc_address = Rails.env.development? ? 'billyswifty@gmail.com' : @site.contact_email
     reply_to = @site.contact_email.blank? ? 'noreply@caboosecms.com' : @site.contact_email
 
     setting = Caboose::Setting.where(:site_id => @site.id, :name => "welcome_email_subject").first
@@ -48,6 +49,7 @@ class CabooseRets::RetsMailer < ActionMailer::Base
 
     mail(
       :to => to_address,
+      :bcc => bcc_address,
       :from => from_address(@site.id, nil),
       :subject => subject,
       :reply_to => reply_to
