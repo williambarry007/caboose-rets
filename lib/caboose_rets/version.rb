@@ -1,3 +1,3 @@
 module CabooseRets
-  VERSION = '0.1.183'
+  VERSION = '0.1.184'
 end
