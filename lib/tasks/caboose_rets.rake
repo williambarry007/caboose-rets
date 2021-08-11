@@ -242,6 +242,10 @@ namespace :caboose_rets do
     CabooseRets::RetsImporter.update_helper('Property', last_updated, false)
   end
 
+  task :send_daily_emails => :environment do
+    CabooseRets::Notification.delay(:queue => "rets").send_new_suggested_emails
+  end
+
   #desc "Delete old rets properties"
   #task :delete_old_properties => :environment do
   #  CabooseRets::RetsImporter.delete_old_properties 
@@ -273,6 +277,11 @@ namespace :caboose_rets do
   task :update_test => :environment do
     d = DateTime.now - 6.hours
     CabooseRets::RetsImporter.update_helper("OpenHouse", d, false)
+  end
+
+  desc "update rets"
+  task :updater => :environment do
+    CabooseRets::RetsImporter.delay(:queue => "rets").update_rets
   end
 
   desc "Updates all the listings from MLS"

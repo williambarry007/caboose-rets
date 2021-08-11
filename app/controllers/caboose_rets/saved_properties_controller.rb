@@ -11,7 +11,8 @@ module CabooseRets
     # GET /admin/users/:id/mls
     def rets_info
       @edituser = Caboose::User.where(:id => params[:id], :site_id => @site.id).first
-      @saved = SavedProperty.where(:user_id => @edituser.id).order('date_saved desc').all
+      @saved = SavedProperty.where(:user_id => @edituser.id).order('date_saved desc').limit(100)
+      @emails = Notification.where(:user_id => @edituser.id).order('date_sent desc').limit(100)
       render :layout => 'caboose/admin'
     end
 

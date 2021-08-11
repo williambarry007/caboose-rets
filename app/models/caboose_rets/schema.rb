@@ -347,6 +347,18 @@ class CabooseRets::Schema < Caboose::Utilities::Schema
       Caboose::User => [
         [ :rets_agent_mls_id , :string ]
       ],
+      CabooseRets::Notification => [
+        [ :user_id, :integer ],
+        [ :date_sent, :datetime ],
+        [ :site_id, :integer ],
+        [ :kind, :string ],
+        [ :sent_to, :string ],
+        [ :object_kind, :string ],
+        [ :object_id, :string ],
+        [ :old_value, :string ],
+        [ :new_value, :string ],
+        [ :message, :text ]
+      ],
       CabooseRets::RetsConfig => [
         [ :site_id, :integer ],
         [ :office_mls, :string ],

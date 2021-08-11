@@ -24,10 +24,12 @@ class CabooseRets::Property <ActiveRecord::Base
             m = Caboose::Media.where(:id => img.media_id).first
             if m && m.image && m.image.url(:large)
                 img_url = m.image.url(:large)
+                img_url = "https:#{img_url}" if !img_url.include?('http')
                 return img_url
                 break
             end
         end
+        img_url = "https:#{img_url}" if !img_url.include?('http')
         return img_url
     end
 
@@ -55,6 +57,10 @@ class CabooseRets::Property <ActiveRecord::Base
     end
 
     def parse(data)
+
+        old_price = self.list_price
+        old_status = self.status
+
     #    puts(data.to_s)
      #   self.access                           = nil
         self.acreage                          = data['LotSizeAcres'].blank? ? nil : data['LotSizeAcres'].to_f
@@ -249,5 +255,14 @@ class CabooseRets::Property <ActiveRecord::Base
         self.zoning                           = data['Zoning']
         # self.zoning_northport                 = data['ZoningNorthPort']
         # self.zoning_tusc                      = data['ZoningTusc']
+
+
+        if old_status != self.status # status was changed
+            CabooseRets::Notification.delay(:queue => "rets").property_status_changed(self, old_status)
+        elsif old_price != self.list_price && self.status == 'Active' # price was changed
+            CabooseRets::Notification.delay(:queue => "rets").property_price_changed(self, old_price)
+        end
+
+
     end
 end

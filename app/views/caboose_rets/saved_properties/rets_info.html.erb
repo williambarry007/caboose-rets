@@ -4,7 +4,7 @@
 
 <div class="mb-holder">
   <p><div id='user_<%= @edituser.id %>_rets_agent_mls_id' ></div></p>
-  <% if @edituser.date_created %><p>Date Registered: <%= @edituser.date_created.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y') %></p><% end %>
+  <% if @edituser.date_created %><p>Date Registered: <%= @edituser.date_created.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y, %l:%M%P') %></p><% end %>
 </div>
 
 <% if @saved.count > 0 %>
@@ -15,7 +15,30 @@
       <% next if prop.nil? || prop.status != 'Active' %>
       <li>
         <a href="/properties/<%= sp.mls_number %>/details" target="_blank">MLS #<%= sp.mls_number %> - <%= prop.full_address %></a>
-        <% if !sp.date_saved.blank? %><span> - saved on <%= sp.date_saved.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y') %></span><% end %>
+        <% if !sp.date_saved.blank? %><span> - saved on <%= sp.date_saved.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y, %l:%M%P') %></span><% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if @emails.count > 0 %>
+  <h3 class="sp">Emails Sent</h3>
+  <ul class="saved">
+    <% @emails.each do |em| %>
+      <li>
+        <strong><%= em.kind %></strong>
+        <span>- sent on <%= em.date_sent.in_time_zone('Central Time (US & Canada)').strftime('%B %-d, %Y, %l:%M%P') %></span>
+        <% if !em.message.blank? %>
+          <p><%== em.message.gsub("\n","<br />") %></p>
+        <% elsif em.object_kind == 'Property' && em.object_id %>
+          <p><a href="/properties/<%= em.object_id %>/details" target="_blank">MLS # <%= em.object_id %></a>, 
+            <% if em.kind.include?('Price') %>
+              Old Price: <%= number_to_currency(em.old_value, :precision => 0) %> -> New Price: <%= number_to_currency(em.new_value, :precision => 0) %>
+            <% else %>
+              Old Status: <%= em.old_value %> -> New Status: <%= em.new_value %>
+            <% end %>
+          </p>
+        <% end %>
       </li>
     <% end %>
   </ul>
@@ -29,12 +52,25 @@
       margin: 30px 0 10px 0;
     }
     ul.saved {
+      margin: 0;
       padding-left: 0;
       list-style-type: none;
     }
     ul.saved li {
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
+    }
+    ul.saved li a {
+      text-decoration: none;
+      color: #3939a7;
+    }
+    ul.saved li a:hover {
+      color: #59a739;
+    }
+    ul.saved li p {
+      margin: 3px 0 0 0;
+      color:  #3e3e3e;
+      font-size:  13px;
     }
     ul.saved li a {
       text-decoration: none;

@@ -56,4 +56,76 @@ class CabooseRets::RetsMailer < ActionMailer::Base
     )
   end
 
+  def daily_report(user, new_listings, related_listings)
+    @user = user
+    @new_listings = new_listings
+    @related_listings = related_listings
+    @site = user.site
+    to_address = user.email
+    reply_to = @site.contact_email.blank? ? 'noreply@caboosecms.com' : @site.contact_email
+    @color = @site.theme ? @site.theme.color_main : @site.theme_color
+    @domain = "https://#{@site.primary_domain.domain}"
+    @domain = "http://dev.pmre.com:3000" if Rails.env.development?
+    @url = @domain
+    @url += "/real-estate" if @site.id == 541
+    @logo_url = @site.logo.url(:large)
+    subject = @site.id == 541 ? "New and Suggested Listings from Pritchett-Moore Real Estate" : "New and Suggested Listings from #{@site.description}"
+    @logo_url = "https:#{@logo_url}" if !@logo_url.include?('http')
+    @unsubscribe_url = "https://#{@site.primary_domain.domain}/rets-unsubscribe?token=7b8v9j#{@user.id}9b6h0c2n"
+    mail(
+      :to => to_address,
+      :from => from_address(@site.id, nil),
+      :subject => subject,
+      :reply_to => reply_to
+    )
+  end
+
+  def property_status_change(user, property, old_status)
+    @user = user
+    @property = property
+    @old_status = old_status
+    @site = user.site
+    to_address = user.email
+    reply_to = @site.contact_email.blank? ? 'noreply@caboosecms.com' : @site.contact_email
+    @color = @site.theme ? @site.theme.color_main : @site.theme_color
+    @domain = "https://#{@site.primary_domain.domain}"
+    @domain = "http://dev.pmre.com:3000" if Rails.env.development?
+    @url = @domain
+    @url += "/real-estate" if @site.id == 541
+    @logo_url = @site.logo.url(:large)
+    subject = "Status Change for Listing MLS ##{@property.mls_number}"
+    @logo_url = "https:#{@logo_url}" if !@logo_url.include?('http')
+    @unsubscribe_url = "https://#{@site.primary_domain.domain}/rets-unsubscribe?token=7b8v9j#{@user.id}9b6h0c2n"
+    mail(
+      :to => to_address,
+      :from => from_address(@site.id, nil),
+      :subject => subject,
+      :reply_to => reply_to
+    )
+  end
+
+  def property_price_change(user, property, old_price)
+    @user = user
+    @property = property
+    @old_price = old_price
+    @site = user.site
+    to_address = user.email
+    reply_to = @site.contact_email.blank? ? 'noreply@caboosecms.com' : @site.contact_email
+    @color = @site.theme ? @site.theme.color_main : @site.theme_color
+    @domain = "https://#{@site.primary_domain.domain}"
+    @domain = "http://dev.pmre.com:3000" if Rails.env.development?
+    @url = @domain
+    @url += "/real-estate" if @site.id == 541
+    @logo_url = @site.logo.url(:large)
+    subject = "Price Change for Listing MLS ##{@property.mls_number}"
+    @logo_url = "https:#{@logo_url}" if !@logo_url.include?('http')
+    @unsubscribe_url = "https://#{@site.primary_domain.domain}/rets-unsubscribe?token=7b8v9j#{@user.id}9b6h0c2n"
+    mail(
+      :to => to_address,
+      :from => from_address(@site.id, nil),
+      :subject => subject,
+      :reply_to => reply_to
+    )
+  end
+
 end

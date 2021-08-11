@@ -70,7 +70,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :search_type => m.search_type,
       :class => class_type,
       :query => query,
-    #  :limit => 3,
       :timeout => -1
     }
     obj = nil
@@ -135,7 +134,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     statusquery = ""
     case class_type
-      when 'Property'  then statusquery = "MlsStatus=Active"
+      when 'Property'  then statusquery = "OriginatingSystemName=WESTAL"
       when 'Office'    then statusquery = "OfficeStatus=Active"
       when 'Member'    then statusquery = "MemberStatus=Active"
       when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
@@ -164,7 +163,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
 
     # Check for changed images
-    if class_type == 'Property'
+    if class_type == 'Property' && Rails.env.production?
       self.log3("Property",nil,"Checking for modified images on Properties...")
       d1 = (self.last_updated - 1.hours).in_time_zone(CabooseRets::timezone).strftime("%FT%T")
       params = {
@@ -191,17 +190,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Single model import methods (called from a worker dyno)
   #=============================================================================
 
-  # def self.import_property(mui, save_images = true)
-  #   self.import('Listing', "(Matrix_Unique_ID=#{mui})")
-  #   p = CabooseRets::Property.where(:matrix_unique_id => mui.to_s).first
-  #   if p != nil
-  #     self.download_property_images(p)
-  #     self.update_coords(p)
-  #   else
-  #     self.log("No Property associated with #{mui}")
-  #   end
-  # end
-
   def self.import_properties(mls_id, save_images = true)
     si = save_images ? 'saving images' : 'not saving images'
     self.log3('Property',mls_id,"Importing Property #{mls_id} and #{si}...")
@@ -209,12 +197,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.import('Property', "(ListingId=#{mls_id})")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil && p.status == 'Active'
-      self.download_property_images(p) if save_images == true
+      self.download_property_images(p) if save_images == true && Rails.env.production?
       if p.latitude.blank? || p.latitude == '0.0' || p.longitude.blank? || p.longitude == '0.0'
         self.update_coords(p) 
       end
     else
-      self.log3(nil,nil,"No Property associated with #{mls_id}")
+      self.log3(nil,nil,"No Active Property associated with #{mls_id}, not downloading images")
     end
   end
 
@@ -265,43 +253,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Images go here
   #=============================================================================
 
-  # def self.download_property_images(p, save_images = true)
-  #   return if save_images == false
-  #   self.log("- Downloading GFX records for #{p.matrix_unique_id}...")
-  #   params = {
-  #     :search_type => 'Media',
-  #     :class => 'Photo',
-  #     :type => 'Photo',
-  #     :resource => 'Property',
-  #     :query => "(ID=*#{p.matrix_unique_id}:1*)",
-  #     :limit => 1000,
-  #     :timeout => -1
-  #   }
-  #   ids = []
-  #   self.client.search(params) do |data|
-  #     puts data
-  #     ids << data['MEDIA_ID']
-  #     m = CabooseRets::Media.where(:media_id => data['MEDIA_ID']).first
-  #     m = CabooseRets::Media.new if m.nil?
-  #     data.MEDIA_MUI = p.matrix_unique_id
-  #     m.parse(data)
-  #     m.save
-  #   end
-  #   if ids.count > 0
-  #     # Delete any records in the local database that shouldn't be there
-  #     self.log("- Deleting GFX records for MLS ##{p.matrix_unique_id} in the local database that are not in the remote database...")
-  #     query = "select media_id from rets_media where matrix_unique_id = '#{p.matrix_unique_id}'"
-  #     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-  #     local_ids = rows.collect{ |row| row['media_id'] }
-  #     ids_to_remove = local_ids - ids
-  #     if ids_to_remove && ids_to_remove.count > 0 
-  #       query = ["delete from rets_media where media_id in (?)", ids_to_remove]
-  #       ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
-  #     end
-  #   end
-  # end
-
   def self.download_property_images(p)
+    return if Rails.env.development?
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
     ids_to_keep = []
     begin
@@ -369,93 +322,21 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
     end
 
-      # # Get first image  
-      # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:0") do |headers, content|
-      #   self.log3('Media',p.mls_number,"Downloading first photo with content-id #{headers['content-id']}, orderhint #{headers['orderhint']}, object-id #{headers['object-id']}")
-      #   m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => 0).first
-      #   m = CabooseRets::Media.new if m.nil?
-      #   tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:0.jpeg"
-      #   File.open(tmp_path, "wb") do |f|
-      #     f.write(content)
-      #   end
-      #   m.media_mui     = headers['content-id']
-      #   m.media_order   = 0
-      #   m.media_type    = 'Photo'
-      #   cm               = Caboose::Media.new
-      #   cm.image         = File.open(tmp_path)
-      #   cm.name          = "rets_media_#{headers['content-id']}_0"
-      #   cm.original_name = "rets_media_#{headers['content-id']}_0.jpeg"
-      #   cm.processed     = true
-      #   cm.save
-      #   m.media_id = cm.id
-      #   m.save
-      #   self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
-      #   `rm #{tmp_path}`
-      #   self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_0 saved")
-      # end
-      # # Get rest of images
-      # self.client.get_object(:resource => 'Property', :type => 'Photo', :location=> false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-      #   self.log3('Media',p.mls_number,"Downloading subsequent photo with content-id #{headers['content-id']}, orderhint #{headers['orderhint']}, object-id #{headers['object-id']}")
-      #   m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => headers['orderhint']).first
-      #   m = CabooseRets::Media.new if m.nil?
-      #   tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}:#{headers['object-id']}.jpeg"
-      #   File.open(tmp_path, "wb") do |f|
-      #     f.write(content)
-      #   end
-      #   m.media_mui     = headers['content-id']
-      #   m.media_order   = headers['orderhint']
-      #   m.media_type    = 'Photo'
-      #   cm               = Caboose::Media.new
-      #   cm.image         = File.open(tmp_path)
-      #   cm.name          = "rets_media_#{headers['content-id']}_#{headers['object-id']}"
-      #   cm.original_name = "rets_media_#{headers['content-id']}_#{headers['object-id']}.jpeg"
-      #   cm.processed     = true
-      #   cm.save
-      #   m.media_id = cm.id
-      #   m.save
-      #   self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, CabooseMedia object #{cm.id}")
-      #   `rm #{tmp_path}`
-      #   self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{headers['object-id']} saved")
-      # end
- #   rescue RETS::APIError => err
- #     self.log "No image for #{p.mls_number}."
- #     self.log err
-#    end
   end
 
   def self.download_missing_images
     self.log3("Property",nil,"Downloading all missing images...")
-    CabooseRets::Property.where("photo_count = ? OR photo_count is null", '').all.each do |p|
+    CabooseRets::Property.where("photo_count = ? OR photo_count is null", '').where(:status => "Active").all.each do |p|
       self.delay(:priority => 10, :queue => 'rets').import_properties(p.mls_number, true)
     end
   end
 
   def self.download_agent_image(agent)
-    # self.log "Saving image  for #{agent.first_name} #{agent.last_name}..."
-    # begin
-    #   self.client.get_object(:resource => :Member, :type => :Photo, :location => true, :id => property.list_agent_mls_id) do |headers, content|
-    #     agent.verify_meta_exists
-    #     agent.meta.image_location = headers['location']
-    #     agent.meta.save
-    #   end
-    # rescue RETS::APIError => err
-    #   self.log "No image for #{agent.first_name} #{agent.last_name}."
-    #   self.log err
-    # end
+
   end
 
   def self.download_office_image(office)
-    #self.log "Saving image for #{agent.first_name} #{agent.last_name}..."
-    #begin
-    #  self.client.get_object(:resource => :Agent, :type => :Photo, :location => true, :id => agent.la_code) do |headers, content|
-    #    agent.verify_meta_exists
-    #    agent.meta.image_location = headers['location']
-    #    agent.meta.save
-    #  end
-    #rescue RETS::APIError => err
-    #  self.log "No image for #{agent.first_name} #{agent.last_name}."
-    #  self.log err
-    #end
+
   end
 
   #=============================================================================
@@ -517,6 +398,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.purge_open_houses()  self.delay(:priority => 10, :queue => 'rets').purge_helper('OpenHouse', '2012-01-01') end
   
 
+  # Adds/removes records in the database
   def self.purge_helper(class_type, date_modified)    
     m = self.meta(class_type)    
     self.log(m.search_type)
@@ -573,12 +455,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_remove = local_ids - ids
       self.log3(class_type,nil,"Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
       
-      # Delete all RetsMedia and CabooseMedia for the deleted property listings 
+      # Delete all RetsMedia and CabooseMedia for the deleted property listings (except keep the first image)
       if class_type == 'Property' && ids_to_remove && ids_to_remove.count > 0
         self.log3(class_type,nil,"Deleting Media objects that shouldn't be there...")
         muis = CabooseRets::Property.where("#{k} in (?)", ids_to_remove).pluck(:matrix_unique_id)
-        if muis && muis.count > 0
-          CabooseRets::Media.where("media_mui in (?)", muis).each do |med|
+        if muis && muis.count > 0 && Rails.env.production?
+          CabooseRets::Media.where("media_mui in (?)", muis).where("media_order != ?", 1).each do |med|
             self.log3("Media",med.id,"Deleting old RetsMedia #{med.id} and CabooseMedia #{med.media_id}...")
             m = Caboose::Media.where(:id => med.media_id).where("name ILIKE ?","rets_media%").first
             m.destroy if m
@@ -587,9 +469,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         end
       end
 
-      self.log3(class_type,nil,"Deleting #{class_type} records in the local database that shouldn't be there...")
-      query = ["delete from #{t} where #{k} in (?)", ids_to_remove]
-      ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      if class_type != 'Property' # keep all properties in the DB
+        self.log3(class_type,nil,"Deleting #{class_type} records in the local database that shouldn't be there...")
+        query = ["delete from #{t} where #{k} in (?)", ids_to_remove]
+        ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      end
 
       # Find any ids in the remote database that should be in the local database
       self.log3(class_type,nil,"Finding #{class_type} records in the remote database that should be in the local database...")
@@ -611,54 +495,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       end
     end
   end
-
-  # def self.get_media_urls
-  #   m = self.meta(class_type)
-
-  #   # Get the total number of records
-  #   params = {
-  #     :search_type => m.search_type,
-  #     :class => class_type,
-  #     :query => "(#{m.matrix_modified_dt}=#{date_modified}T00:00:01+)",
-  #     :standard_names_only => true,
-  #     :timeout => -1
-  #   }
-  #   self.client.search(params.merge({ :count => 1 }))
-  #   count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]
-  #   batch_count = (count.to_f/5000.0).ceil
-
-  #   ids = []
-  #   k = m.remote_key_field
-  #   (0...batch_count).each do |i|
-  #     self.client.search(params.merge({ :select => [k], :limit => 5000, :offset => 5000*i })) do |data|
-  #       ids << data[k]
-  #     end
-  #   end
-
-  #   if ids.count > 0
-  #     # Delete any records in the local database that shouldn't be there
-  #     t = m.local_table
-  #     k = m.local_key_field
-  #     query = ["delete from #{t} where #{k} not in (?)", ids]
-  #     ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
-
-  #     # Find any ids in the remote database that should be in the local database
-  #     query = "select distinct #{k} from #{t}"      
-  #     rows = ActiveRecord::Base.connection.select_all(ActiveRecord::Base.send(:sanitize_sql_array, query))
-  #     local_ids = rows.collect{ |row| row[k] }
-  #     ids_to_add = ids - local_ids
-  #     ids_to_add.each do |id|
-  #       self.log("Importing #{id}...")
-  #       case class_type
-  #         when "Property"  then self.delay(:priority => 10, :queue => 'rets').import_properties(id, true)
-  #         when "Office"    then self.delay(:priority => 10, :queue => 'rets').import_office(id, false)
-  #         when "Member"    then self.delay(:priority => 10, :queue => 'rets').import_agent(id, false)
-  #         when "OpenHouse" then self.delay(:priority => 10, :queue => 'rets').import_open_house(id, false)
-  #       end
-  #     end
-  #   end
-
-  # end
 
   #=============================================================================
   # Logging
@@ -704,7 +540,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         overlap = 1.week
       end
       self.update_after((self.last_updated - overlap), false)
-      self.download_missing_images
+      self.download_missing_images if Rails.env.production?
       self.log3(nil,nil,"Saving the timestamp for when we updated to #{task_started.to_s}...")
 		  self.save_last_updated(task_started)
 		  self.log2("Unlocking the task...")
@@ -725,7 +561,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 		end
 
     # Delete RETS logs over 7 days old
-    dt = DateTime.now - 7.days
+    dt = DateTime.now - 5.days
     sql = "delete from rets_logs where timestamp < '#{dt}';"
     ActiveRecord::Base.connection.select_all(sql)
 
