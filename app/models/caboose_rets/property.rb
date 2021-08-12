@@ -33,6 +33,12 @@ class CabooseRets::Property <ActiveRecord::Base
         return img_url
     end
 
+    def dynamic_photo_url(site)
+        domain = site.primary_domain.domain
+        return "http://dev.pmre.com:3000/api/rets-properties/#{self.mls_number}/photo.jpg" if Rails.env.development?
+        return "https://#{domain}/api/rets-properties/#{self.mls_number}/photo.jpg"
+    end
+
     def agent
         CabooseRets::Agent.where(:mls_id => self.list_agent_mls_id).first
     end
@@ -257,9 +263,9 @@ class CabooseRets::Property <ActiveRecord::Base
         # self.zoning_tusc                      = data['ZoningTusc']
 
 
-        if old_status != self.status # status was changed
+        if !old_status.blank? && old_status != self.status # status was changed
             CabooseRets::Notification.delay(:queue => "rets").property_status_changed(self, old_status)
-        elsif old_price != self.list_price && self.status == 'Active' # price was changed
+        elsif !old_price.blank? && old_price != self.list_price && self.status == 'Active' # price was changed
             CabooseRets::Notification.delay(:queue => "rets").property_price_changed(self, old_price)
         end
 

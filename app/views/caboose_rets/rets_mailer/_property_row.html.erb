@@ -1,10 +1,8 @@
-<table border="0" cellpadding="0" cellspacing="0" width="800" id="templateColumns" style="width:100%;margin:0 0 20px 0;text-align:left;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateColumns" style="width:100%;margin:0 0 20px 0;text-align:left;">
 	<tr>
 		<td align="left" valign="top" width="25%" class="templateColumnContainer" style="width:25%;padding:0;">
 			<a style="display:block;text-decoration:none;" href="<%= url %>/properties/<%= p.mls_number %>/details">
-        <% if p.featured_photo_url %>
-          <img style="display:block;max-width:200px;height:auto;" width="200" alt="MLS # <%= p.mls_number %>" src="<%= p.featured_photo_url %>" />
-        <% end %>
+        <img style="display:block;max-width:200px;height:auto;" width="200" alt="MLS # <%= p.mls_number %>" src="<%= p.dynamic_photo_url(@site) %>" />
       </a>
 		</td>
 		<td align="left" valign="top" width="37.5%" class="templateColumnContainer" style="width:37.5%;padding:5px 5px 5px 10px;">
@@ -19,8 +17,7 @@
 			<p style="margin:0 0 5px 0;font-size:16px;line-height:18px;"><strong><%= number_to_currency(p.list_price, :precision => 0) %></strong></p>
       <p style="margin:0 0 5px 0;font-size:15px;line-height:17px;">
         <% if !p.beds_total.blank? %><span><strong><%= p.beds_total %></strong> beds</span><br /><% end %>
-        <% if !p.baths_full.blank? %><span><strong><%= p.baths_full %></strong> baths</span><br /><% end %>
-        <% if !p.baths_half.blank? && p.baths_half > 0 %><span><strong><%= p.baths_half %></strong> ½ baths</span><br /><% end %>
+        <% if !p.baths_full.blank? %><span><strong><%= p.baths_full %>&nbsp;<% if !p.baths_half.blank? && p.baths_half > 0 %><%= p.baths_half %>&nbsp;½<% end %></strong>baths</span><br /><% end %>
         <% if !p.sqft_total.blank? %><span><strong><%= number_with_delimiter(p.sqft_total.to_i, :delimiter => ',') %></strong> sqft</span><% end %>
       </p>
       <% if !p.original_entry_timestamp.blank? %>

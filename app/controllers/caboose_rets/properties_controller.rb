@@ -217,6 +217,17 @@ module CabooseRets
       render :json => resp
     end
 
+    # @route GET /api/rets-properties/:mls/photo
+    def dynamic_photo_url
+      render :json => false and return if !@site || !@site.use_rets
+      p = Property.where(:mls_number => params[:mls]).first
+      if p
+        redirect_to p.featured_photo_url, :status => 307 and return
+      else
+        redirect_to "https://cabooseit.s3.amazonaws.com/assets/pmre/house.png", :status => 307 and return
+      end
+    end
+
     # @route GET /admin/properties/:id/refresh
     def admin_refresh
       return unless (user_is_allowed_to 'edit', 'rets_properties')

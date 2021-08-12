@@ -18,7 +18,7 @@ class CabooseRets::Notification < ActiveRecord::Base
       user_ids.each do |user_id|
         user = Caboose::User.where(uwhere).where(:id => user_id, :tax_exempt => false).first
         d1 = DateTime.now - 24.hours
-        if user
+        if user && user.site && user.site.use_rets
           # Check if a similar notification has already been sent
           n = CabooseRets::Notification.where(
             :user_id => user.id,
@@ -64,7 +64,7 @@ class CabooseRets::Notification < ActiveRecord::Base
       user_ids.each do |user_id|
         user = Caboose::User.where(uwhere).where(:id => user_id, :tax_exempt => false).first
         d1 = DateTime.now - 24.hours
-        if user
+        if user && user.site && user.site.use_rets
           # Check if a similar notification has already been sent
           n = CabooseRets::Notification.where(
             :user_id => user.id,
