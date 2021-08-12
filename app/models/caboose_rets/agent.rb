@@ -40,7 +40,7 @@ class CabooseRets::Agent < ActiveRecord::Base
     CabooseRets::RetsImporter.import_agent(self.mls_id)          
   end
 
-  # Sends a SMS to the agent (using Twilio) notifying them that a new user has registered and been assigned to them
+  # Sends a SMS to the agent (using Twilio) notifying them that a new user has registered and been assigned to them.
   def send_text(message, site_id)
     s1 = Caboose::Setting.where(:site_id => site_id, :name => "twilio_account_sid").first
     account_sid = s1 ? s1.value : nil
