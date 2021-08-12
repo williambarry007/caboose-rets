@@ -185,7 +185,6 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   end
 
-
   #=============================================================================
   # Single model import methods (called from a worker dyno)
   #=============================================================================
