@@ -17,7 +17,7 @@
 			<p style="margin:0 0 5px 0;font-size:16px;line-height:18px;"><strong><%= number_to_currency(p.list_price, :precision => 0) %></strong></p>
       <p style="margin:0 0 5px 0;font-size:15px;line-height:17px;">
         <% if !p.beds_total.blank? %><span><strong><%= p.beds_total %></strong> beds</span><br /><% end %>
-        <% if !p.baths_full.blank? %><span><strong><%= p.baths_full %>&nbsp;<% if !p.baths_half.blank? && p.baths_half > 0 %><%= p.baths_half %>&nbsp;½<% end %></strong>baths</span><br /><% end %>
+        <% if !p.baths_full.blank? %><span><strong><%= p.baths_full %>&nbsp;<% if p.baths_half == 1 %>½&nbsp;<% end %></strong>baths</span><br /><% end %>
         <% if !p.sqft_total.blank? %><span><strong><%= number_with_delimiter(p.sqft_total.to_i, :delimiter => ',') %></strong> sqft</span><% end %>
       </p>
       <% if !p.original_entry_timestamp.blank? %>
