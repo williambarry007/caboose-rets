@@ -18,7 +18,7 @@ class CabooseRets::Notification < ActiveRecord::Base
       user_ids.each do |user_id|
         user = Caboose::User.where(uwhere).where(:id => user_id, :tax_exempt => false).first
         d1 = DateTime.now - 24.hours
-        if user && user.site && user.site.use_rets
+        if user && user.site && user.site.use_rets && !Caboose::BouncedEmail.where(:email_address => user.email).exists?
           # Check if a similar notification has already been sent
           n = CabooseRets::Notification.where(
             :user_id => user.id,
@@ -64,7 +64,7 @@ class CabooseRets::Notification < ActiveRecord::Base
       user_ids.each do |user_id|
         user = Caboose::User.where(uwhere).where(:id => user_id, :tax_exempt => false).first
         d1 = DateTime.now - 24.hours
-        if user && user.site && user.site.use_rets
+        if user && user.site && user.site.use_rets && !Caboose::BouncedEmail.where(:email_address => user.email).exists?
           # Check if a similar notification has already been sent
           n = CabooseRets::Notification.where(
             :user_id => user.id,
@@ -114,6 +114,8 @@ class CabooseRets::Notification < ActiveRecord::Base
         new_listings = CabooseRets::Property.where(:status => 'Active', :property_type => 'Residential').order('original_entry_timestamp desc').take(3)
 
         users.each do |user|
+
+          next if user.email.blank? || Caboose::BouncedEmail.where(:email_address => user.email).exists?
 
           puts "Gathering data for user: #{user.username}" if Rails.env.development?
 
