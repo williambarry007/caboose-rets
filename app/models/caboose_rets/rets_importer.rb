@@ -472,6 +472,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         self.log3(class_type,nil,"Deleting #{class_type} records in the local database that shouldn't be there...")
         query = ["delete from #{t} where #{k} in (?)", ids_to_remove]
         ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
+      else # mark deleted properties as Deleted status
+        self.log3(class_type,nil,"Setting deleted properties as Deleted status...")
+        query = ["update #{t} set status = ? where #{k} in (?)", "Deleted", ids_to_remove]
+        ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql_array, query))
       end
 
       # Find any ids in the remote database that should be in the local database
