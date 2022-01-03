@@ -454,7 +454,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       ids_to_remove = local_ids - ids
       self.log3(class_type,nil,"Found #{ids_to_remove.count} #{class_type} records in the local database that are not in the remote database.")
       
-      # Delete all RetsMedia and CabooseMedia for the deleted property listings (except keep the first image)
+      # Delete all RetsMedia and CabooseMedia for the deleted property listings (except keep the first image) 
       if class_type == 'Property' && ids_to_remove && ids_to_remove.count > 0
         self.log3(class_type,nil,"Deleting Media objects that shouldn't be there...")
         muis = CabooseRets::Property.where("#{k} in (?)", ids_to_remove).pluck(:matrix_unique_id)
