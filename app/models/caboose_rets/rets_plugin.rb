@@ -17,7 +17,7 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
     item['children'] << { 'id' => 'properties'      , 'icon' => 'rets', 'href' => '/admin/properties'     , 'text' => 'Properties'  , 'modal' => false }  if user.is_allowed('rets_properties','view',is_superadmin)
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/commercial'       , 'text' => 'Commercial Property'   , 'modal' => false }
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/multi-family'     , 'text' => 'Multi-Family Property' , 'modal' => false }
-    # item['children'] << { 'id' => 'land'             , 'href' => '/admin/land'             , 'text' => 'Land Property'         , 'modal' => false }
+    # item['children'] << { 'id' => 'land'           , 'href' => '/admin/land'             , 'text' => 'Land Property'         , 'modal' => false }
     # item['children'] << { 'id' => 'saved-properties' , 'href' => '/saved-properties'       , 'text' => 'Saved Properties'      , 'modal' => false }
     item['children'] << { 'id' => 'user-report'   , 'icon' => 'users', 'href' => '/admin/mls/user-report'         , 'text' => 'User Report'        , 'modal' => false }
     nav << item
