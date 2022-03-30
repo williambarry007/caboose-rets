@@ -1,6 +1,6 @@
 class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
 
-  def self.admin_nav(nav, user = nil, page = nil, site)  
+  def self.admin_nav(nav, user = nil, page = nil, site, is_superadmin)  
     return nav if user.nil?
     return nav if !site.use_rets    
     return nav if !user.is_allowed('rets_properties', 'view')
@@ -11,10 +11,10 @@ class CabooseRets::RetsPlugin < Caboose::CaboosePlugin
       'children' => [],
       'modal' => true
     }    
-    item['children'] << { 'id' => 'agents', 'icon' => 'users',    'href' => '/admin/agents'           , 'text' => 'Agents'                , 'modal' => false }  if user.is_allowed('rets_agents','view')
+    item['children'] << { 'id' => 'agents', 'icon' => 'users',    'href' => '/admin/agents'           , 'text' => 'Agents'                , 'modal' => false }  if user.is_allowed('rets_agents','view', is_superadmin)
     # item['children'] << { 'id' => 'offices'          , 'href' => '/admin/offices'          , 'text' => 'Offices'               , 'modal' => false }
-    item['children'] << { 'id' => 'open-houses', 'icon' => 'calendars', 'href' => '/admin/open-houses'      , 'text' => 'Open Houses'           , 'modal' => false } if user.is_allowed('rets_open_houses','view')
-    item['children'] << { 'id' => 'properties'      , 'icon' => 'rets', 'href' => '/admin/properties'     , 'text' => 'Properties'  , 'modal' => false }  if user.is_allowed('rets_properties','view')
+    item['children'] << { 'id' => 'open-houses', 'icon' => 'calendars', 'href' => '/admin/open-houses'      , 'text' => 'Open Houses'           , 'modal' => false } if user.is_allowed('rets_open_houses','view',is_superadmin)
+    item['children'] << { 'id' => 'properties'      , 'icon' => 'rets', 'href' => '/admin/properties'     , 'text' => 'Properties'  , 'modal' => false }  if user.is_allowed('rets_properties','view',is_superadmin)
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/commercial'       , 'text' => 'Commercial Property'   , 'modal' => false }
     # item['children'] << { 'id' => 'commercial'       , 'href' => '/admin/multi-family'     , 'text' => 'Multi-Family Property' , 'modal' => false }
     # item['children'] << { 'id' => 'land'             , 'href' => '/admin/land'             , 'text' => 'Land Property'         , 'modal' => false }
