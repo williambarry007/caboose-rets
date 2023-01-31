@@ -448,13 +448,15 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.coords_from_address(address)
     begin
-      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyB9Wwx7sdWaUnFyLcdQ61NOV7DE2NZkDUE&address=#{address}"
+      config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
+      api_key = config[Rails.env]['google_api_key']
+      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=#{api_key}&address=#{address}"
       uri.gsub!(" ", "+")
       resp = HTTParty.get(uri)
       json = JSON.parse(resp.body)
       return json['results'][0]['geometry']['location']
     rescue
-      self.log "Error: #{uri}"
+      self.log3("Property",nil,"Error with Geocoder API, url: #{uri}")
       sleep(2)
       return false
     end

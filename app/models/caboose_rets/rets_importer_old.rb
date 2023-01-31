@@ -367,7 +367,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.coords_from_address(address)
     begin
-      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyB9Wwx7sdWaUnFyLcdQ61NOV7DE2NZkDUE&address=#{address}"
+      uri = "https://maps.googleapis.com/maps/api/geocode/json?key=12345&address=#{address}"
       uri.gsub!(" ", "+")
       resp = HTTParty.get(uri)
       json = JSON.parse(resp.body)
