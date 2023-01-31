@@ -218,7 +218,7 @@ namespace :caboose_rets do
   end
 
   task :test_import => :environment do
-    CabooseRets::RetsImporter.import_one_property('146546')
+    CabooseRets::RetsImporter.import_properties('151429', true)
   end
   
   desc "Single Import Test"

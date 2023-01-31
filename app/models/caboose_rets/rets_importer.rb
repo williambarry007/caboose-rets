@@ -233,7 +233,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.import('Property', "ListingId eq '#{mls_id}'")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil && p.status == 'Active'
-      self.download_property_images(p) if save_images == true # && Rails.env.production?
+      self.download_property_images(p) if save_images
       if p.latitude.blank? || p.latitude == '0.0' || p.longitude.blank? || p.longitude == '0.0'
         self.update_coords(p) 
       end
@@ -386,8 +386,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     #     `rm #{tmp_path}`
     #   end
 
-    rescue
-      self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}")
+    rescue Exception => err
+      self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}: #{err}")
     end
 
     # If we downloaded new images, look for old images to delete. 
