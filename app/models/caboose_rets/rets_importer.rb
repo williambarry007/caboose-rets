@@ -326,8 +326,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
         if !is_new
           old_media = Caboose::Media.where(:id => old_cm_id).first
-          self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
-          old_media.destroy if Rails.env.production?
+          if old_media
+            self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
+            old_media.destroy if Rails.env.production?
+          end
         end
 
         if Rails.env.production?
