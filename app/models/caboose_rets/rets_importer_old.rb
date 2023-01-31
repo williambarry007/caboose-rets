@@ -72,7 +72,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :query => query,
       :timeout => -1 
     }
-    obj = nil
+    obj = nil 
 
     begin
       self.client.search(params) do |data|
