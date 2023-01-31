@@ -235,7 +235,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       else
         self.log3('Agent',mls_id,"Skipping importing Agent #{mls_id} because last_updated is today...")
       end
-    end
+    end  
   end
 
   def self.import_open_house(oh_id, save_images = true)
