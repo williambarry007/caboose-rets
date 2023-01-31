@@ -70,7 +70,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :search_type => m.search_type,
       :class => class_type,
       :query => query,
-      :timeout => -1 
+      :timeout => -1
     }
     obj = nil 
 
