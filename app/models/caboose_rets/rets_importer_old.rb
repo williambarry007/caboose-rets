@@ -362,7 +362,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
     p.latitude = coords['lat'].to_f
     p.longitude = coords['lng'].to_f
-    p.save
+    p.save 
   end
 
   def self.coords_from_address(address)
