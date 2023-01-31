@@ -73,7 +73,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       :timeout => -1 
     }
     obj = nil 
- 
+
     begin
       self.client.search(params) do |data|
         obj = self.get_instance_with_id(class_type, data)
