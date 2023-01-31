@@ -47,87 +47,87 @@ class CabooseRets::Media < ActiveRecord::Base
 
   def self.reorder(media_ids, bucket_name)
 
-    s3 = AWS::S3.new
-    b = s3.buckets[bucket_name]
+    # s3 = AWS::S3.new
+    # b = s3.buckets[bucket_name]
 
-    # Rename the s3 assets to temp names
-    media_ids.each do |id|
-      m = CabooseRets::Media.find(id)
-      (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.media_type == 'Photo'
-      b.objects[m.file.path].rename_to "#{m.file.path}.temp" if m.media_type == 'File'
-    end
+    # # Rename the s3 assets to temp names
+    # media_ids.each do |id|
+    #   m = CabooseRets::Media.find(id)
+    #   (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.media_type == 'Photo'
+    #   b.objects[m.file.path].rename_to "#{m.file.path}.temp" if m.media_type == 'File'
+    # end
 
-    # Rename the assets to their new names
-    i = 1
-    j = 1
-    media_ids.each do |id|
-      m = CabooseRets::Media.find(id)
-      if m.media_type == 'Photo'
-        orig_name = "#{m.image.path}.temp"
-        m.media_order = i
-        (m.image.styles.keys+[:original]).each { |style| b.objects[orig_name.gsub("original", style.to_s)].rename_to m.image.path(style) }
-        m.save
-        i = i + 1
-      elsif m.media_type == 'File'
-        b.objects["#{m.file.path}.temp"].rename_to m.file.path
-        m.media_order = j
-        m.save
-        j = j + 1
-      end
-    end
+    # # Rename the assets to their new names
+    # i = 1
+    # j = 1
+    # media_ids.each do |id|
+    #   m = CabooseRets::Media.find(id)
+    #   if m.media_type == 'Photo'
+    #     orig_name = "#{m.image.path}.temp"
+    #     m.media_order = i
+    #     (m.image.styles.keys+[:original]).each { |style| b.objects[orig_name.gsub("original", style.to_s)].rename_to m.image.path(style) }
+    #     m.save
+    #     i = i + 1
+    #   elsif m.media_type == 'File'
+    #     b.objects["#{m.file.path}.temp"].rename_to m.file.path
+    #     m.media_order = j
+    #     m.save
+    #     j = j + 1
+    #   end
+    # end
 
-    return true
+    # return true
   end
 
   def self.reorder(media_ids, bucket_name)
 
-    s3 = AWS::S3.new
-    b = s3.buckets[bucket_name]
+    # s3 = AWS::S3.new
+    # b = s3.buckets[bucket_name]
 
-    # Rename the s3 assets to temp names
-    media_ids.each do |id|
-      m = CabooseRets::Media.find(id)
-      (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.media_type == 'Photo'
-      b.objects[m.file.path].rename_to "#{m.file.path}.temp" if m.media_type == 'File'
-    end
+    # # Rename the s3 assets to temp names
+    # media_ids.each do |id|
+    #   m = CabooseRets::Media.find(id)
+    #   (m.image.styles.keys+[:original]).each { |style| b.objects[m.image.path(style)].rename_to "#{m.image.path(style)}.temp" } if m.media_type == 'Photo'
+    #   b.objects[m.file.path].rename_to "#{m.file.path}.temp" if m.media_type == 'File'
+    # end
 
-    # Rename the assets to their new names
-    i = 1
-    j = 1
-    media_ids.each do |id|
-      m = CabooseRets::Media.find(id)
-      if m.media_type == 'Photo'
-        orig_name = "#{m.image.path}.temp"
-        m.media_order = i
-        (m.image.styles.keys+[:original]).each { |style| b.objects[orig_name.gsub("original", style.to_s)].rename_to m.image.path(style) }
-        m.save
-        i = i + 1
-      elsif m.media_type == 'File'
-        b.objects["#{m.file.path}.temp"].rename_to m.file.path
-        m.media_order = j
-        m.save
-        j = j + 1
-      end
-    end
+    # # Rename the assets to their new names
+    # i = 1
+    # j = 1
+    # media_ids.each do |id|
+    #   m = CabooseRets::Media.find(id)
+    #   if m.media_type == 'Photo'
+    #     orig_name = "#{m.image.path}.temp"
+    #     m.media_order = i
+    #     (m.image.styles.keys+[:original]).each { |style| b.objects[orig_name.gsub("original", style.to_s)].rename_to m.image.path(style) }
+    #     m.save
+    #     i = i + 1
+    #   elsif m.media_type == 'File'
+    #     b.objects["#{m.file.path}.temp"].rename_to m.file.path
+    #     m.media_order = j
+    #     m.save
+    #     j = j + 1
+    #   end
+    # end
 
-    return true
+    # return true
   end
 
   def self.rename_media
-    s3 = AWS::S3.new
-    b = s3.buckets["advantagerealtygroup"]
+    # s3 = AWS::S3.new
+    # b = s3.buckets["advantagerealtygroup"]
 
-    CabooseRets::Media.where(:media_type => 'Photo').reorder("mls, media_order").all.each do |m|
-      puts "Renaming #{m.mls}_#{m.id}..."
-      if m.image_file_name && m.image
-        ext = File.extname(m.image_file_name)
-        (m.image.styles.keys+[:original]).each do |style|
-          b.objects[m.image.path(style)].copy_to "rets/media_new/#{m.id}_#{style}.#{ext}" if b.objects[m.image.path(style)].exists?
-        end
-      end
-    end
+    # CabooseRets::Media.where(:media_type => 'Photo').reorder("mls, media_order").all.each do |m|
+    #   puts "Renaming #{m.mls}_#{m.id}..."
+    #   if m.image_file_name && m.image
+    #     ext = File.extname(m.image_file_name)
+    #     (m.image.styles.keys+[:original]).each do |style|
+    #       b.objects[m.image.path(style)].copy_to "rets/media_new/#{m.id}_#{style}.#{ext}" if b.objects[m.image.path(style)].exists?
+    #     end
+    #   end
+    # end
 
-    return true
+    # return true
   end
 
   def image_url(style)

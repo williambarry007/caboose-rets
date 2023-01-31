@@ -1,9 +1,21 @@
-require 'oauth2'
+#require 'ruby-rets'
+require "rets/version"
+require "rets/exceptions"
+require "rets/client"
+require "rets/http"
+require "rets/stream_http"
+require "rets/base/core"
+require "rets/base/sax_search"
+require "rets/base/sax_metadata"
+
+require 'httparty'
+require 'json'
+
+# http://rets.solidearth.com/ClientHome.aspx
 
 class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   @@rets_client = nil   
-  @@rets_access = nil
   @@config = nil
 
   def self.config
@@ -12,12 +24,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.get_config
     @@config = {
-      'endpoint'                 => nil,
-      'token_endpoint'                 => nil,
-      'client_id'            => nil,
-      'client_secret'            => nil,
+      'url'                 => nil, # URL to the RETS login
+      'username'            => nil,
+      'password'            => nil,
       'temp_path'           => nil,
-      'log_file'            => nil
+      'log_file'            => nil,
+      'media_base_url'      => nil
     }
     config = YAML::load(File.open("#{Rails.root}/config/rets_importer.yml"))    
     config = config[Rails.env]
@@ -27,56 +39,13 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   def self.client
     self.get_config if @@config.nil? || @@config['url'].nil?
     if @@rets_client.nil?
-      @@rets_client = ::OAuth2::Client.new(
-        @@config['client_id'],
-        @@config['client_secret'],
-        site: @@config['endpoint'],
-        token_url: @@config['token_endpoint']
+      @@rets_client = RETS::Client.login(
+        :url      => @@config['url'],
+        :username => @@config['username'],
+        :password => @@config['password']
       )
     end
     return @@rets_client
-  end
-
-  def self.access
-    @@rets_access = self.client.client_credentials.get_token
-  end
-
-  def self.resource(resource_name, query, per_page = 100, count = false, select_column = nil, page_number = 1)
-
-    params = {
-      "$filter" => query,
-      "$top" => per_page
-    }
-
-    extra_path = ""
-
-    if count
-      extra_path = "/$count"
-    end
-
-    if !select_column.blank?
-      params["$select"] = "ListingId"
-    end
-
-    if page_number > 1
-      params["$skip"] = ((page_number - 1) * per_page)
-    end
-
-    url_path = "/trestle/odata/#{resource_name}#{extra_path}"
-
-   # self.log3(resource_name, nil, "Making request to URL #{url_path} with params #{params}")
-
-    response = self.access.get(url_path, params: params )
-
-    if response && response.body
-      if response.parsed['@odata.count']
-        return response.parsed['@odata.count']
-      else
-        return response.parsed['value']
-      end
-    else
-      return nil
-    end
   end
 
   def self.meta(class_type)
@@ -93,44 +62,32 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   # Import method
   #=============================================================================
 
-  def self.import_one_property(mls_number)
-    response = self.resource('Property', "ListingId eq '#{mls_number}'")
-    data = response ? response[0] : nil
-   # self.log3('Property',nil,"WE GOT THE PROPERTY: #{data['ListingId']}") if data
-    obj = data ? self.get_instance_with_id('Property', data) : nil
-    if obj.nil?
-      self.log3(class_type,nil,"Error: object is nil")
-      self.log3(class_type,nil,data.inspect)
-    else
-      obj.parse(data)
-      obj.save
-    end
-  end
-
   def self.import(class_type, query)
     m = self.meta(class_type)
     self.log3(class_type,nil,"Importing #{m.search_type}:#{class_type} with query #{query}...") 
     self.get_config if @@config.nil? || @@config['url'].nil?
-
+    params = {
+      :search_type => m.search_type,
+      :class => class_type,
+      :query => query,
+      :timeout => -1
+    }
     obj = nil
 
     begin
-      results = self.resource(m.search_type, query)
-      if results && results.count > 0
-        results.each do |data|
-          obj = self.get_instance_with_id(class_type, data)
-          if obj.nil?
-            self.log3(class_type,nil,"Error: object is nil")
-            self.log3(class_type,nil,data.inspect)
-            next
-          end
-          obj.parse(data)
-          obj.save
+      self.client.search(params) do |data|
+        obj = self.get_instance_with_id(class_type, data)
+        if obj.nil?
+          self.log3(class_type,nil,"Error: object is nil")
+          self.log3(class_type,nil,data.inspect)
+          next
         end
+        obj.parse(data)
+        obj.save
       end
-    rescue
+    rescue RETS::HTTPError => err
       self.log3(class_type,nil,"Import error for #{class_type}: #{query}")
-      #self.log3(class_type,nil,err.message)
+      self.log3(class_type,nil,err.message)
     end
   end
 
@@ -173,50 +130,56 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     self.log3(class_type,nil,"Updating #{class_type} modified after #{date_modified} and #{si}")
     m = self.meta(class_type)
     k = m.remote_key_field
-    d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%TZ")
+    d = date_modified.in_time_zone(CabooseRets::timezone).strftime("%FT%T")
 
     statusquery = ""
     case class_type
-      when 'Property'  then statusquery = "OriginatingSystemName eq 'WESTAL'"
-      when 'Office'    then statusquery = "OfficeStatus eq 'Active'"
-      when 'Member'    then statusquery = "MemberStatus eq 'Active'"
-      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric gt 0"
+      when 'Property'  then statusquery = "OriginatingSystemName=WESTAL"
+      when 'Office'    then statusquery = "OfficeStatus=Active"
+      when 'Member'    then statusquery = "MemberStatus=Active"
+      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
     end
 
-    query = "#{m.date_modified_field} gt #{d} and #{statusquery}"
-
-    self.log3(class_type,nil,"Searching with query: " + query)
-
-    results = self.resource(m.search_type, query, 1000)
-
-    if results && results.count > 0
-      results.each do |data|
-       # self.log3(class_type,nil,"Resulting data: " + data.to_s)
-        case class_type
-          when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
-          when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], false)
-          when 'Member'    then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], false)
-          when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], false)
-        end
+    quer = "(#{m.date_modified_field}=#{d}+)AND(OriginatingSystemName=WESTAL)AND(#{statusquery})"
+    params = {
+      :search_type => m.search_type,
+      :class => class_type,
+      :select => [m.remote_key_field],
+      :querytype => 'DMQL2',
+      :query => quer,
+      :limit => 1000,
+      :standard_names_only => true,
+      :timeout => -1
+    }    
+    self.log3(class_type,nil,"Searching with params: " + params.to_s)
+    self.client.search(params) do |data|
+      self.log3(class_type,nil,"Resulting data: " + data.to_s)
+      case class_type
+        when 'Property'  then self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], save_images)
+        when 'Office'    then self.delay(:priority => 10, :queue => 'rets').import_office(    data[k], false)
+        when 'Member'    then self.delay(:priority => 10, :queue => 'rets').import_agent(     data[k], false)
+        when 'OpenHouse' then self.delay(:priority => 10, :queue => 'rets').import_open_house(data[k], false)
       end
     end
 
     # Check for changed images
     if class_type == 'Property' && Rails.env.production?
       self.log3("Property",nil,"Checking for modified images on Properties...")
-      d1 = (self.last_updated - 1.hours).in_time_zone(CabooseRets::timezone).strftime("%FT%TZ")
-
-      query = "PhotosChangeTimestamp gt #{d1} and OriginatingSystemName eq 'WESTAL' and MlsStatus eq 'Active'"
-
-      self.log3(class_type,nil,"Searching with query: " + query)
-
-      results = self.resource(m.search_type, query, 1000)
-
-      if results && results.count > 0
-        results.each do |data|
-         # self.log3(class_type,nil,"Resulting data: " + data.to_s)
-          self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], true)
-        end
+      d1 = (self.last_updated - 1.hours).in_time_zone(CabooseRets::timezone).strftime("%FT%T")
+      params = {
+        :search_type => m.search_type,
+        :class => class_type,
+        :select => [m.remote_key_field],
+        :querytype => 'DMQL2',
+        :limit => 1000,
+        :query => "(PhotosChangeTimestamp=#{d1}+)AND(OriginatingSystemName=WESTAL)AND(MlsStatus=Active)",
+        :standard_names_only => true,
+        :timeout => -1
+      }
+      self.log3(class_type,nil,"Searching with params: " + params.to_s)
+      self.client.search(params) do |data|
+        self.log3(class_type,nil,"Resulting data: " + data.to_s)
+        self.delay(:priority => 10, :queue => 'rets').import_properties(data[k], true)
       end
     end
 
@@ -230,10 +193,10 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     si = save_images ? 'saving images' : 'not saving images'
     self.log3('Property',mls_id,"Importing Property #{mls_id} and #{si}...")
     save_images = true if !CabooseRets::Property.where(:mls_number => mls_id.to_s).exists?
-    self.import('Property', "ListingId eq '#{mls_id}'")
+    self.import('Property', "(ListingId=#{mls_id})")
     p = CabooseRets::Property.where(:mls_number => mls_id.to_s).first
     if p != nil && p.status == 'Active'
-      self.download_property_images(p) if save_images == true # && Rails.env.production?
+      self.download_property_images(p) if save_images == true && Rails.env.production?
       if p.latitude.blank? || p.latitude == '0.0' || p.longitude.blank? || p.longitude == '0.0'
         self.update_coords(p) 
       end
@@ -244,7 +207,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.import_office(mls_id, save_images = true)
     self.log3('Office',mls_id,"Importing Office #{mls_id}...")
-    self.import('Office', "OfficeMlsId eq '#{mls_id}'")
+    self.import('Office', "(OfficeMlsId=#{mls_id})")
     office = CabooseRets::Office.where(:matrix_unique_id => mls_id.to_s).first
   end
 
@@ -253,7 +216,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
     if a.nil?
       self.log3('Agent',mls_id,"Importing new Agent #{mls_id}...")
-      self.import('Member', "MemberMlsId eq '#{mls_id}'")
+      self.import('Member', "(MemberMlsId=#{mls_id})")
       a = CabooseRets::Agent.where(:mls_id => mls_id.to_s).first
       if a
         a.last_updated = DateTime.now
@@ -266,7 +229,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       is_old = diff > 86400 # 24 hours
       if is_old
         self.log3('Agent',mls_id,"Updating existing Agent #{mls_id}...")
-        self.import('Member', "MemberMlsId eq '#{mls_id}'")
+        self.import('Member', "(MemberMlsId=#{mls_id})")
         a.last_updated = DateTime.now
         a.save
       else
@@ -277,12 +240,12 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
   def self.import_open_house(oh_id, save_images = true)
     self.log3('OpenHouse',oh_id,"Importing Open House #{oh_id}...")
-    self.import('OpenHouse', "OpenHouseKey eq '#{oh_id}'")
+    self.import('OpenHouse', "(OpenHouseKey=#{oh_id})")
   end
 
   def self.import_media(id, save_images = true)
     self.log3('Media',id,"Importing Media #{id}...")
-    self.import('Media', "MediaObjectID eq '#{id}'")
+    self.import('Media', "((MediaObjectID=#{id}+),(MediaObjectID=#{id}-))")
   end
 
   #=============================================================================
@@ -290,102 +253,58 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   #=============================================================================
 
   def self.download_property_images(p)
-   # return if Rails.env.development?
+    return if Rails.env.development?
     self.log3('Property',p.mls_number,"Downloading images for #{p.mls_number}...")
     ids_to_keep = []
     begin
-
-      query = "ResourceRecordKey eq '#{p.matrix_unique_id}'"
-      photos = self.resource('Media',query,100)
-
-      photos.each do |photo|
-        ind = photo['Order']
-        self.log3('Media',p.mls_number,"Downloading photo with order #{ind}")
+      self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
+        next if headers.blank?
+        ind = headers['orderhint'] ? headers['orderhint'].to_i : 1 
+        self.log3('Media',p.mls_number,headers.to_s)
+        self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
         is_new = false
-        m = CabooseRets::Media.where(:media_mui => photo['ResourceRecordKey'], :media_order => ind).first
+        m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
         is_new = true if m.nil?
         m = CabooseRets::Media.new if m.nil?
-
-        url = photo['MediaURL']
-        m.media_mui     = photo['ResourceRecordKey']
+        tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
+        File.open(tmp_path, "wb") do |f|
+          f.write(content)
+        end
+        m.media_mui     = headers['content-id']
         m.media_order   = ind
         m.media_type    = 'Photo'
-        m.media_remarks = photo['ShortDescription']
-
+        cm = nil
         old_cm_id = is_new ? nil : m.media_id
-
-        cm = is_new ? Caboose::Media.new : Caboose::Media.where(:id => old_cm_id).first
-
-        cm.name          = "rets_media_#{photo['ResourceRecordKey']}_#{ind}"
-        cm.save
-
-        m.media_id = cm.id
-        m.save
-        ids_to_keep << m.id
-
-        if !is_new
-          old_media = Caboose::Media.where(:id => old_cm_id).first
-          self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
-          old_media.destroy if Rails.env.production?
+        begin
+          cm               = Caboose::Media.new
+          cm.image         = File.open(tmp_path)
+          cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
+          cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
+          cm.processed     = true
+          cm.save
+          if cm && !cm.id.blank?
+            m.media_id = cm.id
+            m.save
+            ids_to_keep << m.id
+            if is_new
+              self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
+            else
+              old_media = Caboose::Media.where(:id => old_cm_id).first
+              if old_media
+                self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
+                old_media.destroy
+              end
+              self.log3("Media",p.mls_number,"RetsMedia object already existed #{m.id}, updated media_id = #{m.media_id}")
+            end
+            self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
+          else
+            self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
+          end
+        rescue
+          self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
         end
-
-        if Rails.env.production?
-          cm.download_image_from_url(url)
-        else
-          puts "would download photo from URL #{url}"
-        end
-
+        `rm #{tmp_path}`
       end
-
-    #   self.client.get_object(:resource => 'Property', :type => 'Photo', :location => false, :id => "#{p.matrix_unique_id}:*") do |headers, content|
-    #     next if headers.blank?
-    #     ind = headers['orderhint'] ? headers['orderhint'].to_i : 1 
-    #     self.log3('Media',p.mls_number,headers.to_s)
-    #     self.log3('Media',p.mls_number,"Downloading photo with content-id #{headers['content-id']}, index #{ind}")
-    #     is_new = false
-    #     m = CabooseRets::Media.where(:media_mui => headers['content-id'], :media_order => ind).first
-    #     is_new = true if m.nil?
-    #     m = CabooseRets::Media.new if m.nil?
-    #     tmp_path = "#{Rails.root}/tmp/rets_media_#{headers['content-id']}_#{ind}.jpeg"
-    #     File.open(tmp_path, "wb") do |f|
-    #       f.write(content)
-    #     end
-    #     m.media_mui     = headers['content-id']
-    #     m.media_order   = ind
-    #     m.media_type    = 'Photo'
-    #     cm = nil
-    #     old_cm_id = is_new ? nil : m.media_id
-    #     begin
-    #       cm               = Caboose::Media.new
-    #       cm.image         = File.open(tmp_path)
-    #       cm.name          = "rets_media_#{headers['content-id']}_#{ind}"
-    #       cm.original_name = "rets_media_#{headers['content-id']}_#{ind}.jpeg"
-    #       cm.processed     = true
-    #       cm.save
-    #       if cm && !cm.id.blank?
-    #         m.media_id = cm.id
-    #         m.save
-    #         ids_to_keep << m.id
-    #         if is_new
-    #           self.log3("Media",p.mls_number,"Created new RetsMedia object #{m.id}, media_id = #{m.media_id}")
-    #         else
-    #           old_media = Caboose::Media.where(:id => old_cm_id).first
-    #           if old_media
-    #             self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
-    #             old_media.destroy
-    #           end
-    #           self.log3("Media",p.mls_number,"RetsMedia object already existed #{m.id}, updated media_id = #{m.media_id}")
-    #         end
-    #         self.log3("Media",p.mls_number,"Image rets_media_#{headers['content-id']}_#{ind} saved")
-    #       else
-    #         self.log3("Media",p.mls_number,"CabooseMedia was not created for some reason, not saving RetsMedia")
-    #       end
-    #     rescue
-    #       self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
-    #     end
-    #     `rm #{tmp_path}`
-    #   end
-
     rescue
       self.log3("Media",p.mls_number,"Error downloading images for property with MLS # #{p.mls_number}")
     end
@@ -397,7 +316,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
       CabooseRets::Media.where(:media_mui => p.matrix_unique_id).where("id not in (?)",ids_to_keep).each do |med|
         self.log3("Media",p.mls_number,"Deleting old RetsMedia #{med.id} and CabooseMedia #{med.media_id}...")
         m = Caboose::Media.where(:id => med.media_id).where("name ILIKE ?","rets_media%").first
-        m.destroy if m && Rails.env.production?
+        m.destroy if m
         med.destroy
       end
     end
@@ -474,7 +393,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   
   def self.purge_properties()   self.delay(:priority => 10, :queue => 'rets').purge_helper('Property', '2012-01-01') end
   def self.purge_offices()      self.delay(:priority => 10, :queue => 'rets').purge_helper('Office', '2012-01-01') end
-  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Member', '2012-01-01T') end
+  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Member', '2012-01-01') end
   def self.purge_open_houses()  self.delay(:priority => 10, :queue => 'rets').purge_helper('OpenHouse', '2012-01-01') end
   
 
@@ -491,31 +410,32 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     statusquery = ""
 
     case class_type
-      when 'Property'  then statusquery = "MlsStatus eq 'Active'"
-      when 'Office'    then statusquery = "OfficeStatus eq 'Active'"
-      when 'Member'    then statusquery = "MemberStatus eq 'Active'"
-      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric gt 0"
+      when 'Property'  then statusquery = "MlsStatus=Active"
+      when 'Office'    then statusquery = "OfficeStatus=Active"
+      when 'Member'    then statusquery = "MemberStatus=Active"
+      when 'OpenHouse' then statusquery = "OpenHouseKeyNumeric=0+"
     end
 
-    query = "#{m.date_modified_field} gt #{date_modified}T00:00:01Z and #{statusquery} and OriginatingSystemName eq 'WESTAL'"
-
+    params = {
+      :search_type => m.search_type,
+      :class => class_type,
+      :query => "(#{m.date_modified_field}=#{date_modified}T00:00:01+)AND(#{statusquery})AND(OriginatingSystemName=WESTAL)",
+      :standard_names_only => true,
+      :limit => 1000,
+      :timeout => -1
+    }
     count = 0
-    result = self.resource(class_type, query, 1, true, nil)
-    
-    count = result ? result.to_f : 0.0
-
+    self.client.search(params.merge({ :count => 1})) do |data| end        
+    count = self.client.rets_data[:code] == "20201" ? 0 : self.client.rets_data[:count]    
     batch_count = (count.to_f/1000.0).ceil
 
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
       self.log3(class_type,nil,"Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
-
-      results = self.resource(class_type, query, 1000, false, k, (i+1))
-      results.each do |data|
+      self.client.search(params.merge({ :select => [k], :limit => 1000, :offset => 1000*i })) do |data|
         ids << data[k]
       end
-      
     end
 
     # Only do stuff if we got a real response from the server 

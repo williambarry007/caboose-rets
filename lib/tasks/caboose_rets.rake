@@ -211,10 +211,14 @@ namespace :caboose_rets do
 
   desc "Import rets data"
   task :import => :environment do
-    CabooseRets::RetsImporter.import('Member'    , "(MemberStatus=Active)")
-    CabooseRets::RetsImporter.import('Property'  , "(MlsStatus=Active)")
-    CabooseRets::RetsImporter.import('Office'    , "(OfficeStatus=Active)")    
-    CabooseRets::RetsImporter.import('OpenHouse' , "(OpenHouseKeyNumeric=0+)")
+    CabooseRets::RetsImporter.import('Member'    , "MemberStatus eq 'Active'")
+    CabooseRets::RetsImporter.import('Property'  , "MlsStatus eq 'Active'")
+    CabooseRets::RetsImporter.import('Office'    , "OfficeStatus eq 'Active'")
+    CabooseRets::RetsImporter.import('OpenHouse' , "OpenHouseKeyNumeric gt 0")
+  end
+
+  task :test_import => :environment do
+    CabooseRets::RetsImporter.import_one_property('146546')
   end
   
   desc "Single Import Test"
