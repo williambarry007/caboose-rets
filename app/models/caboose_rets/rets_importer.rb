@@ -314,7 +314,8 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
 
         old_cm_id = is_new ? nil : m.media_id
 
-        cm = is_new ? Caboose::Media.new : Caboose::Media.where(:id => old_cm_id).first
+        cm = Caboose::Media.where(:id => old_cm_id).first
+        cm = Caboose::Media.new if cm.nil?
 
         cm.name          = "rets_media_#{photo['ResourceRecordKey']}_#{ind}"
         cm.save
