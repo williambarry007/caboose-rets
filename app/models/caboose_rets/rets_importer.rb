@@ -55,7 +55,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     end
 
     if !select_column.blank?
-      params["$select"] = "ListingId"
+      params["$select"] = select_column
     end
 
     if page_number > 1
@@ -479,7 +479,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
   
   def self.purge_properties()   self.delay(:priority => 10, :queue => 'rets').purge_helper('Property', '2012-01-01') end
   def self.purge_offices()      self.delay(:priority => 10, :queue => 'rets').purge_helper('Office', '2012-01-01') end
-  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Member', '2012-01-01T') end
+  def self.purge_agents()       self.delay(:priority => 10, :queue => 'rets').purge_helper('Member', '2012-01-01') end
   def self.purge_open_houses()  self.delay(:priority => 10, :queue => 'rets').purge_helper('OpenHouse', '2012-01-01') end
   
 
@@ -514,13 +514,11 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     ids = []
     k = m.remote_key_field
     (0...batch_count).each do |i|
-      self.log3(class_type,nil,"Getting ids for #{class_type} (batch #{i+1} of #{batch_count})...")
-
+      self.log3(class_type,nil,"Getting ids for #{class_type} with key #{k} (batch #{i+1} of #{batch_count})...")
       results = self.resource(class_type, query, 1000, false, k, (i+1))
       results.each do |data|
         ids << data[k]
       end
-      
     end
 
     # Only do stuff if we got a real response from the server 
