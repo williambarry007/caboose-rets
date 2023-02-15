@@ -211,7 +211,7 @@ namespace :caboose_rets do
 
   desc "Import rets data"
   task :import => :environment do
-    CabooseRets::RetsImporter.import('Member'    , "MemberStatus eq 'Active'")
+    CabooseRets::RetsImporter.import('Member'    , "MemberStatus eq 'Active'") 
     CabooseRets::RetsImporter.import('Property'  , "MlsStatus eq 'Active'")
     CabooseRets::RetsImporter.import('Office'    , "OfficeStatus eq 'Active'")
     CabooseRets::RetsImporter.import('OpenHouse' , "OpenHouseKeyNumeric gt 0")
