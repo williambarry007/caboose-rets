@@ -178,7 +178,7 @@ namespace :caboose_rets do
   task :fix_images => :environment do 
     props = CabooseRets::Property.where(:status => "Active").where("photo_count is not null and photo_count != ?", "0").order('id desc').all
     props.each do |p|
-      puts "Checking property #{p.mls_number}"
+      puts "Checking property #{p.mls_number}..."
       if p.images.count == 0
         puts "Didn't find any images, re-importing"
         CabooseRets::RetsImporter.delay(:queue => 'rets', :priority => 4).download_property_images(p)
