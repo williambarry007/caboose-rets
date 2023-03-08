@@ -387,7 +387,7 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
     #     rescue
     #       self.log3("Media",p.mls_number,"Error processing image #{ind} from RETS")
     #     end
-    #     `rm #{tmp_path}` 
+    #     `rm #{tmp_path}`
     #   end
 
     rescue Exception => err
