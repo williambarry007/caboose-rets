@@ -324,13 +324,14 @@ class CabooseRets::RetsImporter # < ActiveRecord::Base
         m.save
         ids_to_keep << m.id if m
 
-        if !is_new
-          old_media = Caboose::Media.where(:id => old_cm_id).first
-          if old_media
-            self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
-            old_media.destroy if Rails.env.production?
-          end
-        end
+        # Delete old caboose media if it exists
+        # if !is_new
+        #   old_media = Caboose::Media.where(:id => old_cm_id).first
+        #   if old_media
+        #     self.log3("Media",p.mls_number,"Deleting old CabooseMedia #{old_media.id}")
+        #     old_media.destroy if Rails.env.production?
+        #   end
+        # end
 
         if Rails.env.production?
           cm.download_image_from_url(url)
