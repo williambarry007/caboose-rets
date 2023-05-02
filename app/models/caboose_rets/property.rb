@@ -206,7 +206,7 @@ class CabooseRets::Property <ActiveRecord::Base
      #   self.price_sqft                       = data['PriceSqft']
     #    self.property_name                    = data['PropertyName']
         self.property_subtype                 = data['PropertySubType']
-        self.property_type                    = data['PropertyType']
+        self.property_type                    = data['PropertyType'].blank? ? nil : data['PropertyType'].gsub(" ","")
         self.property_use                     = data['CurrentUse']
         self.prop_mgmt_comp                   = data['ParkManagerName']
         self.public_remarks                   = data['PublicRemarks']
